@@ -7,6 +7,7 @@ import { UserModule } from '@user/user.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './service/auth/auth.module';
 import { WebContentModule } from './service/webcontent/webcontent.module';
+import {OldTweetModule} from "@tweet/old_tweets/old.tweet.module";
 
 @Module({
 	imports: [
@@ -32,6 +33,7 @@ import { WebContentModule } from './service/webcontent/webcontent.module';
 		UserModule,
 		AuthModule,
 		WebContentModule,
+		OldTweetModule,
 	],
 })
 export class AppModule {}
