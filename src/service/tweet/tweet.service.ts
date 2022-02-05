@@ -1,5 +1,5 @@
 import { TwitterApiException } from '@error/general';
-import { ICreateTweet, ICreateTweetParams } from '@interface/tweet';
+import { CreateTweet, TweetProps, TweetResponse } from '../../types/dto/tweet';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@user/user.entity';
@@ -10,6 +10,7 @@ import { Tweet } from './tweet.entity';
 @Injectable()
 export class TweetService {
 	private readonly logger = new ConsoleLogger(TweetService.name);
+
 	constructor(
 		@InjectRepository(Tweet)
 		private readonly tweetRepository: Repository<Tweet>,
@@ -19,7 +20,7 @@ export class TweetService {
 		return this.tweetRepository.findOne({ id, user });
 	}
 
-	async createTweet({ url, tweetData, author, user }: ICreateTweetParams) {
+	async createTweet({ url, tweetData, author, user }: CreateTweet): Promise<Tweet> {
 		const { public_metrics, text, id, lang, entities } = tweetData;
 		if (!public_metrics) {
 			throw new TwitterApiException('Twitter API did not return public metrics for the tweet');
@@ -31,7 +32,7 @@ export class TweetService {
 		const listOfHashtags = entities.hashtags.map((h) => {
 			return new Hashtag(h.tag);
 		});
-		const tweetParams: ICreateTweet = {
+		const tweetParams: TweetProps = {
 			hashtags: listOfHashtags,
 			language: lang,
 			totalQuotes: quote_count,
@@ -50,7 +51,7 @@ export class TweetService {
 		return tweet;
 	}
 
-	async findAllByUserId(id: string) {
-		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author'] });
+	async findAllByUserId(id: string): Promise<TweetResponse[]> {
+		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags', 'webContents'] });
 	}
 }

@@ -3,7 +3,7 @@ import {Column, Entity, PrimaryColumn} from 'typeorm';
 @Entity({ name: 'old_tweets' })
 export class OldTweet {
 
-    @PrimaryColumn({ name: 'id_str' })
+    @PrimaryColumn({ name: 'id' })
     id!: string;
 
     @Column({ nullable: true })
@@ -12,17 +12,20 @@ export class OldTweet {
     @Column({ nullable: true })
     description!: string;
 
+    @Column({ name: 'id_str'})
+    tweetId!: string;
+
     @Column({ name: 'user_name'})
     userName!: string;
 
     @Column({ nullable: true })
     country!: string;
 
-    @Column({ name: 'is_verified'})
-    isVerified!: boolean;
+    @Column({ name: 'is_verified' })
+    isVerified!: string;
 
     @Column({ name: 'created_at' })
-    createdAt!: Date;
+    createdAt!: string;
 
     @Column({ nullable: true })
     source!: string;

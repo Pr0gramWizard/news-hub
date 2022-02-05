@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert';
+
 export function assertMany(...variables: unknown[]): void {
 	variables.forEach((x) => assert(x));
 }

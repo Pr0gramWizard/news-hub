@@ -1,4 +1,4 @@
-import { ICreateWebContent } from '@interface/webcontent';
+import { ICreateWebContent } from '../../types/dto/webcontent';
 import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 } from 'uuid';

@@ -2,7 +2,7 @@ import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
 import { InternalServerException, TwitterApiException } from '@error/general';
 import { UserNotFoundException } from '@error/user';
-import { IStoreTweetPayload } from '@interface/tweet';
+import { StoreTweetRequest, TweetResponse } from '../../types/dto/tweet';
 import { BadRequestException, Body, ConsoleLogger, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { URL } from 'url';
@@ -12,7 +12,16 @@ import { JwtPayload } from '../auth/auth.service';
 import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetService } from './tweet.service';
+import {
+	ApiBadRequestResponse,
+	ApiBearerAuth,
+	ApiCreatedResponse,
+	ApiNotFoundResponse,
+	ApiOkResponse,
+	ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Tweet')
 @Controller('tweet')
 export class TweetController {
 	private readonly logger = new ConsoleLogger(TweetController.name);
@@ -26,14 +35,28 @@ export class TweetController {
 		private readonly webContentService: WebContentService,
 	) {}
 
-	@Get(':id')
-	async getTweetsByUserToken(@Param('id') id: string) {
-		return await this.tweetService.findAllByUserId(id);
+	@Get(':user_id')
+	@ApiOkResponse({
+		description: 'Get all tweets by a user id',
+		type: [TweetResponse],
+	})
+	async getTweetsByUserToken(@Param('user_id') id: string): Promise<TweetResponse[]> {
+		return this.tweetService.findAllByUserId(id);
 	}
 
 	@Post('')
 	@UseGuards(new AuthGuard())
-	async create(@Body() body: IStoreTweetPayload, @UserContext() jwtPayload: JwtPayload) {
+	@ApiBearerAuth()
+	@ApiCreatedResponse({
+		description: 'Stored the tweet in the database',
+	})
+	@ApiNotFoundResponse({
+		description: 'User not found',
+	})
+	@ApiBadRequestResponse({
+		description: 'Either the tweet url is not valid or there was an error with the data the Twitter API returned',
+	})
+	async create(@Body() body: StoreTweetRequest, @UserContext() jwtPayload: JwtPayload): Promise<void> {
 		const { sub } = jwtPayload;
 		const { url } = body;
 		// Check if requesting user exists
@@ -115,6 +138,8 @@ export class TweetController {
 		});
 
 		const { data } = twitterApiResponse;
+
+		this.logger.debug(`Twitter API returned ${data}  for hashtag '${hashtag}'`);
 
 		// const tweets = data.data.map((t) => {
 		// 	const { id, text, created_at, author_id, entities } = t;

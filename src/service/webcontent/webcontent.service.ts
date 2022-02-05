@@ -1,4 +1,4 @@
-import { ICreateWebContent, TweetEntityUrlImageV2 } from '@interface/webcontent';
+import { ICreateWebContent, TweetEntityUrlImageV2 } from '../../types/dto/webcontent';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tweet } from '@tweet/tweet.entity';

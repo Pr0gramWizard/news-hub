@@ -1,6 +1,6 @@
 import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ICreateUser } from '../../types/interface/user';
+import { CreateUserDTO } from '../../types/dto/user';
 
 @Entity()
 export class User {
@@ -13,13 +13,13 @@ export class User {
 	@Column({ unique: true })
 	email!: string;
 
-	@OneToMany(() => Tweet, (tweet) => tweet.user)
+	@OneToMany(() => Tweet, (tweet) => tweet.user, { eager: true })
 	tweets!: Tweet[];
 
 	@CreateDateColumn()
 	createdAt!: Date;
 
-	constructor(props?: ICreateUser) {
+	constructor(props?: CreateUserDTO) {
 		if (props) {
 			const { password, email } = props;
 			this.password = password;

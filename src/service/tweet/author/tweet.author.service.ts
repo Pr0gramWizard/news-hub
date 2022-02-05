@@ -1,11 +1,11 @@
 import { isUndefinedOrEmptyObject } from '@common/util';
 import { TwitterApiException } from '@error/general';
-import { ICreateAuthor } from '@interface/tweet';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
 import { Author } from './tweet.author.entity';
+import { CreateAuthor } from '../../../types/dto/author';
 
 @Injectable()
 export class TweetAuthorService {
@@ -25,7 +25,7 @@ export class TweetAuthorService {
 			throw new TwitterApiException('Twitter API did not return public metrics for the author');
 		}
 		const { tweet_count, followers_count } = public_metrics;
-		const authorParams: ICreateAuthor = {
+		const authorParams: CreateAuthor = {
 			userId: id,
 			bio: description,
 			isVerified: verified,

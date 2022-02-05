@@ -1,15 +1,24 @@
-import { ICreateUserRequest, ICreateUserResponse, ILoginUserRequest } from '@interface/user';
+import { RegisterUserRequest, LoginUserRequest, LoginUserResponse, RegisterUserResponse } from '../../types/dto/user';
 import { BadRequestException, Body, ConflictException, ConsoleLogger, Controller, Post } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '@user/user.service';
 import { AuthService } from './auth.service';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
 	private readonly logger = new ConsoleLogger(AuthController.name);
 	constructor(private readonly userService: UserService, private readonly authService: AuthService) {}
 
 	@Post('register')
-	async register(@Body() body: ICreateUserRequest): Promise<ICreateUserResponse> {
+	@ApiCreatedResponse({
+		description: 'The record has been successfully created.',
+		type: RegisterUserResponse,
+	})
+	@ApiConflictResponse({
+		description: 'There is already a user with given mail',
+	})
+	async register(@Body() body: RegisterUserRequest): Promise<RegisterUserResponse> {
 		const { password, email } = body;
 		const existingUser = await this.userService.findByMail(email);
 		if (existingUser) {
@@ -23,9 +32,15 @@ export class AuthController {
 	}
 
 	@Post('login')
-	async login(@Body() body: ILoginUserRequest) {
+	@ApiCreatedResponse({
+		description: 'The record has been successfully created.',
+		type: LoginUserResponse,
+	})
+	@ApiBadRequestResponse({
+		description: 'Either email or password is wrong',
+	})
+	async login(@Body() body: LoginUserRequest): Promise<LoginUserResponse> {
 		const { email, password } = body;
-		this.logger.debug(email);
 		const user = await this.userService.findByMail(email);
 		if (!user) {
 			this.logger.debug(`There is no user with mail ${email}`);
@@ -37,7 +52,6 @@ export class AuthController {
 			throw new BadRequestException();
 		}
 		const jwtToken = await this.authService.login(user);
-		this.logger.debug(jwtToken);
 		return {
 			token: jwtToken,
 		};

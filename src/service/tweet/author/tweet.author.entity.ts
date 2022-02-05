@@ -1,6 +1,6 @@
-import { ICreateAuthor } from '@interface/tweet';
 import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { CreateAuthor } from '../../../types/dto/author';
 
 @Entity()
 export class Author {
@@ -31,7 +31,7 @@ export class Author {
 	@CreateDateColumn()
 	createdAt!: Date;
 
-	constructor(props?: ICreateAuthor) {
+	constructor(props?: CreateAuthor) {
 		if (props) {
 			const { userId, username, location, bio, isVerified, numberOfFollower, numberOfTweets } = props;
 			this.id = userId;
@@ -39,8 +39,8 @@ export class Author {
 			this.location = location || 'unknown';
 			this.bio = bio || '';
 			this.isVerified = isVerified || false;
-			this.numberOfFollower = numberOfFollower || 0;
-			this.numberOfTweets = numberOfTweets || 0;
+			this.numberOfFollower = numberOfFollower;
+			this.numberOfTweets = numberOfTweets;
 		}
 	}
 }

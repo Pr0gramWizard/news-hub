@@ -1,6 +1,6 @@
 import { User } from '@user/user.entity';
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { ICreateTweet } from '../../types/interface/tweet';
+import { TweetProps } from '../../types/dto/tweet';
 import { WebContent } from '../webcontent/webcontent.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
@@ -47,7 +47,7 @@ export class Tweet {
 	@CreateDateColumn()
 	createdAt!: Date;
 
-	constructor(props?: ICreateTweet) {
+	constructor(props?: TweetProps) {
 		if (props) {
 			const {
 				id,
