@@ -7,7 +7,7 @@ import { UserModule } from '@user/user.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './service/auth/auth.module';
 import { WebContentModule } from './service/webcontent/webcontent.module';
-import {OldTweetModule} from "@tweet/old_tweets/old.tweet.module";
+import { OldTweetModule } from '@tweet/old_tweets/old.tweet.module';
 
 @Module({
 	imports: [
@@ -25,7 +25,8 @@ import {OldTweetModule} from "@tweet/old_tweets/old.tweet.module";
 				autoLoadEntities: true,
 				charset: 'utf8mb4',
 				namingStrategy: new SnakeNamingStrategy(),
-				synchronize: configService.get('NODE_ENV') !== 'production',
+				// synchronize: configService.get('NODE_ENV') !== 'production',
+				synchronize: false,
 			}),
 		}),
 		CommonModule,
