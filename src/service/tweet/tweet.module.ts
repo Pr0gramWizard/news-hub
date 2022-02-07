@@ -13,5 +13,6 @@ import { TweetService } from './tweet.service';
 	imports: [TypeOrmModule.forFeature([Tweet, Author, Hashtag]), UserModule, WebContentModule],
 	controllers: [TweetController],
 	providers: [TweetService, TweetAuthorService],
+	exports: [TweetService, TweetAuthorService],
 })
 export class TweetModule {}

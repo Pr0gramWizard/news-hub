@@ -39,4 +39,8 @@ export class TweetAuthorService {
 		this.logger.debug(`Created a new author with id '${author.id}'`);
 		return author;
 	}
+
+	async count(): Promise<number> {
+		return this.authorRepository.count();
+	}
 }

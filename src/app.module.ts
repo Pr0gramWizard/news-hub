@@ -8,6 +8,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './service/auth/auth.module';
 import { WebContentModule } from './service/webcontent/webcontent.module';
 import { OldTweetModule } from '@tweet/old_tweets/old.tweet.module';
+import {StatsModule} from "./service/stats/stats.module";
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { OldTweetModule } from '@tweet/old_tweets/old.tweet.module';
 				password: configService.get('DB_PW'),
 				database: configService.get('DB_NAME'),
 				autoLoadEntities: true,
+				cache: true,
 				charset: 'utf8mb4',
 				namingStrategy: new SnakeNamingStrategy(),
 				// synchronize: configService.get('NODE_ENV') !== 'production',
@@ -35,6 +37,7 @@ import { OldTweetModule } from '@tweet/old_tweets/old.tweet.module';
 		AuthModule,
 		WebContentModule,
 		OldTweetModule,
+		StatsModule,
 	],
 })
 export class AppModule {}

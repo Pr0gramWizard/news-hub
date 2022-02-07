@@ -54,4 +54,8 @@ export class TweetService {
 	async findAllByUserId(id: string): Promise<TweetResponse[]> {
 		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags', 'webContents'] });
 	}
+
+	async count(): Promise<number> {
+		return this.tweetRepository.count();
+	}
 }

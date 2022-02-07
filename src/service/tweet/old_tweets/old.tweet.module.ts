@@ -9,5 +9,6 @@ import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
 	imports: [TypeOrmModule.forFeature([OldTweet]), UserModule],
 	controllers: [OldTweetController],
 	providers: [OldTweetService],
+	exports: [OldTweetService],
 })
 export class OldTweetModule {}
