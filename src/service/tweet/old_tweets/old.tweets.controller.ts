@@ -44,9 +44,4 @@ export class OldTweetController {
 			lastId: lastTweet ? lastTweet.id : null,
 		};
 	}
-
-	@Get('/stats')
-	async getStats(): Promise<any> {
-		return this.oldTweetService.getTweetFrequency();
-	}
 }

@@ -15,25 +15,27 @@ export class StatsController {
 		private readonly oldTweetService: OldTweetService,
 		private readonly authorService: TweetAuthorService,
 		private readonly userService: UserService,
-	) {}
+	) {
+		this.logger.log('StatsController created');
+	}
 
 	@Get('')
 	async getStats(): Promise<StatsResponse> {
-		this.logger.log('Getting stats');
 		const numberOfTweets = await this.tweetService.count();
 		const numberOfOldTweets = await this.oldTweetService.count();
 		const numberOfAuthors = await this.authorService.count();
 		const numberOfUsers = await this.userService.count();
+		const oldTweetsFrequencyByDay = await this.oldTweetService.getTweetFrequency();
+		const oldTweetsUserGroups = await this.oldTweetService.countUsers();
+		const topTweeters = await this.oldTweetService.getTopNTweetUsers(10)
 		return {
 			numberOfTweets,
 			numberOfOldTweets,
 			numberOfAuthors,
 			numberOfUsers,
-			numberOfHashtags: 0,
-			numberOfLanguages: 0,
-			numberOfVerifiedUsers: 0,
-			oldTweetGroupedByMonth: [],
-
+			oldTweetsUserGroups,
+			topTweeters,
+			oldTweetsFrequencyByDay,
 		};
 	}
 }

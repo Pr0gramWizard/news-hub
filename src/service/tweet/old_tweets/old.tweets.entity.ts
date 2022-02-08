@@ -1,6 +1,6 @@
 import {Column, Entity, PrimaryColumn} from 'typeorm';
 
-@Entity({ name: 'old_tweets' })
+@Entity({ name: 'old_tweets', synchronize: false })
 export class OldTweet {
 
     @PrimaryColumn({ name: 'id' })

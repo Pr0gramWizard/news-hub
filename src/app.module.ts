@@ -1,5 +1,5 @@
 import { CommonModule } from '@common/common.module';
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TweetModule } from '@tweet/tweet.module';
@@ -8,11 +8,19 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './service/auth/auth.module';
 import { WebContentModule } from './service/webcontent/webcontent.module';
 import { OldTweetModule } from '@tweet/old_tweets/old.tweet.module';
-import {StatsModule} from "./service/stats/stats.module";
+import { StatsModule } from './service/stats/stats.module';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
+		CacheModule.registerAsync({
+			imports: [ConfigModule],
+			inject: [ConfigService],
+			useFactory: async (configService: ConfigService) => ({
+				host: configService.get('REDIS_HOST'),
+				port: configService.get('REDIS_PORT'),
+			}),
+		}),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],
 			inject: [ConfigService],
@@ -28,7 +36,7 @@ import {StatsModule} from "./service/stats/stats.module";
 				charset: 'utf8mb4',
 				namingStrategy: new SnakeNamingStrategy(),
 				// synchronize: configService.get('NODE_ENV') !== 'production',
-				synchronize: false,
+				synchronize: true,
 			}),
 		}),
 		CommonModule,

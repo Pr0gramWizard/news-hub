@@ -22,8 +22,8 @@ export function dateToString(date: Date): string {
 }
 
 interface DateValue {
+	id: number;
 	date: string;
-	name: string;
 }
 
 export function generateAllDatesBetweenTwoDates(startDate: Date, endDate: Date): DateValue[] {
@@ -32,7 +32,7 @@ export function generateAllDatesBetweenTwoDates(startDate: Date, endDate: Date):
 	while (currentDate <= endDate) {
 		dates.push({
 			date: new Date(currentDate).toISOString().slice(0,10),
-			name: dateToString(currentDate),
+			id: currentDate.getTime(),
 		});
 		dates.push();
 		currentDate.setDate(currentDate.getDate() + 1);

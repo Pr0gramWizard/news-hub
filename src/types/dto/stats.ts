@@ -1,35 +1,25 @@
-import {ApiProperty} from '@nestjs/swagger';
-
-export class ChartData {
-	@ApiProperty()
-	label!: string;
-
-	@ApiProperty()
-	value!: number;
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { OldTweetFrequencyResponse, OldTweetTopTweetersResponse, OldTweetUserGroupResponse } from './old.tweet';
 
 export class StatsResponse {
-    @ApiProperty()
-    numberOfTweets!: number;
+	@ApiProperty()
+	numberOfTweets!: number;
 
-    @ApiProperty()
-    numberOfOldTweets!: number;
+	@ApiProperty()
+	numberOfOldTweets!: number;
 
-    @ApiProperty()
-    numberOfAuthors!: number;
+	@ApiProperty()
+	numberOfAuthors!: number;
 
-    @ApiProperty()
-    numberOfUsers!: number;
+	@ApiProperty()
+	numberOfUsers!: number;
 
-    @ApiProperty()
-    numberOfHashtags!: number;
+	@ApiProperty()
+	oldTweetsUserGroups!: OldTweetUserGroupResponse;
 
-    @ApiProperty()
-    numberOfLanguages!: number;
+	@ApiProperty()
+	oldTweetsFrequencyByDay!: OldTweetFrequencyResponse;
 
-    @ApiProperty()
-    numberOfVerifiedUsers!: number;
-
-    @ApiProperty()
-    oldTweetGroupedByMonth!: ChartData[];
+	@ApiProperty()
+	topTweeters!: OldTweetTopTweetersResponse;
 }
