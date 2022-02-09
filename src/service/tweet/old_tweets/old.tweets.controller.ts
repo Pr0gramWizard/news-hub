@@ -37,11 +37,12 @@ export class OldTweetController {
 			}
 		}
 		this.logger.log(`getById: Find ${limitQuery} tweets after last id ${lastIdQuery}`);
-		const tweets = await this.oldTweetService.findSome(limitQuery, order, lastIdNumber);
-		const lastTweet = tweets[tweets.length - 1];
+		const { result, totalNumberOfTweets } = await this.oldTweetService.findSome(limitQuery, order, lastIdNumber);
+		const lastTweet = result[result.length - 1];
 		return {
-			tweets,
+			tweets: result,
 			lastId: lastTweet ? lastTweet.id : null,
+			totalNumberOfTweets,
 		};
 	}
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, LessThan, MoreThan, Repository } from 'typeorm';
 import { OldTweet } from './old.tweets.entity';
 import {
+	GetSomeOldTweets,
 	OldTweetFrequency,
 	OldTweetFrequencyResponse,
 	OldTweetsPerUser,
@@ -22,12 +23,14 @@ export class OldTweetService {
 		private readonly oldTweetRepository: Repository<OldTweet>,
 	) {}
 
-	async findSome(limit: number, order: OrderParam, lastId?: number): Promise<OldTweet[]> {
+	async findSome(limit: number, order: OrderParam, lastId?: number): Promise<GetSomeOldTweets> {
+		this.logger.log(`Fetching ${limit} old tweets with last id ${lastId} and sorted by ${order}`);
 		const params: FindManyOptions<OldTweet> = {
 			order: {
 				id: order === 'asc' ? 'ASC' : 'DESC',
 			},
 			take: limit,
+			where: {},
 		};
 		if (lastId) {
 			if (order === 'asc') {
@@ -40,8 +43,15 @@ export class OldTweetService {
 				};
 			}
 		}
-		this.logger.log(`Fetching ${limit} old tweets with last id ${lastId} and sorted by ${order}`);
-		return await this.oldTweetRepository.find(params);
+
+		const result =  await this.oldTweetRepository.find(params);
+		const totalNumberOfTweets = await this.oldTweetRepository.count({
+			where: params.where,
+		});
+		return {
+			result,
+			totalNumberOfTweets,
+		}
 	}
 
 	async count(): Promise<number> {

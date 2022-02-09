@@ -1,5 +1,6 @@
-import {IsArray, IsString, ValidateIf, ValidateNested} from 'class-validator';
+import {IsArray, IsNumber, IsString, ValidateIf, ValidateNested} from 'class-validator';
 import {ApiProperty} from '@nestjs/swagger';
+import {OldTweet} from "@tweet/old_tweets/old.tweets.entity";
 
 export type OrderParam = 'asc' | 'desc';
 
@@ -70,6 +71,10 @@ export class OldTweetResponse {
     @IsString()
     @ValidateIf((object, value) => value !== null)
     lastId!: string | null;
+
+    @ApiProperty({description: 'The total number of tweets', required: true})
+    @IsNumber()
+    totalNumberOfTweets!: number;
 }
 
 export class OldTweetFrequency {
@@ -113,4 +118,9 @@ export class OldTweetsPerUser {
     user_name!: string;
     number_of_tweets!: string;
     is_verified!: string;
+}
+
+export class GetSomeOldTweets {
+    result!: OldTweet[]
+    totalNumberOfTweets!: number
 }
