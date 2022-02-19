@@ -1,10 +1,27 @@
-import { ValidationPipe } from '@nestjs/common';
+import {LogLevel, ValidationPipe} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+function getLogLevels(): LogLevel[] {
+	console.log(process.env.NODE_ENV)
+	const env = process.env.NODE_ENV || 'development';
+	switch (env) {
+		case 'development':
+			return ['log', 'error', 'warn', 'debug', 'verbose'];
+		case 'production':
+			return ['error'];
+		case 'test':
+			return ['error'];
+		default:
+			return ['debug', 'error'];
+	}
+}
+
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule, {
+		logger: getLogLevels(),
+	});
 	app.setGlobalPrefix('api');
 	app.useGlobalPipes(new ValidationPipe({ forbidUnknownValues: true }));
 	app.enableCors();
@@ -23,4 +40,5 @@ async function bootstrap() {
 
 	await app.listen(3000);
 }
+
 bootstrap();

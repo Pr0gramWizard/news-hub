@@ -33,14 +33,8 @@ export class OldTweetService {
 			where: {},
 		};
 		if (lastId) {
-			if (order === 'asc') {
-				params.where = {
-					id: MoreThan(lastId),
-				};
-			} else {
-				params.where = {
-					id: LessThan(lastId),
-				};
+			params.where = {
+				id: (order === 'asc' ? MoreThan : LessThan) (lastId),
 			}
 		}
 

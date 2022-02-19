@@ -1,4 +1,4 @@
-import { RegisterUserRequest, LoginUserRequest, LoginUserResponse, RegisterUserResponse } from '../../types/dto/user';
+import { LoginUserRequest, LoginUserResponse, RegisterUserRequest, RegisterUserResponse } from '../../types/dto/user';
 import { BadRequestException, Body, ConflictException, ConsoleLogger, Controller, Post } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { AuthService } from './auth.service';
@@ -7,8 +7,9 @@ import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiTags
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-	private readonly logger = new ConsoleLogger(AuthController.name);
-	constructor(private readonly userService: UserService, private readonly authService: AuthService) {}
+	constructor(private readonly userService: UserService, private readonly authService: AuthService, private logger: ConsoleLogger) {
+		this.logger.setContext(AuthController.name);
+	}
 
 	@Post('register')
 	@ApiCreatedResponse({

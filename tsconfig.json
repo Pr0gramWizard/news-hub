@@ -23,7 +23,6 @@
 			"@common/*": ["common/*"],
 			"@tweet/*": ["service/tweet/*"],
 			"@user/*": ["service/user/*"],
-			"@interface/*": ["types/interface/*"],
 			"@error/*": ["types/error/*"],
 		}
 	},
