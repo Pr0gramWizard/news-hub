@@ -8,15 +8,14 @@ import { UserService } from '@user/user.service';
 @Injectable()
 @Controller('stats')
 export class StatsController {
-	private readonly logger = new ConsoleLogger(StatsController.name);
-
 	constructor(
 		private readonly tweetService: TweetService,
 		private readonly oldTweetService: OldTweetService,
 		private readonly authorService: TweetAuthorService,
 		private readonly userService: UserService,
+		private readonly logger: ConsoleLogger,
 	) {
-		this.logger.log('StatsController created');
+		this.logger.setContext(StatsController.name);
 	}
 
 	@Get('')
