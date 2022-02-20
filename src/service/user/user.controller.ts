@@ -9,17 +9,8 @@ import { User } from '@user/user.entity';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-	private readonly logger = new ConsoleLogger(UserController.name);
-	constructor(private readonly userService: UserService) {}
-
-	private static transformUserToUserResponse(user: User): GetUserResponse {
-		const { id, createdAt, email } = user;
-		return {
-			id,
-			createdAt,
-			email,
-			numberOfCollectedTweets: user.tweets.length,
-		};
+	constructor(private readonly userService: UserService, private readonly logger: ConsoleLogger) {
+		this.logger.setContext(UserController.name);
 	}
 
 	@Get(':id')
@@ -28,18 +19,26 @@ export class UserController {
 	async getUserById(@Param('id') userId: string): Promise<ControllerResponse<GetUserResponse>> {
 		const user = await this.userService.findById(userId);
 		if (!user) {
-			return new UserNotFoundException();
+			throw new UserNotFoundException();
 		}
-		this.logger.log(`User with id ${userId} found`);
-		return UserController.transformUserToUserResponse(user);
+		this.logger.log(`User with id ${userId} was found`);
+		return this.transformUserToUserResponse(user);
 	}
 
 	@Get('')
 	@ApiOkResponse({ description: 'User entities', type: [GetUserResponse] })
 	async getAllUsers(): Promise<ControllerResponse<GetUserResponse[]>> {
 		const rawUsers = await this.userService.findAll();
-		return await Promise.all(
-			rawUsers.map(async (user): Promise<GetUserResponse> => UserController.transformUserToUserResponse(user)),
-		);
+		return rawUsers.map(this.transformUserToUserResponse);
+	}
+
+	transformUserToUserResponse(user: User): GetUserResponse {
+		const { id, createdAt, email } = user;
+		return {
+			id,
+			createdAt,
+			email,
+			numberOfCollectedTweets: user.tweets.length,
+		};
 	}
 }

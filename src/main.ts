@@ -4,7 +4,6 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 function getLogLevels(): LogLevel[] {
-	console.log(process.env.NODE_ENV)
 	const env = process.env.NODE_ENV || 'development';
 	switch (env) {
 		case 'development':

@@ -1,4 +1,4 @@
-import { ICreateWebContent, TweetEntityUrlImageV2 } from '../../types/dto/webcontent';
+import { ICreateWebContent } from '../../types/dto/webcontent';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tweet } from '@tweet/tweet.entity';
@@ -8,15 +8,12 @@ import { WebContent } from './webcontent.entity';
 
 @Injectable()
 export class WebContentService {
-	private readonly logger = new ConsoleLogger(WebContentService.name);
-
 	constructor(
 		@InjectRepository(WebContent)
 		private readonly webContentRepository: Repository<WebContent>,
-	) {}
-
-	async findByUrl(url: string) {
-		return this.webContentRepository.findOne({ url });
+		private readonly logger: ConsoleLogger,
+	) {
+		this.logger.setContext(WebContentService.name);
 	}
 
 	async create(webContentParams: ICreateWebContent) {
@@ -29,7 +26,7 @@ export class WebContentService {
 	async createMany(twitterApiUrls: TweetEntityUrlV2[], tweet: Tweet) {
 		const webContents: WebContent[] = [];
 		for (const twitterApiUrl of twitterApiUrls) {
-			const urlMedia = twitterApiUrl.images as unknown as TweetEntityUrlImageV2[];
+			const urlMedia = twitterApiUrl.images;
 			const media = urlMedia ? [urlMedia[0].url] : [];
 			const webContent = await this.create({
 				url: twitterApiUrl.unwound_url,

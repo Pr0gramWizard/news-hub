@@ -28,8 +28,7 @@ export class UserService {
 		const { email, password } = body;
 		const hashedPassword = await bcrypt.hash(password, 12);
 		const user = new User({ email, password: hashedPassword });
-		await this.userRepository.save(user);
-		return user;
+		return this.userRepository.save(user);
 	}
 
 	async count(): Promise<number> {
