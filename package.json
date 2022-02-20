@@ -86,6 +86,22 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "coverageDirectory": "../coverage",
+    "collectCoverageFrom": [
+      "**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "node_modules",
+      "test-config",
+      "types",
+      "jestGlobalMocks.ts",
+      ".module.ts",
+      ".entity.ts",
+      "common/twitter.service.ts",
+      ".decorator.ts",
+      ".guard.ts",
+      "main.ts",
+      ".mock.ts"
+    ],
     "testEnvironment": "node"
   }
 }

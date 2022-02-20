@@ -31,8 +31,8 @@ export class TweetAuthorService {
 			isVerified: verified,
 			location,
 			username,
-			numberOfFollower: followers_count,
-			numberOfTweets: tweet_count,
+			numberOfFollower: followers_count || 0,
+			numberOfTweets: tweet_count || 0,
 		};
 		const author = new Author(authorParams);
 		await this.authorRepository.save(author);

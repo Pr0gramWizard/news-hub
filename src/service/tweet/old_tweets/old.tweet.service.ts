@@ -53,9 +53,9 @@ export class OldTweetService {
 	}
 
 	async getTweetFrequency(): Promise<OldTweetFrequencyResponse> {
-		const startDateString = new Date('2020-05-23');
-		const endDateString = new Date('2020-07-28');
-		const allDates = generateAllDatesBetweenTwoDates(startDateString, endDateString);
+		const startDate = new Date('2020-05-23');
+		const endDate = new Date('2020-07-28');
+		const allDates = generateAllDatesBetweenTwoDates(startDate, endDate);
 		// TODO: use a query builder instead of a raw SQL query
 		const data = (await this.oldTweetRepository.query(
 			`SELECT CASE

@@ -7,6 +7,7 @@ export class AuthGuard implements CanActivate {
 	private readonly logger: ConsoleLogger;
 	constructor() {
 		this.logger = new ConsoleLogger();
+		this.logger.setContext('AuthGuard');
 	}
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
@@ -17,8 +18,7 @@ export class AuthGuard implements CanActivate {
 		const token = authorization.split(' ')[1];
 		const jwtService = new JwtService({ secret: process.env.JWT_SECRET });
 		try {
-			const payload = await jwtService.verifyAsync<JwtPayload>(token);
-			request.user = payload;
+			request.user = await jwtService.verifyAsync<JwtPayload>(token);
 		} catch (error) {
 			this.logger.error(error);
 			return false;
