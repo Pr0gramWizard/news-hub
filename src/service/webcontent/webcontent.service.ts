@@ -18,9 +18,7 @@ export class WebContentService {
 
 	async create(webContentParams: ICreateWebContent) {
 		const webContent = new WebContent(webContentParams);
-		await this.webContentRepository.save(webContent);
-		this.logger.debug(`Created a new web content entity with id '${webContent.id}'`);
-		return webContent;
+		return this.webContentRepository.save(webContent);
 	}
 
 	async createMany(twitterApiUrls: TweetEntityUrlV2[], tweet: Tweet) {
