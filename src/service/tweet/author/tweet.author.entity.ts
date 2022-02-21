@@ -23,7 +23,7 @@ export class Author {
 	numberOfTweets!: number;
 
 	@Column()
-	numberOfFollower!: number;
+	numberOfFollowers!: number;
 
 	@OneToMany(() => Tweet, (tweet) => tweet.author)
 	tweets!: Tweet[];
@@ -39,7 +39,7 @@ export class Author {
 			this.location = location || 'unknown';
 			this.bio = bio || '';
 			this.isVerified = isVerified || false;
-			this.numberOfFollower = numberOfFollower;
+			this.numberOfFollowers = numberOfFollower;
 			this.numberOfTweets = numberOfTweets;
 		}
 	}
