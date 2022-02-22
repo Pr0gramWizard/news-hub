@@ -24,7 +24,7 @@ export class AuthorResponse {
 
 	@ApiProperty()
 	@IsNumber()
-	numberOfFollower!: number;
+	numberOfFollowers!: number;
 
 	@ApiProperty()
 	@IsDate()
