@@ -102,7 +102,8 @@
 			".decorator.ts",
 			".guard.ts",
 			"main.ts",
-			".mock.ts"
+			".mock.ts",
+			"common/logger.service.ts"
 		],
 		"testEnvironment": "node"
 	},

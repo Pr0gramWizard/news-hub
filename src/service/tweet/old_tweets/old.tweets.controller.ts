@@ -2,7 +2,7 @@ import { NewsHubLogger } from '@common/logger.service';
 import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
-import { LastIdQuery, LimitQuery, OldTweetResponse, OrderParam, OrderQuery } from '@type/dto/old.tweet';
+import { LastIdQuery, LimitQuery, OldTweetResponse, OrderQuery } from '@type/dto/old.tweet';
 import { OldTweetErrorCode } from '@type/error/old.tweet';
 
 @ApiTags('Tweet')
@@ -19,8 +19,8 @@ export class OldTweetController {
 	@ApiOkResponse({ type: OldTweetResponse, description: 'List of old tweets' })
 	@ApiBadRequestResponse({ description: 'Invalid query parameter' })
 	async getById(
-		@Query('limit') limit: number,
-		@Query('order') order: OrderParam = 'asc',
+		@Query('limit') limit?: number,
+		@Query('order') order = 'asc',
 		@Query('last_id') lastId?: string,
 	): Promise<OldTweetResponse> {
 		const limitQuery = limit || 10;
@@ -32,11 +32,8 @@ export class OldTweetController {
 		}
 		const lastIdQuery = lastId || '0';
 		const lastIdNumber = parseInt(lastIdQuery, 10);
-
-		if (lastId) {
-			if (!isNaN(lastIdNumber) && lastIdNumber < 1) {
-				throw new BadRequestException('Last id must be an integer greater than 0');
-			}
+		if (lastId && (isNaN(lastIdNumber) || lastIdNumber < 1)) {
+			throw new BadRequestException(OldTweetErrorCode.LAST_ID_QUERY_PARAM_INVALID);
 		}
 		const { result, totalNumberOfTweets } = await this.oldTweetService.findSome(limitQuery, order, lastIdNumber);
 		const lastTweet = result[result.length - 1];

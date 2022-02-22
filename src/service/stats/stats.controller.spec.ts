@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing';
-import { StatsResponse } from '../../types/dto/stats';
+import { StatsResponse } from '@type/dto/stats';
 import { TweetAuthorService } from '../tweet/author/tweet.author.service';
 import { OldTweetService } from '../tweet/old_tweets/old.tweet.service';
 import { TweetService } from '../tweet/tweet.service';
 import { UserService } from '../user/user.service';
-import { NewsHubLogger } from './../../common/logger.service';
+import { NewsHubLogger } from '@common/logger.service';
 import { StatsController } from './stats.controller';
 
 describe('StatsController', () => {
@@ -18,14 +18,12 @@ describe('StatsController', () => {
 		const moduleRef = await Test.createTestingModule({
 			controllers: [StatsController],
 			providers: [
-				TweetService,
 				{
 					provide: TweetService,
 					useValue: {
 						count: jest.fn().mockResolvedValue(1),
 					},
 				},
-				OldTweetService,
 				{
 					provide: OldTweetService,
 					useValue: {
@@ -39,21 +37,18 @@ describe('StatsController', () => {
 						}),
 					},
 				},
-				TweetAuthorService,
 				{
 					provide: TweetAuthorService,
 					useValue: {
 						count: jest.fn().mockResolvedValue(1),
 					},
 				},
-				UserService,
 				{
 					provide: UserService,
 					useValue: {
 						count: jest.fn().mockResolvedValue(1),
 					},
 				},
-				NewsHubLogger,
 				{
 					provide: NewsHubLogger,
 					useValue: {

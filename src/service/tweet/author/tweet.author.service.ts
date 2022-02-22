@@ -6,7 +6,7 @@ import { TwitterApiException } from '@type/error/general';
 import { TwitterApiErrorCode } from '@type/error/twitter.api';
 import { UserV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
-import { CreateAuthor } from '../../../types/dto/author';
+import { CreateAuthor } from '@type/dto/author';
 import { Author } from './tweet.author.entity';
 
 @Injectable()

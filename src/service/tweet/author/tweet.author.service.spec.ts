@@ -1,28 +1,29 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConsoleLogger } from '@nestjs/common';
 import { TweetAuthorService } from './tweet.author.service';
 import { Author } from './tweet.author.entity';
 import { Repository } from 'typeorm';
 import { UserV2 } from 'twitter-api-v2';
-import { TwitterApiErrorCode } from '../../../types/error/twitter.api';
-import { TwitterApiException } from '../../../types/error/general';
-import * as util from '../../../common/util';
+import { TwitterApiErrorCode } from '@type/error/twitter.api';
+import { TwitterApiException } from '@type/error/general';
+import * as util from '@common/util';
+import { NewsHubLogger } from '@common/logger.service';
 
 describe('WebContentService', () => {
 	let service: TweetAuthorService;
 	let repository: Repository<Author>;
-	const author = new Author({
-		userId: '12345',
-		bio: 'Author description',
-		isVerified: true,
-		location: 'de',
-		username: 'news-hub',
-		numberOfFollower: 3,
-		numberOfTweets: 3,
-	});
+	let author: Author;
 
 	beforeEach(async () => {
+		author = new Author({
+			userId: '12345',
+			bio: 'Author description',
+			isVerified: true,
+			location: 'de',
+			username: 'news-hub',
+			numberOfFollower: 3,
+			numberOfTweets: 3,
+		});
 		const moduleRef = await Test.createTestingModule({
 			providers: [
 				TweetAuthorService,
@@ -35,7 +36,7 @@ describe('WebContentService', () => {
 					},
 				},
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						setContext: jest.fn(),
 					},
@@ -85,7 +86,7 @@ describe('WebContentService', () => {
 					followers_count: author.numberOfFollowers,
 					tweet_count: author.numberOfTweets,
 				},
-				name: "NewsHub"
+				name: 'NewsHub',
 			};
 		});
 		it('should return an author if created', async () => {
@@ -99,6 +100,34 @@ describe('WebContentService', () => {
 			await expect(service.create(params)).rejects.toThrowError(
 				new TwitterApiException(TwitterApiErrorCode.NO_PUBLIC_METRIC),
 			);
+		});
+
+		it('should use default value if no follower count is passed', async () => {
+			params = {
+				...params,
+				public_metrics: {
+					...params.public_metrics,
+					followers_count: undefined,
+				},
+			};
+			const result = await service.create(params);
+			author.numberOfFollowers = 0;
+			expect(result).toEqual(author);
+			expect(repository.save).toHaveBeenCalledWith(author);
+		});
+
+		it('should use default value if no tweet count is passed', async () => {
+			params = {
+				...params,
+				public_metrics: {
+					...params.public_metrics,
+					tweet_count: undefined,
+				},
+			};
+			const result = await service.create(params);
+			author.numberOfTweets = 0;
+			expect(result).toEqual(author);
+			expect(repository.save).toHaveBeenCalledWith(author);
 		});
 	});
 

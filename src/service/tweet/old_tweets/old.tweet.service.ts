@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, LessThan, MoreThan, Repository } from 'typeorm';
 import { OldTweet } from './old.tweets.entity';
@@ -11,17 +11,19 @@ import {
 	OldTweetUserGroupResponse,
 	OldTweetUserGroups,
 	OrderParam,
-} from '../../../types/dto/old.tweet';
+} from "@type/dto/old.tweet";
 import { generateAllDatesBetweenTwoDates, minutesToMilliseconds } from '@common/util';
+import { NewsHubLogger } from '@common/logger.service';
 
 @Injectable()
 export class OldTweetService {
-	private readonly logger = new ConsoleLogger(OldTweetService.name);
-
 	constructor(
 		@InjectRepository(OldTweet)
 		private readonly oldTweetRepository: Repository<OldTweet>,
-	) {}
+		private readonly logger: NewsHubLogger,
+	) {
+		this.logger.setContext(OldTweetService.name);
+	}
 
 	async findSome(limit: number, order: OrderParam, lastId?: number): Promise<GetSomeOldTweets> {
 		this.logger.log(`Fetching ${limit} old tweets with last id ${lastId} and sorted by ${order}`);
@@ -34,18 +36,18 @@ export class OldTweetService {
 		};
 		if (lastId) {
 			params.where = {
-				id: (order === 'asc' ? MoreThan : LessThan) (lastId),
-			}
+				id: (order === 'asc' ? MoreThan : LessThan)(lastId),
+			};
 		}
 
-		const result =  await this.oldTweetRepository.find(params);
+		const result = await this.oldTweetRepository.find(params);
 		const totalNumberOfTweets = await this.oldTweetRepository.count({
 			where: params.where,
 		});
 		return {
 			result,
 			totalNumberOfTweets,
-		}
+		};
 	}
 
 	async count(): Promise<number> {
