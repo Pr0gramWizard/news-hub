@@ -1,7 +1,8 @@
-import { ICreateWebContent } from '../../types/dto/webcontent';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { NewsHubLogger } from '@common/logger.service';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tweet } from '@tweet/tweet.entity';
+import { ICreateWebContent } from '@type/dto/webcontent';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
 import { WebContent } from './webcontent.entity';
@@ -11,7 +12,7 @@ export class WebContentService {
 	constructor(
 		@InjectRepository(WebContent)
 		private readonly webContentRepository: Repository<WebContent>,
-		private readonly logger: ConsoleLogger,
+		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(WebContentService.name);
 	}

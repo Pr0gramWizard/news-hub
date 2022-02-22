@@ -23,7 +23,7 @@
 			"@common/*": ["common/*"],
 			"@tweet/*": ["service/tweet/*"],
 			"@user/*": ["service/user/*"],
-			"@error/*": ["types/error/*"],
+			"@type/*": ["types/*"]
 		}
 	},
 	"include": ["src/**/*"],

@@ -1,9 +1,9 @@
-import { TwitterApiException } from '@error/general';
-import { CreateTweet, TweetProps, TweetResponse } from '../../types/dto/tweet';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TwitterApiException } from '@type/error/general';
 import { User } from '@user/user.entity';
 import { Repository } from 'typeorm';
+import { CreateTweet, TweetProps, TweetResponse } from '../../types/dto/tweet';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
 

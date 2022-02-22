@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
-import { UserService } from '../user/user.service';
-import { StatsController } from './stats.controller';
-import { TweetService } from '../tweet/tweet.service';
-import { OldTweetService } from '../tweet/old_tweets/old.tweet.service';
-import { TweetAuthorService } from '../tweet/author/tweet.author.service';
 import { StatsResponse } from '../../types/dto/stats';
-import { ConsoleLogger } from '@nestjs/common';
+import { TweetAuthorService } from '../tweet/author/tweet.author.service';
+import { OldTweetService } from '../tweet/old_tweets/old.tweet.service';
+import { TweetService } from '../tweet/tweet.service';
+import { UserService } from '../user/user.service';
+import { NewsHubLogger } from './../../common/logger.service';
+import { StatsController } from './stats.controller';
 
 describe('StatsController', () => {
 	let controller: StatsController;
@@ -53,9 +53,9 @@ describe('StatsController', () => {
 						count: jest.fn().mockResolvedValue(1),
 					},
 				},
-				ConsoleLogger,
+				NewsHubLogger,
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						setContext: jest.fn(),
 					},

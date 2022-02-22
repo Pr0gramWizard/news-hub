@@ -1,15 +1,15 @@
 import { Test } from '@nestjs/testing';
-import { UserService } from './user.service';
-import { ConsoleLogger } from '@nestjs/common';
+import { NewsHubLogger } from '../../common/logger.service';
 import { GetUserResponse } from '../../types/dto/user';
+import { UserNotFoundException } from '../../types/error/user';
 import { UserController } from './user.controller';
 import { User } from './user.entity';
-import { UserNotFoundException } from '../../types/error/user';
+import { UserService } from './user.service';
 
 describe('UserController', () => {
 	let controller: UserController;
 	let userService: UserService;
-	let logger: ConsoleLogger;
+	let logger: NewsHubLogger;
 	let transformUserSpy: jest.SpyInstance;
 	const user: User = {
 		email: 'test@mail.com',
@@ -31,9 +31,9 @@ describe('UserController', () => {
 						findAll: jest.fn().mockResolvedValue([user]),
 					},
 				},
-				ConsoleLogger,
+				NewsHubLogger,
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						log: jest.fn(),
 						debug: jest.fn(),
@@ -45,7 +45,7 @@ describe('UserController', () => {
 			],
 		})
 			.setLogger(
-				new ConsoleLogger('TestLogger', {
+				new NewsHubLogger('TestLogger', {
 					logLevels: ['error'],
 				}),
 			)
@@ -53,7 +53,7 @@ describe('UserController', () => {
 
 		controller = moduleRef.get(UserController);
 		userService = moduleRef.get(UserService);
-		logger = moduleRef.get(ConsoleLogger);
+		logger = moduleRef.get(NewsHubLogger);
 		transformUserSpy = jest
 			.spyOn(UserController.prototype, 'transformUserToUserResponse')
 			.mockImplementation((user: User) => {

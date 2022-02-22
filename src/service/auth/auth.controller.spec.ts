@@ -1,15 +1,16 @@
+import { BadRequestException, ConflictException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { NewsHubLogger } from '../../common/logger.service';
+import { LoginUserRequest, RegisterUserRequest } from '../../types/dto/user';
+import { UserService } from '../user/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { Test } from '@nestjs/testing';
-import { UserService } from '../user/user.service';
-import { BadRequestException, ConflictException, ConsoleLogger } from '@nestjs/common';
-import {LoginUserRequest, RegisterUserRequest} from "../../types/dto/user";
 
 describe('AuthController', () => {
 	let controller: AuthController;
 	let authService: AuthService;
 	let userService: UserService;
-	let logger: ConsoleLogger;
+	let logger: NewsHubLogger;
 	const token = 'some-token';
 	const user = {
 		email: 'test@mail.com',
@@ -36,9 +37,9 @@ describe('AuthController', () => {
 						create: jest.fn().mockResolvedValue(user),
 					},
 				},
-				ConsoleLogger,
+				NewsHubLogger,
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						log: jest.fn(),
 						debug: jest.fn(),
@@ -50,7 +51,7 @@ describe('AuthController', () => {
 			],
 		})
 			.setLogger(
-				new ConsoleLogger('TestLogger', {
+				new NewsHubLogger('TestLogger', {
 					logLevels: ['error'],
 				}),
 			)
@@ -59,7 +60,7 @@ describe('AuthController', () => {
 		controller = moduleRef.get(AuthController);
 		authService = moduleRef.get(AuthService);
 		userService = moduleRef.get(UserService);
-		logger = moduleRef.get(ConsoleLogger);
+		logger = moduleRef.get(NewsHubLogger);
 	});
 
 	afterEach(() => {
@@ -74,7 +75,7 @@ describe('AuthController', () => {
 		const payload: RegisterUserRequest = {
 			email: 'test@mail.com',
 			password: 'test',
-		}
+		};
 		const expectedResult = {
 			token,
 		};
@@ -123,4 +124,3 @@ describe('AuthController', () => {
 		});
 	});
 });
-

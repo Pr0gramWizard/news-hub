@@ -1,8 +1,9 @@
-import { ConsoleLogger, Controller, Get, Injectable } from '@nestjs/common';
-import { TweetService } from '@tweet/tweet.service';
-import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
+import { NewsHubLogger } from '@common/logger.service';
+import { Controller, Get, Injectable } from '@nestjs/common';
 import { TweetAuthorService } from '@tweet/author/tweet.author.service';
-import { StatsResponse } from '../../types/dto/stats';
+import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
+import { TweetService } from '@tweet/tweet.service';
+import { StatsResponse } from '@type/dto/stats';
 import { UserService } from '@user/user.service';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class StatsController {
 		private readonly oldTweetService: OldTweetService,
 		private readonly authorService: TweetAuthorService,
 		private readonly userService: UserService,
-		private readonly logger: ConsoleLogger,
+		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(StatsController.name);
 	}
@@ -26,7 +27,7 @@ export class StatsController {
 		const numberOfUsers = await this.userService.count();
 		const oldTweetsFrequencyByDay = await this.oldTweetService.getTweetFrequency();
 		const oldTweetsUserGroups = await this.oldTweetService.countUsers();
-		const topTweeters = await this.oldTweetService.getTopNTweetUsers(10)
+		const topTweeters = await this.oldTweetService.getTopNTweetUsers(10);
 		return {
 			numberOfTweets,
 			numberOfOldTweets,

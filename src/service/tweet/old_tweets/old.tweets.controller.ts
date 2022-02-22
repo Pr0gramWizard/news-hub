@@ -1,13 +1,14 @@
-import { BadRequestException, ConsoleLogger, Controller, Get, Query } from '@nestjs/common';
-import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
+import { NewsHubLogger } from '@common/logger.service';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { LastIdQuery, LimitQuery, OldTweetResponse, OrderParam, OrderQuery } from '../../../types/dto/old.tweet';
-import { OldTweetErrorCode } from '@error/old.tweet';
+import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
+import { LastIdQuery, LimitQuery, OldTweetResponse, OrderParam, OrderQuery } from '@type/dto/old.tweet';
+import { OldTweetErrorCode } from '@type/error/old.tweet';
 
 @ApiTags('Tweet')
 @Controller('old/tweets')
 export class OldTweetController {
-	constructor(private readonly oldTweetService: OldTweetService, private readonly logger: ConsoleLogger) {
+	constructor(private readonly oldTweetService: OldTweetService, private readonly logger: NewsHubLogger) {
 		this.logger.setContext(OldTweetController.name);
 	}
 

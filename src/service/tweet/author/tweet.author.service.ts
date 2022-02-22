@@ -1,19 +1,20 @@
+import { NewsHubLogger } from '@common/logger.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
-import { TwitterApiException } from '@error/general';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TwitterApiException } from '@type/error/general';
+import { TwitterApiErrorCode } from '@type/error/twitter.api';
 import { UserV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
-import { Author } from './tweet.author.entity';
 import { CreateAuthor } from '../../../types/dto/author';
-import { TwitterApiErrorCode } from '@error/twitter.api';
+import { Author } from './tweet.author.entity';
 
 @Injectable()
 export class TweetAuthorService {
 	constructor(
 		@InjectRepository(Author)
 		private readonly authorRepository: Repository<Author>,
-		private readonly logger: ConsoleLogger,
+		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(TweetAuthorService.name);
 	}

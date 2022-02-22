@@ -1,10 +1,11 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { BadRequestException, ConsoleLogger } from '@nestjs/common';
-import { OldTweetController } from './old.tweets.controller';
-import { OldTweetService } from './old.tweet.service';
-import {OldTweetResponse, OrderParam} from '../../../types/dto/old.tweet';
-import { OldTweet } from './old.tweets.entity';
+import { NewsHubLogger } from '../../../common/logger.service';
+import { OldTweetResponse, OrderParam } from '../../../types/dto/old.tweet';
 import { OldTweetErrorCode } from '../../../types/error/old.tweet';
+import { OldTweetService } from './old.tweet.service';
+import { OldTweetController } from './old.tweets.controller';
+import { OldTweet } from './old.tweets.entity';
 
 describe('OldTweetController', () => {
 	let controller: OldTweetController;
@@ -28,7 +29,7 @@ describe('OldTweetController', () => {
 					},
 				},
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						log: jest.fn(),
 						debug: jest.fn(),

@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
-import { WebContentService } from './webcontent.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { WebContent } from './webcontent.entity';
-import { Tweet } from '../tweet/tweet.entity';
-import { ICreateWebContent } from '../../types/dto/webcontent';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
-import {ConsoleLogger} from "@nestjs/common";
+import { ICreateWebContent } from '../../types/dto/webcontent';
+import { Tweet } from '../tweet/tweet.entity';
+import { NewsHubLogger } from './../../common/logger.service';
+import { WebContent } from './webcontent.entity';
+import { WebContentService } from './webcontent.service';
 
 describe('WebContentService', () => {
 	let service: WebContentService;
@@ -27,11 +27,11 @@ describe('WebContentService', () => {
 					},
 				},
 				{
-					provide: ConsoleLogger,
+					provide: NewsHubLogger,
 					useValue: {
 						setContext: jest.fn(),
 					},
-				}
+				},
 			],
 		}).compile();
 
@@ -67,10 +67,10 @@ describe('WebContentService', () => {
 					unwound_url: 'https://twitter.com/example/status/1',
 					images: [
 						{
-							url: "https://www.example.com/image.jpg",
+							url: 'https://www.example.com/image.jpg',
 							height: 50,
 							width: 50,
-						}
+						},
 					],
 				},
 				{

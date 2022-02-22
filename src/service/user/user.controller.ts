@@ -1,15 +1,16 @@
+import { NewsHubLogger } from '@common/logger.service';
 import { ControllerResponse } from '@common/util';
-import { UserNotFoundException } from '@error/user';
-import { GetUserResponse } from '../../types/dto/user';
-import { ConsoleLogger, Controller, Get, Param } from '@nestjs/common';
-import { UserService } from './user.service';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { GetUserResponse } from '@type/dto/user';
+import { UserNotFoundException } from '@type/error/user';
 import { User } from '@user/user.entity';
+import { UserService } from './user.service';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-	constructor(private readonly userService: UserService, private readonly logger: ConsoleLogger) {
+	constructor(private readonly userService: UserService, private readonly logger: NewsHubLogger) {
 		this.logger.setContext(UserController.name);
 	}
 

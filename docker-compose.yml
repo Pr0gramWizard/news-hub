@@ -1,26 +1,25 @@
 version: '3.7'
 services:
-  cache:
-    container_name: cache
-    image: 'redis:alpine'
-    ports:
-      - "6379:6379"
+    cache:
+        container_name: cache
+        image: 'redis:alpine'
+        ports:
+            - '6378:6379'
 
-  backend:
-    container_name: backend
-    build: ./
-    depends_on:
-      - cache
-    volumes:
-      - .:/srv/app
-      - ./node_modules:/srv/app/node_modules
-    command: npm run start:debug -- --preserveWatchOutput
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
-    ports:
-      - "8080:3000"
-      - "9229:9229"
-
+    backend:
+        container_name: backend
+        build: ./
+        depends_on:
+            - cache
+        volumes:
+            - .:/srv/app
+            - ./node_modules:/srv/app/node_modules
+        command: npm run start:debug -- --preserveWatchOutput
+        environment:
+            NODE_ENV: development
+            PORT: 3000
+            REDIS_HOST: localhost
+            REDIS_PORT: 6379
+        ports:
+            - '8080:3000'
+            - '9229:9229'
