@@ -29,11 +29,15 @@ export class TweetService {
 			throw new TwitterApiException('Twitter API did not return entities for the tweet');
 		}
 		const { retweet_count, like_count, reply_count, quote_count } = public_metrics;
-		const listOfHashtags = entities.hashtags.map((h) => {
-			return new Hashtag(h.tag);
-		});
+		const listOfTweetHashtags = entities.hashtags;
+		let hashtags: Hashtag[] = [];
+		if (listOfTweetHashtags && listOfTweetHashtags.length > 0) {
+			hashtags = entities.hashtags.map((h) => {
+				return new Hashtag(h.tag);
+			});
+		}
 		const tweetParams: TweetProps = {
-			hashtags: listOfHashtags,
+			hashtags,
 			language: lang,
 			totalQuotes: quote_count,
 			totalComments: reply_count,
