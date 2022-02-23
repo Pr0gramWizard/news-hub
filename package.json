@@ -103,7 +103,8 @@
 			".guard.ts",
 			"main.ts",
 			".mock.ts",
-			"common/logger.service.ts"
+			"common/logger.service.ts",
+			"middleware/*"
 		],
 		"testEnvironment": "node"
 	},
