@@ -28,7 +28,7 @@ export class WebContentService {
 			const urlMedia = twitterApiUrl.images;
 			const media = urlMedia ? [urlMedia[0].url] : [];
 			const webContent = await this.create({
-				url: twitterApiUrl.unwound_url,
+				url: twitterApiUrl.unwound_url || twitterApiUrl.url,
 				content: twitterApiUrl.description,
 				tweet,
 				media,

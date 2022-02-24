@@ -109,7 +109,7 @@ describe('OldTweetController', () => {
 		});
 
 		it('should throw an error for limit > 100', async () => {
-			await expect(controller.getById(500)).rejects.toThrowError(
+			await expect(controller.getById(5001)).rejects.toThrowError(
 				new BadRequestException(OldTweetErrorCode.LIMIT_QUERY_PARAM_TOO_BIG),
 			);
 		});

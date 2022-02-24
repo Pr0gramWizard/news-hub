@@ -24,7 +24,7 @@ export class OldTweetController {
 		@Query('last_id') lastId?: string,
 	): Promise<OldTweetResponse> {
 		const limitQuery = limit || 10;
-		if (limitQuery > 100) {
+		if (limitQuery > 5000) {
 			throw new BadRequestException(OldTweetErrorCode.LIMIT_QUERY_PARAM_TOO_BIG);
 		}
 		if (order !== 'asc' && order !== 'desc') {
