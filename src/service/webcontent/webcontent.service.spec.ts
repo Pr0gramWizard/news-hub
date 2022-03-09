@@ -79,8 +79,7 @@ describe('WebContentService', () => {
 					url: 'https://twitter.com/example/status/2',
 					expanded_url: 'https://twitter.com/example/status/2',
 					display_url: 'https://twitter.com/example/status/2',
-					unwound_url: 'https://twitter.com/example/status/2',
-				},
+				} as TweetEntityUrlV2,
 			];
 			const result = await service.createMany(listOfTwitterApiURLs, tweet);
 			expect(result).toEqual([webContent, webContent]);

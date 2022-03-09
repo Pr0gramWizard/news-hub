@@ -11,7 +11,7 @@ import {
 	OldTweetUserGroupResponse,
 	OldTweetUserGroups,
 	OrderParam,
-} from "@type/dto/old.tweet";
+} from '@type/dto/old.tweet';
 import { generateAllDatesBetweenTwoDates, minutesToMilliseconds } from '@common/util';
 import { NewsHubLogger } from '@common/logger.service';
 
@@ -60,8 +60,7 @@ export class OldTweetService {
 		const allDates = generateAllDatesBetweenTwoDates(startDate, endDate);
 		// TODO: use a query builder instead of a raw SQL query
 		const data = (await this.oldTweetRepository.query(
-			`SELECT CASE
-                        ${allDates.map((e) => `WHEN created_at LIKE '%${e.date}%' THEN '${e.id}'`).join('\n')}
+			`SELECT CASE ${allDates.map((e) => `WHEN created_at LIKE '%${e.date}%' THEN '${e.id}'`).join('\n')}
                         END     CollectionDate,
                     COUNT(*) AS TweetsPerDay
              FROM old_tweets
