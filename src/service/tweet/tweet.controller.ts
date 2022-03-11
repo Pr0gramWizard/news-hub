@@ -120,7 +120,7 @@ export class TweetController {
 		}
 
 		// Create new tweet entity
-		const tweet = await this.tweetService.createTweet({ url, author, user, tweetData: data });
+		const tweet = await this.tweetService.create({ url, author, user, tweetData: data });
 		// Create web content entities for the tweet
 		await this.webContentService.createMany(data.entities.urls, tweet);
 	}

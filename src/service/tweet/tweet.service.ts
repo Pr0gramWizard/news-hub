@@ -1,32 +1,35 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TwitterApiException } from '@type/error/general';
 import { User } from '@user/user.entity';
 import { Repository } from 'typeorm';
-import { CreateTweet, TweetProps, TweetResponse } from '../../types/dto/tweet';
+import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
+import { NewsHubLogger } from '@common/logger.service';
+import { TweetErrorCode } from '@type/error/tweet';
 
 @Injectable()
 export class TweetService {
-	private readonly logger = new ConsoleLogger(TweetService.name);
-
 	constructor(
 		@InjectRepository(Tweet)
 		private readonly tweetRepository: Repository<Tweet>,
-	) {}
+		private readonly logger: NewsHubLogger,
+	) {
+		this.logger.setContext(TweetService.name);
+	}
 
-	async findByIdAndUser(id: string, user: User) {
+	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
 		return this.tweetRepository.findOne({ id, user });
 	}
 
-	async createTweet({ url, tweetData, author, user }: CreateTweet): Promise<Tweet> {
+	async create({ url, tweetData, author, user }: CreateTweet): Promise<Tweet> {
 		const { public_metrics, text, id, lang, entities } = tweetData;
 		if (!public_metrics) {
-			throw new TwitterApiException('Twitter API did not return public metrics for the tweet');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_PUBLIC_METRICS_MISSING);
 		}
 		if (!entities) {
-			throw new TwitterApiException('Twitter API did not return entities for the tweet');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_ENTITIES_MISSING);
 		}
 		const { retweet_count, like_count, reply_count, quote_count } = public_metrics;
 		const listOfTweetHashtags = entities.hashtags;
@@ -50,9 +53,7 @@ export class TweetService {
 			url,
 		};
 		const tweet = new Tweet(tweetParams);
-		await this.tweetRepository.save(tweet);
-		this.logger.debug(`Created a new tweet with id '${tweet.id}'`);
-		return tweet;
+		return await this.tweetRepository.save(tweet);
 	}
 
 	async findAllByUserId(id: string): Promise<TweetResponse[]> {
