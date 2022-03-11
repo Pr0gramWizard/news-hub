@@ -26,14 +26,12 @@ export class StatsController {
 		const numberOfAuthors = await this.authorService.count();
 		const numberOfUsers = await this.userService.count();
 		const oldTweetsFrequencyByDay = await this.oldTweetService.getTweetFrequency();
-		const oldTweetsUserGroups = await this.oldTweetService.countUsers();
 		const topTweeters = await this.oldTweetService.getTopNTweetUsers(10);
 		return {
 			numberOfTweets,
 			numberOfOldTweets,
 			numberOfAuthors,
 			numberOfUsers,
-			oldTweetsUserGroups,
 			topTweeters,
 			oldTweetsFrequencyByDay,
 		};

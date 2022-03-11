@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OldTweetFrequencyResponse, OldTweetTopTweetersResponse, OldTweetUserGroupResponse } from './old.tweet';
+import { OldTweetFrequencyResponse, OldTweetTopTweetersResponse } from './old.tweet';
 
 export class StatsResponse {
 	@ApiProperty()
@@ -13,9 +13,6 @@ export class StatsResponse {
 
 	@ApiProperty()
 	numberOfUsers!: number;
-
-	@ApiProperty()
-	oldTweetsUserGroups!: OldTweetUserGroupResponse;
 
 	@ApiProperty()
 	oldTweetsFrequencyByDay!: OldTweetFrequencyResponse;

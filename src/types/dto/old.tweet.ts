@@ -90,19 +90,6 @@ export class OldTweetFrequencyResponse {
 	values!: number[];
 }
 
-export class OldTweetUserGroups {
-	Status!: string;
-	NumberOfUsers!: string;
-}
-
-export class OldTweetUserGroupResponse {
-	@ApiProperty()
-	unverified!: number;
-
-	@ApiProperty()
-	verified!: number;
-}
-
 export class OldTweetTopTweetersResponse {
 	@ApiProperty()
 	userNames!: string[];

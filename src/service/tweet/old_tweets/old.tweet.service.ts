@@ -8,8 +8,6 @@ import {
 	OldTweetFrequencyResponse,
 	OldTweetsPerUser,
 	OldTweetTopTweetersResponse,
-	OldTweetUserGroupResponse,
-	OldTweetUserGroups,
 	OrderParam,
 } from '@type/dto/old.tweet';
 import { generateAllDatesBetweenTwoDates, minutesToMilliseconds } from '@common/util';
@@ -85,29 +83,6 @@ export class OldTweetService {
 			numberOfTweets: data.map((e: OldTweetsPerUser) => parseInt(e.number_of_tweets, 10)),
 			userNames: data.map((e: OldTweetsPerUser) => e.user_name),
 			verifiedStatus: data.map((e: OldTweetsPerUser) => e.is_verified === 'true'),
-		};
-	}
-
-	async countUsers(): Promise<OldTweetUserGroupResponse> {
-		const numberOfUsersGrouped = await this.oldTweetRepository
-			.createQueryBuilder('old_tweet')
-			.select(
-				`CASE
-                        WHEN old_tweet.is_verified = 'true' THEN 'Verified'
-                        WHEN old_tweet.is_verified = 'false' THEN 'Not Verified'
-                        END                   AS Status`,
-			)
-			.addSelect('COUNT(DISTINCT user_name) AS NumberOfUsers')
-			.groupBy('Status')
-			.cache(minutesToMilliseconds(60))
-			.getRawMany();
-		const numberOfUnverifiedUsers = numberOfUsersGrouped.find(
-			(e: OldTweetUserGroups) => e.Status === 'Not Verified',
-		);
-		const numberOfVerifiedUsers = numberOfUsersGrouped.find((e: OldTweetUserGroups) => e.Status === 'Verified');
-		return {
-			unverified: (numberOfUnverifiedUsers && parseInt(numberOfUnverifiedUsers.NumberOfUsers)) || 0,
-			verified: (numberOfVerifiedUsers && parseInt(numberOfVerifiedUsers.NumberOfUsers)) || 0,
 		};
 	}
 }

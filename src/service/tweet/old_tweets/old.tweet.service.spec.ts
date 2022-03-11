@@ -5,12 +5,25 @@ import { FindManyOptions, LessThan, MoreThan, Repository } from 'typeorm';
 import { NewsHubLogger } from '@common/logger.service';
 import { OldTweet } from './old.tweets.entity';
 import * as util from '../../../common/util';
+import { OldTweetTopTweetersResponse } from '../../../types/dto/old.tweet';
 
 describe('OldTweetService', () => {
 	let service: OldTweetService;
 	let repository: Repository<OldTweet>;
 	const oldTweet: OldTweet = new OldTweet();
 	const totalNumberOfTweets = 10;
+	const topTweeters = [
+		{
+			number_of_tweets: 1,
+			user_name: 'test',
+			is_verified: 'true',
+		},
+		{
+			number_of_tweets: 9,
+			user_name: 'test2',
+			is_verified: 'false',
+		},
+	];
 
 	const tweetFrequency = [
 		{ CollectionDate: '100', TweetsPerDay: '10' },
@@ -29,19 +42,13 @@ describe('OldTweetService', () => {
 						count: jest.fn().mockResolvedValue(totalNumberOfTweets),
 						query: jest.fn().mockResolvedValue(tweetFrequency),
 						createQueryBuilder: jest.fn().mockReturnValue({
-							select: jest.fn().mockReturnValue({
-								addSelect: jest.fn().mockReturnValue({
-									addSelect: jest.fn().mockReturnValue({
-										groupBy: jest.fn().mockResolvedValue({
-											orderBy: jest.fn().mockResolvedValue({
-												take: jest.fn().mockResolvedValue({
-													getRawMany: jest.fn().mockResolvedValue([]),
-												}),
-											}),
-										}),
-									}),
-								}),
-							}),
+							select: jest.fn().mockReturnThis(),
+							where: jest.fn().mockReturnThis(),
+							orderBy: jest.fn().mockReturnThis(),
+							addSelect: jest.fn().mockReturnThis(),
+							groupBy: jest.fn().mockReturnThis(),
+							take: jest.fn().mockReturnThis(),
+							getRawMany: jest.fn().mockResolvedValue(topTweeters),
 						}),
 					},
 				},
@@ -178,6 +185,20 @@ describe('OldTweetService', () => {
                     COUNT(*) AS TweetsPerDay
              FROM old_tweets
              GROUP BY 1;`);
+		});
+	});
+
+	describe('getTopNTweetUsers', () => {
+		it('should return OldTweetTopTweetersResponse', async () => {
+			const expectedResult: OldTweetTopTweetersResponse = {
+				numberOfTweets: [1, 9],
+				userNames: ['test', 'test2'],
+				verifiedStatus: [true, false],
+			};
+
+			const result = await service.getTopNTweetUsers(10);
+			expect(result).toStrictEqual(expectedResult);
+			expect(repository.createQueryBuilder().take).toHaveBeenCalledWith(10);
 		});
 	});
 });

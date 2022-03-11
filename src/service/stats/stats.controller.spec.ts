@@ -28,7 +28,6 @@ describe('StatsController', () => {
 					provide: OldTweetService,
 					useValue: {
 						count: jest.fn().mockResolvedValue(1),
-						countUsers: jest.fn().mockResolvedValue({ unverified: 1, verified: 2 }),
 						getTweetFrequency: jest.fn().mockResolvedValue({ labels: [1], values: [1] }),
 						getTopNTweetUsers: jest.fn().mockResolvedValue({
 							userNames: ['Bob'],
@@ -80,7 +79,6 @@ describe('StatsController', () => {
 				numberOfTweets: 1,
 				numberOfOldTweets: 1,
 				numberOfUsers: 1,
-				oldTweetsUserGroups: { unverified: 1, verified: 2 },
 				oldTweetsFrequencyByDay: { labels: [1], values: [1] },
 				topTweeters: {
 					userNames: ['Bob'],
@@ -94,7 +92,6 @@ describe('StatsController', () => {
 			expect(tweetService.count).toHaveBeenCalledTimes(1);
 			expect(authorService.count).toHaveBeenCalledTimes(1);
 			expect(oldTweetService.count).toHaveBeenCalledTimes(1);
-			expect(oldTweetService.countUsers).toHaveBeenCalledTimes(1);
 			expect(oldTweetService.getTweetFrequency).toHaveBeenCalledTimes(1);
 			expect(oldTweetService.getTopNTweetUsers).toHaveBeenCalledWith(10);
 		});
