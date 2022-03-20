@@ -1,10 +1,11 @@
 import { Test } from '@nestjs/testing';
 import { NewsHubLogger } from '../../common/logger.service';
 import { GetUserResponse } from '../../types/dto/user';
-import { UserNotFoundException } from '../../types/error/user';
+import { UserErrorCodes } from '../../types/error/user';
 import { UserController } from './user.controller';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { BadRequestException } from '@nestjs/common';
 
 describe('UserController', () => {
 	let controller: UserController;
@@ -97,7 +98,9 @@ describe('UserController', () => {
 
 		it('should throw error if user not found', async () => {
 			userService.findById = jest.fn().mockResolvedValue(undefined);
-			await expect(controller.getUserById(user.id)).rejects.toThrowError(new UserNotFoundException());
+			await expect(controller.getUserById(user.id)).rejects.toThrowError(
+				new BadRequestException(UserErrorCodes.USER_NOT_FOUND),
+			);
 			expect(userService.findById).toHaveBeenCalledWith(user.id);
 		});
 	});

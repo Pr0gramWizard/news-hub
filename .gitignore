@@ -261,7 +261,7 @@ fabric.properties
 .history
 .ionide
 
-# tests
+# test
 /test
 /coverage
 /.nyc_output

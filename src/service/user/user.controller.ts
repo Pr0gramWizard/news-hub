@@ -1,9 +1,9 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { ControllerResponse } from '@common/util';
-import { Controller, Get, Param } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserResponse } from '@type/dto/user';
-import { UserNotFoundException } from '@type/error/user';
+import { UserErrorCodes } from '@type/error/user';
 import { User } from '@user/user.entity';
 import { UserService } from './user.service';
 
@@ -20,7 +20,7 @@ export class UserController {
 	async getUserById(@Param('id') userId: string): Promise<ControllerResponse<GetUserResponse>> {
 		const user = await this.userService.findById(userId);
 		if (!user) {
-			throw new UserNotFoundException();
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
 		this.logger.log(`User with id ${userId} was found`);
 		return this.transformUserToUserResponse(user);

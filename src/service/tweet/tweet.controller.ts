@@ -1,6 +1,6 @@
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
-import { BadRequestException, Body, ConsoleLogger, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -9,23 +9,24 @@ import {
 	ApiOkResponse,
 	ApiTags,
 } from '@nestjs/swagger';
-import { InternalServerException, TwitterApiException } from '@type/error/general';
-import { UserNotFoundException } from '@type/error/user';
+import { TwitterApiException } from '@type/error/general';
+import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
-import { StoreTweetRequest, TweetResponse } from '../../types/dto/tweet';
+import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { JwtPayload } from '../auth/auth.service';
 import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetService } from './tweet.service';
+import { NewsHubLogger } from '@common/logger.service';
+import { TweetErrorCode } from '@type/error/tweet';
 
 @ApiTags('Tweet')
 @Controller('tweet')
 export class TweetController {
-	private readonly logger = new ConsoleLogger(TweetController.name);
-	private readonly supportedSocialMediaLinks = ['twitter.com'];
+	private readonly supportedSocialMediaLinks = ['twitter.com', 'twitter.de', 'twitter.fr', 'twitter.co.uk'];
 
 	constructor(
 		private readonly tweetService: TweetService,
@@ -33,7 +34,10 @@ export class TweetController {
 		private readonly twitterService: TwitterService,
 		private readonly authorService: TweetAuthorService,
 		private readonly webContentService: WebContentService,
-	) {}
+		private readonly logger: NewsHubLogger,
+	) {
+		this.logger.setContext(TweetController.name);
+	}
 
 	@Get(':user_id')
 	@ApiOkResponse({
@@ -62,19 +66,20 @@ export class TweetController {
 		// Check if requesting user exists
 		const user = await this.userService.findById(sub);
 		if (!user) {
-			throw new UserNotFoundException();
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
 		// Parse and validate passed url. Currently, we only support twitter.com
 		const { pathname, hostname } = new URL(url);
 		if (!this.supportedSocialMediaLinks.includes(hostname)) {
-			throw new BadRequestException(`Currently we do not support ${hostname}`);
+			this.logger.debug(`Unsupported social media link: ${hostname}`);
+			throw new BadRequestException(`${TweetErrorCode.UNSUPPORTED_URL_HOST}: ${hostname}`);
 		}
 
 		// The tweet id should always be the last path name
 		const pathNames = pathname.split('/');
 		const tweetId = pathNames.pop();
 		if (!tweetId) {
-			throw new BadRequestException("The tweet's url is invalid");
+			throw new BadRequestException(TweetErrorCode.INVALID_TWEET_URL);
 		}
 
 		// If the requesting user already has an entry in the database we just return nothing
@@ -85,31 +90,27 @@ export class TweetController {
 		}
 
 		// This is the actual call to the Twitter API
-		const twitterApiResponse = await this.twitterService.client.v2.singleTweet(tweetId, {
-			expansions: ['author_id', 'attachments.media_keys'],
-			'tweet.fields': ['public_metrics', 'source', 'text', 'created_at', 'lang', 'entities'],
-			'user.fields': ['id', 'username', 'public_metrics', 'verified', 'name', 'description', 'location'],
-		});
+		const twitterApiResponse = await this.twitterService.findTweetById(tweetId);
 
 		// Parse and validate the response from the Twitter API
 		const { data, includes } = twitterApiResponse;
 		if (isUndefinedOrEmptyObject(data)) {
-			throw new TwitterApiException('Twitter API returned empty data object');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_DATA_MISSING);
 		}
 		if (isUndefinedOrEmptyObject(includes)) {
-			throw new TwitterApiException('Twitter API returned empty includes object');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_INCLUDES_MISSING);
 		}
 		if (isUndefinedOrEmptyObject(data.entities)) {
-			throw new TwitterApiException('Twitter API returned empty entities object');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_ENTITIES_MISSING);
 		}
 		const listOfRelatedUsers = includes.users;
 		if (!listOfRelatedUsers) {
-			throw new TwitterApiException('Twitter API returned no list of users for the tweet');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_RELATED_USERS_MISSING);
 		}
 		const tweetAuthor = listOfRelatedUsers.find((u) => u.id === data.author_id);
 		if (!tweetAuthor) {
 			this.logger.error(`The twitter API did not return any author object for url '${url}'`);
-			throw new InternalServerException('The twitter API did not return any author object for url');
+			throw new TwitterApiException(TweetErrorCode.TWITTER_API_AUTHOR_MISSING);
 		}
 
 		// Create author entity if it does not exist
@@ -125,17 +126,12 @@ export class TweetController {
 		await this.webContentService.createMany(data.entities.urls, tweet);
 	}
 
+	/* istanbul ignore next */
 	@Get('hashtag/:hashtag')
 	async getTweetsByHashtag(@Param('hashtag') hashtag: string) {
 		// Search all is not available unless you get the Academic access
 		// Search only returns the tweets of the last 7 days
-		const twitterApiResponse = await this.twitterService.client.v2.search(`#${hashtag}`, {
-			expansions: ['author_id', 'attachments.media_keys'],
-			'tweet.fields': ['public_metrics', 'source', 'text', 'created_at', 'lang', 'entities'],
-			'user.fields': ['id', 'username', 'public_metrics', 'verified', 'name', 'description', 'location'],
-			'media.fields': ['type'],
-			max_results: 10,
-		});
+		const twitterApiResponse = await this.twitterService.findTweetsByHashtag(hashtag);
 
 		const { data } = twitterApiResponse;
 
