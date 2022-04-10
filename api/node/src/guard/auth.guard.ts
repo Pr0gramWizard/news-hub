@@ -1,15 +1,16 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { NewsHubLogger } from '../common/logger.service';
+import { NewsHubLogger } from '@common/logger.service';
 import { JwtPayload } from '../service/auth/auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 	private readonly logger: NewsHubLogger;
+
 	constructor() {
 		this.logger = new NewsHubLogger();
-		this.logger.setContext('AuthGuard');
 	}
+
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const { authorization } = request.headers;

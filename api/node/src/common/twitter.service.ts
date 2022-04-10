@@ -8,7 +8,7 @@ export class TwitterService {
 	readonly client: TwitterApi;
 
 	constructor(private readonly configService: ConfigService) {
-		const bearerToken = this.configService.get('TWITTER_BEARER_TOKEN');
+		const bearerToken = this.configService.get('twitter.bearerToken');
 		assertMany(bearerToken);
 		this.client = new TwitterApi(bearerToken);
 	}

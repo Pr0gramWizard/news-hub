@@ -1,0 +1,23 @@
+app:
+  environment: development
+  port: 8080
+
+db:
+  mariadb:
+    host: 'localhost'
+    port: 5432
+    name: 'yaml-db'
+    user: ''
+    password: ''
+
+
+twitter:
+  api_key: ''
+  api_secret: ''
+  access_token: ''
+  access_token_secret: ''
+  bearer_token: ''
+
+jwt:
+  secret: 'secret'
+  expires_in: '1h'

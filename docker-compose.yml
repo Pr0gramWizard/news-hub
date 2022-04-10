@@ -1,25 +1,29 @@
 version: '3.7'
 services:
-    cache:
-        container_name: cache
-        image: 'redis:alpine'
-        ports:
-            - '6378:6379'
+  newshub-api-node:
+    container_name: newshub-api-node
+    build: ./api/node
+    restart: always
+    volumes:
+      - ./api/node:/srv/app
+      - /srv/app/node_modules/
+    env_file:
+      - ./api/node/.env
+    depends_on:
+      - newshub-api-python
+    command: npm run start:debug -- --preserveWatchOutput
+    ports:
+      - "3000:3000"
 
-    backend:
-        container_name: backend
-        build: ./
-        depends_on:
-            - cache
-        volumes:
-            - .:/srv/app
-            - ./node_modules:/srv/app/node_modules
-        command: npm run start:debug -- --preserveWatchOutput
-        environment:
-            NODE_ENV: development
-            PORT: 3000
-            REDIS_HOST: localhost
-            REDIS_PORT: 6379
-        ports:
-            - '8080:3000'
-            - '9229:9229'
+  newshub-api-python:
+    container_name: newshub-api-python
+    build: ./api/python
+    restart: always
+    volumes:
+      - ./api/python:/app
+      - /app/venv/lib/python3.10/site-packages/
+    env_file:
+      - ./api/python/.env
+    ports:
+      - "4000:4000"
+

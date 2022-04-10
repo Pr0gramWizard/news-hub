@@ -22,6 +22,8 @@ import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetService } from './tweet.service';
 import { NewsHubLogger } from '@common/logger.service';
 import { TweetErrorCode } from '@type/error/tweet';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -35,6 +37,7 @@ export class TweetController {
 		private readonly authorService: TweetAuthorService,
 		private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
+		private readonly configService: ConfigService,
 	) {
 		this.logger.setContext(TweetController.name);
 	}
@@ -145,5 +148,22 @@ export class TweetController {
 		// });
 
 		return twitterApiResponse;
+	}
+
+	@Post('parse')
+	async parseUrl(@Body() requestBody: any): Promise<any> {
+		const { url } = requestBody;
+		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
+		this.logger.debug(`Calling python API at ${pythonApiUrl} with url '${url}'`);
+		const response = await axios.post(
+			`${pythonApiUrl}:4000/parse`,
+			{ url },
+			{
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			},
+		);
+		return response.data;
 	}
 }
