@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   newshub-api-node:
     container_name: newshub-api-node
@@ -26,4 +26,15 @@ services:
       - ./api/python/.env
     ports:
       - "4000:4000"
-
+#  newshub-dashboard:
+#    container_name: newshub-dashboard
+#    build: ./apps/dashboard
+#    restart: always
+#    volumes:
+#      - ./apps/dashboard:/app
+#      - /app/node_modules/
+#    environment:
+#      - API_URL="http://newshub-api-node:3000"
+#    ports:
+#      - "8080:8080"
+#      - "3010:3010"

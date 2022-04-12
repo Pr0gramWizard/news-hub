@@ -1,0 +1,31 @@
+{
+  "name": "dashboard",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "dev:docker": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mantine/core": "^4.1.3",
+    "@mantine/dates": "^4.1.3",
+    "@mantine/form": "^4.1.3",
+    "@mantine/hooks": "^4.1.3",
+    "@mantine/modals": "^4.1.3",
+    "@mantine/next": "^4.1.3",
+    "@mantine/notifications": "^4.1.3",
+    "dayjs": "^1.11.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "6"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@vitejs/plugin-react": "^1.0.7",
+    "typescript": "^4.5.4",
+    "vite": "^2.9.0"
+  }
+}
