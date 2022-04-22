@@ -1,40 +1,26 @@
-var webpack = require('webpack'),
-	path = require('path'),
-	fileSystem = require('fs-extra'),
-	env = require('./utils/env'),
-	CopyWebpackPlugin = require('copy-webpack-plugin'),
-	HtmlWebpackPlugin = require('html-webpack-plugin'),
-	TerserPlugin = require('terser-webpack-plugin');
-var { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require('webpack');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
-var alias = {
+const webpackMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
+const alias = {
 	'react-dom': '@hot-loader/react-dom',
 };
 
-// load the secrets
-var secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
+const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2'];
 
-var fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2'];
-
-if (fileSystem.existsSync(secretsPath)) {
-	alias['secrets'] = secretsPath;
-}
-
-var options = {
-	mode: process.env.NODE_ENV || 'development',
+const options = {
+	mode: webpackMode,
 	entry: {
-		newtab: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.jsx'),
-		options: path.join(__dirname, 'src', 'pages', 'Options', 'index.jsx'),
-		popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.jsx'),
-		background: path.join(__dirname, 'src', 'pages', 'Background', 'index.js'),
-		contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.js'),
-		devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.js'),
-		panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.jsx'),
-	},
-	chromeExtensionBoilerplate: {
-		notHotReload: ['background', 'contentScript', 'devtools'],
+		popup: './src/pages/Popup/index.tsx',
+		background: './src/scripts/background.ts',
+		content: './src/scripts/content/twitter.ts',
 	},
 	output: {
 		filename: '[name].bundle.js',
@@ -45,9 +31,7 @@ var options = {
 	module: {
 		rules: [
 			{
-				// look for .css or .scss files
 				test: /\.(css|scss)$/,
-				// in the `src` directory
 				use: [
 					{
 						loader: 'style-loader',
@@ -67,10 +51,6 @@ var options = {
 				test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
 				type: 'asset/resource',
 				exclude: /node_modules/,
-				// loader: 'file-loader',
-				// options: {
-				//   name: '[name].[ext]',
-				// },
 			},
 			{
 				test: /\.html$/,
@@ -99,8 +79,6 @@ var options = {
 	plugins: [
 		new CleanWebpackPlugin({ verbose: false }),
 		new webpack.ProgressPlugin(),
-		// expose and write the allowed env vars on the compiled bundle
-		new webpack.EnvironmentPlugin(['NODE_ENV']),
 		new CopyWebpackPlugin({
 			patterns: [
 				{
@@ -123,15 +101,6 @@ var options = {
 		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: 'src/pages/Content/content.styles.css',
-					to: path.join(__dirname, 'build'),
-					force: true,
-				},
-			],
-		}),
-		new CopyWebpackPlugin({
-			patterns: [
-				{
 					from: 'src/assets/img/icon-128.png',
 					to: path.join(__dirname, 'build'),
 					force: true,
@@ -148,33 +117,9 @@ var options = {
 			],
 		}),
 		new HtmlWebpackPlugin({
-			template: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.html'),
-			filename: 'newtab.html',
-			chunks: ['newtab'],
-			cache: false,
-		}),
-		new HtmlWebpackPlugin({
-			template: path.join(__dirname, 'src', 'pages', 'Options', 'index.html'),
-			filename: 'options.html',
-			chunks: ['options'],
-			cache: false,
-		}),
-		new HtmlWebpackPlugin({
 			template: path.join(__dirname, 'src', 'pages', 'Popup', 'index.html'),
 			filename: 'popup.html',
 			chunks: ['popup'],
-			cache: false,
-		}),
-		new HtmlWebpackPlugin({
-			template: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.html'),
-			filename: 'devtools.html',
-			chunks: ['devtools'],
-			cache: false,
-		}),
-		new HtmlWebpackPlugin({
-			template: path.join(__dirname, 'src', 'pages', 'Panel', 'index.html'),
-			filename: 'panel.html',
-			chunks: ['panel'],
 			cache: false,
 		}),
 	],
@@ -183,7 +128,7 @@ var options = {
 	},
 };
 
-if (env.NODE_ENV === 'development') {
+if (webpackMode === 'development') {
 	options.devtool = 'cheap-module-source-map';
 } else {
 	options.optimization = {
