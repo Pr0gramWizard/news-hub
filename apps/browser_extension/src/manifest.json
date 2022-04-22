@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
-	"name": "NewsNet Collector",
-	"description": "Browser extension that collects social media posts for NewsNet",
+	"name": "NewsHub Collector",
+	"description": "Browser extension that collects social media posts for NewsHub",
 	"options_page": "options.html",
 	"background": { "service_worker": "background.bundle.js" },
 	"action": {

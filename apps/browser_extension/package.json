@@ -1,7 +1,7 @@
 {
-	"name": "news_net_browser_extension",
+	"name": "news_hub_browser_extension",
 	"version": "1.0.0",
-	"description": "Browser extension that collects social media posts for NewsNet",
+	"description": "Browser extension that collects social media posts for NewsHub",
 	"license": "MIT",
 	"scripts": {
 		"build": "node utils/build.js",
