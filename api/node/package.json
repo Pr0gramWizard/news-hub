@@ -1,5 +1,5 @@
 {
-	"name": "news-hub",
+	"name": "news-hub-api-node",
 	"version": "0.0.1",
 	"description": "",
 	"author": "",
@@ -17,8 +17,7 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-		"test:e2e": "jest --config ./test/jest-e2e.json",
-		"docker": "docker-compose up"
+		"test:e2e": "jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
 		"@nestjs/common": "^8.3.1",
