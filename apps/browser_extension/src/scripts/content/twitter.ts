@@ -5,9 +5,8 @@ document.body.appendChild(
 );
 
 async function storeLink(url: string, token: string) {
-	const apiUrl = 'https://api.mortaga.de';
 	console.log(`Storing tweet: '${url}' for user: '${token}'`);
-	const response = await fetch(`${apiUrl}/api/tweet`, {
+	const response = await fetch(`${process.env.API_URL}/api/tweet`, {
 		method: 'post',
 		headers: {
 			'Content-Type': 'application/json',

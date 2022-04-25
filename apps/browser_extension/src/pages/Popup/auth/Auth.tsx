@@ -1,15 +1,13 @@
 import React from 'react';
-import { upperFirst, useForm, useToggle } from '@mantine/hooks';
-import { Anchor, Button, Checkbox, Group, Paper, PaperProps, PasswordInput, Text, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/hooks';
+import { Button, Group, Paper, PaperProps, PasswordInput, Text, TextInput } from '@mantine/core';
 
 export function AuthenticationForm(props: PaperProps<'div'>) {
-	const [type, toggle] = useToggle('login', ['login', 'register']);
 	const form = useForm({
 		initialValues: {
 			email: '',
 			name: '',
 			password: '',
-			terms: true,
 		},
 
 		validationRules: {
@@ -18,23 +16,30 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 		},
 	});
 
+	const login = async (values: typeof form.values) => {
+		const { email, name, password } = values;
+		const response = await fetch(`${process.env.API_URL}/auth/login`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				email,
+				password,
+			}),
+		});
+		const data = await response.json();
+		console.log(data);
+	};
+
 	return (
 		<Paper radius="md" p="xl" withBorder {...props}>
-			<Text size="lg" weight={500}>
-				Welcome to NewsHub, {type} with
+			<Text size="lg" weight={650}>
+				Welcome to NewsHub
 			</Text>
 
-			<form onSubmit={form.onSubmit(() => {})}>
+			<form onSubmit={form.onSubmit(login)}>
 				<Group direction="column" grow>
-					{type === 'register' && (
-						<TextInput
-							label="Name"
-							placeholder="Your name"
-							value={form.values.name}
-							onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
-						/>
-					)}
-
 					<TextInput
 						required
 						label="Email"
@@ -52,21 +57,10 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 						onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
 						error={form.errors.password && 'Password should include at least 6 characters'}
 					/>
-
-					{type === 'register' && (
-						<Checkbox
-							label="I accept terms and conditions"
-							checked={form.values.terms}
-							onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
-						/>
-					)}
 				</Group>
 
-				<Group position="apart" mt="xl">
-					<Anchor component="button" type="button" color="gray" onClick={() => toggle()} size="xs">
-						{type === 'register' ? 'Already have an account? Login' : "Don't have an account? Register"}
-					</Anchor>
-					<Button type="submit">{upperFirst(type)}</Button>
+				<Group position="center" mt="xl">
+					<Button type="submit">{'Login'}</Button>
 				</Group>
 			</form>
 		</Paper>
