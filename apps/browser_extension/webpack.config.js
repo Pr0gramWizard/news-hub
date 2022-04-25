@@ -4,6 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const dotenv = require('dotenv');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
@@ -31,19 +32,13 @@ const options = {
 	module: {
 		rules: [
 			{
-				test: /\.(css|scss)$/,
+				test: /\.(css)$/,
 				use: [
 					{
 						loader: 'style-loader',
 					},
 					{
 						loader: 'css-loader',
-					},
-					{
-						loader: 'sass-loader',
-						options: {
-							sourceMap: true,
-						},
 					},
 				],
 			},
@@ -79,6 +74,9 @@ const options = {
 	plugins: [
 		new CleanWebpackPlugin({ verbose: false }),
 		new webpack.ProgressPlugin(),
+		new webpack.DefinePlugin({
+			'process.env': JSON.stringify(dotenv.config().parsed),
+		}),
 		new CopyWebpackPlugin({
 			patterns: [
 				{

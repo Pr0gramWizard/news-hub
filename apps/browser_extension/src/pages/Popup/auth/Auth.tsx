@@ -1,6 +1,6 @@
-import React from 'react';
-import { useForm } from '@mantine/hooks';
 import { Button, Group, Paper, PaperProps, PasswordInput, Text, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/hooks';
+import React from 'react';
 
 export function AuthenticationForm(props: PaperProps<'div'>) {
 	const form = useForm({
@@ -11,14 +11,14 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 		},
 
 		validationRules: {
-			email: (val) => /^\S+@\S+$/.test(val),
-			password: (val) => val.length >= 6,
+			email: (val: string) => /^\S+@\S+$/.test(val),
+			password: (val: string) => val.length >= 6,
 		},
 	});
 
 	const login = async (values: typeof form.values) => {
 		const { email, name, password } = values;
-		const response = await fetch(`${process.env.API_URL}/auth/login`, {
+		const response = await fetch(`${process.env.API_URL}auth/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 
 	return (
 		<Paper radius="md" p="xl" withBorder {...props}>
-			<Text size="lg" weight={650}>
+			<Text size="lg" weight={700}>
 				Welcome to NewsHub
 			</Text>
 

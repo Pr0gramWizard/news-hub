@@ -18,8 +18,6 @@ const Popup = () => {
 		getToken();
 	});
 
-	console.log('Test');
-
 	const deleteToken = async () => {
 		await chrome.storage.sync.remove(tokenStorageKey);
 		setToken('No token');
