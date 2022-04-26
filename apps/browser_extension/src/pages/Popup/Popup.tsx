@@ -1,38 +1,40 @@
+import { MantineProvider } from '@mantine/core';
+import { NotificationsProvider } from '@mantine/notifications';
 import React, { useEffect } from 'react';
 import { AuthenticationForm } from './auth/Auth';
 
+export const TOKEN_STORAGE_KEY = 'userToken';
+
 const Popup = () => {
-	const tokenStorageKey = 'userToken';
 	const [state, setState] = React.useState('login');
 	const [token, setToken] = React.useState('No token');
 	useEffect(() => {
-		console.log(token);
-
 		async function getToken() {
-			const { token } = await chrome.storage.sync.get(tokenStorageKey);
+			const { token } = await chrome.storage.sync.get(TOKEN_STORAGE_KEY);
 			if (token) {
 				setToken(token);
+				setState('dashboard');
 			}
 		}
-
 		getToken();
 	});
-
-	const deleteToken = async () => {
-		await chrome.storage.sync.remove(tokenStorageKey);
-		setToken('No token');
-	};
 
 	const getStateComponent = () => {
 		switch (state) {
 			case 'login':
 				return <AuthenticationForm />;
+			case 'dashboard':
+				return <div>Dashboard</div>;
 			default:
 				return <div>Default State</div>;
 		}
 	};
 
-	return <>{getStateComponent()}</>;
+	return (
+		<MantineProvider>
+			<NotificationsProvider position="top-right">{getStateComponent()}</NotificationsProvider>
+		</MantineProvider>
+	);
 };
 
 export default Popup;

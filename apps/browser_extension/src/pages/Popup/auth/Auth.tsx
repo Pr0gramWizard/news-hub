@@ -1,8 +1,11 @@
-import { Button, Group, Paper, PaperProps, PasswordInput, Text, TextInput } from '@mantine/core';
+import { Button, Group, Paper, PasswordInput, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
 import React from 'react';
+import { X } from 'tabler-icons-react';
+import { TOKEN_STORAGE_KEY } from '../Popup';
 
-export function AuthenticationForm(props: PaperProps<'div'>) {
+export function AuthenticationForm() {
 	const form = useForm({
 		initialValues: {
 			email: '',
@@ -16,22 +19,48 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 
 	const login = async (values: typeof form.values) => {
 		const { email, password } = values;
-		const response = await fetch(`${process.env.API_URL}auth/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				email,
-				password,
-			}),
-		});
-		const data = await response.json();
-		console.log(data);
+		try {
+			const response = await fetch(`${process.env.API_URL}auth/login`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email,
+					password,
+				}),
+			});
+			const data = await response.json();
+			if (response.status === 400) {
+				showNotification({
+					autoClose: 5000,
+					title: 'Something went wrong',
+					message: 'Wrong login credentials',
+					color: 'red',
+					icon: <X />,
+				});
+			}
+			if (response.status === 201 && data.token) {
+				await chrome.storage.sync.set({
+					[TOKEN_STORAGE_KEY]: data.token,
+				});
+			}
+		} catch (e) {
+			if (!(e instanceof Error)) {
+				throw e;
+			}
+			showNotification({
+				autoClose: 5000,
+				title: 'Something went wrong',
+				message: e.message || 'Unknown error',
+				color: 'red',
+				icon: <X />,
+			});
+		}
 	};
 
 	return (
-		<Paper radius="md" p="xl" withBorder {...props}>
+		<Paper radius="md" p="xl" withBorder>
 			<Text size="lg" weight={700}>
 				Welcome to NewsHub
 			</Text>
@@ -53,7 +82,6 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 						placeholder="Your password"
 						value={form.values.password}
 						onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
-						error={form.errors.password && 'Password should include at least 6 characters'}
 					/>
 				</Group>
 
