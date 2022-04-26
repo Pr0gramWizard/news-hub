@@ -6,18 +6,16 @@ export function AuthenticationForm(props: PaperProps<'div'>) {
 	const form = useForm({
 		initialValues: {
 			email: '',
-			name: '',
 			password: '',
 		},
 
 		validationRules: {
 			email: (val: string) => /^\S+@\S+$/.test(val),
-			password: (val: string) => val.length >= 6,
 		},
 	});
 
 	const login = async (values: typeof form.values) => {
-		const { email, name, password } = values;
+		const { email, password } = values;
 		const response = await fetch(`${process.env.API_URL}auth/login`, {
 			method: 'POST',
 			headers: {
