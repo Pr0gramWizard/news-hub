@@ -1,10 +1,19 @@
 import { NewsHubLogger } from '@common/logger.service';
-import { Controller, Get, Injectable } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Injectable, UseGuards } from '@nestjs/common';
 import { TweetAuthorService } from '@tweet/author/tweet.author.service';
 import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
 import { TweetService } from '@tweet/tweet.service';
 import { StatsResponse } from '@type/dto/stats';
 import { UserService } from '@user/user.service';
+import { UserContext } from '../../decorator/user.decorator';
+import { AuthGuard } from '../../guard/auth.guard';
+import { UserErrorCodes } from '../../types/error/user';
+import { JwtPayload } from '../auth/auth.service';
+
+interface UserStats {
+	value: string | number;
+	label: string;
+}
 
 @Injectable()
 @Controller('stats')
@@ -35,5 +44,17 @@ export class StatsController {
 			topTweeters,
 			oldTweetsFrequencyByDay,
 		};
+	}
+
+	@Get('/me')
+	@UseGuards(new AuthGuard())
+	async getOwnStats(@UserContext() jwtPayload: JwtPayload): Promise<UserStats[]> {
+		const { sub } = jwtPayload;
+		const user = await this.userService.findById(sub);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		const numberOfCollectedTweets = await this.tweetService.countByUserId(sub);
+		return [{ label: 'Collected tweets', value: numberOfCollectedTweets }];
 	}
 }

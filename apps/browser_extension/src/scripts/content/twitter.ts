@@ -6,19 +6,23 @@ document.body.appendChild(
 
 async function storeLink(url: string, token: string) {
 	console.log(`Storing tweet: '${url}' for user: '${token}'`);
-	const response = await fetch(`${process.env.API_URL}/api/tweet`, {
-		method: 'post',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			url,
-			token,
-		}),
-	});
-	if (response.status !== 201) {
-		const error = await response.json();
-		console.log(error);
+	try {
+		const response = await fetch(`${process.env.API_URL}/api/tweet`, {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				url,
+				token,
+			}),
+		});
+		if (response.status !== 201) {
+			const error = await response.json();
+			console.log(error);
+		}
+	} catch (e) {
+		console.error(e);
 	}
 }
 
@@ -98,7 +102,20 @@ const observer = new MutationObserver(function (mutations, observer) {
 	}
 });
 
-observer.observe(document, {
-	subtree: true,
-	childList: true,
+(window as any).twitterContentObserver = observer;
+
+chrome.storage.local.get('observerState', (data) => {
+	if (data.observerState === 'enabled') {
+		console.log('Enabling observer');
+		observer.observe(document, {
+			subtree: true,
+			childList: true,
+		});
+	} else {
+		const existingObserver = (window as any).twitterContentObserver;
+		if (existingObserver) {
+			console.log('Disabling existing observer');
+			existingObserver.disconnect();
+		}
+	}
 });

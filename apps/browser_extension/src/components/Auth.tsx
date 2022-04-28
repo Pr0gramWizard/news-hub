@@ -3,9 +3,14 @@ import { useForm } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import React from 'react';
 import { X } from 'tabler-icons-react';
-import { TOKEN_STORAGE_KEY } from '../Popup';
+import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
 
-export function AuthenticationForm() {
+interface AuthenticationFormProps {
+	onLogin: () => void;
+}
+
+export function AuthenticationForm(props: AuthenticationFormProps) {
+	const { onLogin } = props;
 	const form = useForm({
 		initialValues: {
 			email: '',
@@ -20,7 +25,7 @@ export function AuthenticationForm() {
 	const login = async (values: typeof form.values) => {
 		const { email, password } = values;
 		try {
-			const response = await fetch(`${process.env.API_URL}auth/login`, {
+			const response = await fetch(`${process.env.API_URL}/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -41,9 +46,8 @@ export function AuthenticationForm() {
 				});
 			}
 			if (response.status === 201 && data.token) {
-				await chrome.storage.sync.set({
-					[TOKEN_STORAGE_KEY]: data.token,
-				});
+				localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+				onLogin();
 			}
 		} catch (e) {
 			if (!(e instanceof Error)) {

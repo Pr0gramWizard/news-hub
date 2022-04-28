@@ -1,13 +1,13 @@
+import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
+import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
 import { Repository } from 'typeorm';
-import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
-import { NewsHubLogger } from '@common/logger.service';
-import { TweetErrorCode } from '@type/error/tweet';
 
 @Injectable()
 export class TweetService {
@@ -58,6 +58,10 @@ export class TweetService {
 
 	async findAllByUserId(id: string): Promise<TweetResponse[]> {
 		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags', 'webContents'] });
+	}
+
+	async countByUserId(id: string): Promise<number> {
+		return this.tweetRepository.count({ where: { user: { id } } });
 	}
 
 	async count(): Promise<number> {

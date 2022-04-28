@@ -1,11 +1,11 @@
+import json
 import os
+from urllib.parse import urlparse
 
+import nltk
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, request
-import json
 from newspaper import Article
-import nltk
-from urllib.parse import urlparse
 
 nltk.download('punkt')
 
@@ -24,10 +24,11 @@ def parse_tweet():
     url = data['url']
 
     try:
-        article_source_domain = parsed_url(url)
-        source_info = extract_source(article_source_domain)
+        article_source_domain = parse_url(url)
+        # source_info = extract_source(article_source_domain)
         article_info = extract_article(url)
-        return json.dumps({'article': article_info, 'source': source_info})
+        # return json.dumps({'article': article_info, 'source': source_info})
+        return json.dumps({'article': article_info})
     except Exception as e:
         return json.dumps({'error': str(e)}), 400
 
@@ -50,7 +51,7 @@ def extract_article(url):
     article.build()
     return {
         "authors": list(article.authors),
-        "html": article.html,
+        # "html": article.html,
         "images": list(article.images),
         "keywords": list(article.keywords),
         "meta_data": article.meta_data,

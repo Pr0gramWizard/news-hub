@@ -13,7 +13,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 		return;
 	}
 
-	const { token } = await chrome.storage.sync.get(['token']);
+	const { token } = await chrome.storage.local.get(['token']);
 	console.log(`User token: '${token}'`);
 	if (!token) {
 		const { token } = await getUserToken();
