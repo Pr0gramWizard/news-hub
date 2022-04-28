@@ -1,18 +1,19 @@
 import { ActionIcon, Card, Group, Text } from '@mantine/core';
 import React, { useEffect } from 'react';
 import { Logout, Refresh } from 'tabler-icons-react';
+import { useStateContext } from '../context/StateContext';
 import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
 
 interface DashboardProps {
 	mail: string;
-	onLogout: () => void;
 }
 
 interface UserStatistic {
 	label: string;
 	value: number | string;
 }
-export function Dashboard({ mail, onLogout }: DashboardProps) {
+export function Dashboard({ mail }: DashboardProps) {
+	const { setState } = useStateContext();
 	const [stats, setStats] = React.useState<UserStatistic[]>([]);
 	const [isEnabled, setIsEnabled] = React.useState(false);
 
@@ -80,7 +81,13 @@ export function Dashboard({ mail, onLogout }: DashboardProps) {
 				>
 					<Refresh />
 				</ActionIcon>
-				<ActionIcon color={'red'} onClick={onLogout}>
+				<ActionIcon
+					color={'red'}
+					onClick={() => {
+						localStorage.removeItem(TOKEN_STORAGE_KEY);
+						setState('login');
+					}}
+				>
 					<Logout />
 				</ActionIcon>
 			</Group>

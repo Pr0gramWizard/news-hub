@@ -3,14 +3,11 @@ import { useForm } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import React from 'react';
 import { X } from 'tabler-icons-react';
+import { useStateContext } from '../context/StateContext';
 import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
 
-interface AuthenticationFormProps {
-	onLogin: () => void;
-}
-
-export function AuthenticationForm(props: AuthenticationFormProps) {
-	const { onLogin } = props;
+export function AuthenticationForm() {
+	const { setState } = useStateContext();
 	const form = useForm({
 		initialValues: {
 			email: '',
@@ -47,7 +44,7 @@ export function AuthenticationForm(props: AuthenticationFormProps) {
 			}
 			if (response.status === 201 && data.token) {
 				localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-				onLogin();
+				setState('dashboard');
 			}
 		} catch (e) {
 			if (!(e instanceof Error)) {

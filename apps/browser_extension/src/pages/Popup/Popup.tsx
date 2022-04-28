@@ -4,6 +4,7 @@ import jwt_decode from 'jwt-decode';
 import React, { useEffect } from 'react';
 import { AuthenticationForm } from '../../components/Auth';
 import { Dashboard } from '../../components/Dashboard';
+import { StateContextProvider, useStateContext } from '../../context/StateContext';
 
 export const TOKEN_STORAGE_KEY = 'userToken';
 
@@ -15,12 +16,27 @@ export interface JWTPayload {
 }
 
 const Popup = () => {
+	return (
+		<MantineProvider>
+			<NotificationsProvider position="top-right">
+				<StateContextProvider>
+					<Conponent />
+				</StateContextProvider>
+			</NotificationsProvider>
+		</MantineProvider>
+	);
+};
+
+export default Popup;
+
+function Conponent() {
+	const { state, setState } = useStateContext();
 	const [mail, setMail] = React.useState('');
-	const [state, setState] = React.useState('login');
 	const [token, setToken] = React.useState('No token');
-	const [didStateChange, setDidStateChange] = React.useState(false);
+
 	useEffect(() => {
 		const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+		if (state === 'dasshboard') return;
 		if (token) {
 			setToken(token);
 			setState('dashboard');
@@ -29,41 +45,14 @@ const Popup = () => {
 		} else {
 			console.log('No token found');
 		}
-	}, [didStateChange]);
+	}, [state, setState]);
 
-	const getStateComponent = () => {
-		switch (state) {
-			case 'login':
-				return (
-					<AuthenticationForm
-						onLogin={() => {
-							console.log('Login');
-							setDidStateChange(true);
-							setState('dashboard');
-						}}
-					/>
-				);
-			case 'dashboard':
-				return (
-					<Dashboard
-						mail={mail}
-						onLogout={() => {
-							console.log('Logging out');
-							localStorage.removeItem(TOKEN_STORAGE_KEY);
-							setState('login');
-						}}
-					/>
-				);
-			default:
-				return <div>Default State</div>;
-		}
-	};
-
-	return (
-		<MantineProvider>
-			<NotificationsProvider position="top-right">{getStateComponent()}</NotificationsProvider>
-		</MantineProvider>
-	);
-};
-
-export default Popup;
+	switch (state) {
+		case 'login':
+			return <AuthenticationForm />;
+		case 'dashboard':
+			return <Dashboard mail={mail} />;
+		default:
+			return <div>Default State</div>;
+	}
+}
