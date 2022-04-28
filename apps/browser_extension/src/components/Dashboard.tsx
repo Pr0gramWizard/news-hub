@@ -1,6 +1,7 @@
-import { ActionIcon, Card, Group, Text } from '@mantine/core';
-import React, { useEffect } from 'react';
-import { Logout, Refresh } from 'tabler-icons-react';
+import { ActionIcon, Card, Group, Switch, Text } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import React, { useCallback, useEffect } from 'react';
+import { Logout, Refresh, X } from 'tabler-icons-react';
 import { useStateContext } from '../context/StateContext';
 import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
 
@@ -17,7 +18,7 @@ export function Dashboard({ mail }: DashboardProps) {
 	const [stats, setStats] = React.useState<UserStatistic[]>([]);
 	const [isEnabled, setIsEnabled] = React.useState(false);
 
-	async function fetchStats() {
+	const memoizedCallback = useCallback(async () => {
 		try {
 			console.log('Fetching stats');
 			const response = await fetch(`${process.env.API_URL}/stats/me`, {
@@ -28,21 +29,34 @@ export function Dashboard({ mail }: DashboardProps) {
 				},
 			});
 			const data = await response.json();
+			if (response.status === 403) {
+				localStorage.removeItem(TOKEN_STORAGE_KEY);
+				showNotification({
+					autoClose: 5000,
+					title: 'Authentication error',
+					message: 'Your session has expired. Please log in again.',
+					color: 'red',
+					icon: <X />,
+				});
+				setState('login');
+				return;
+			}
 			setStats(data);
 		} catch (e) {
 			if (!(e instanceof Error)) {
 				throw e;
 			}
+			console.log(e);
 		}
-	}
+	}, [setState]);
 
 	useEffect(() => {
 		async function fetchData() {
-			await fetchStats();
+			await memoizedCallback();
 			setIsEnabled(true);
 		}
 		fetchData();
-	}, []);
+	}, [setStats, memoizedCallback]);
 
 	const items = stats.map((s) => (
 		<div key={s.label}>
@@ -63,20 +77,17 @@ export function Dashboard({ mail }: DashboardProps) {
 			<Group mt="md" position="center" spacing={30}>
 				{items}
 			</Group>
-			<Group grow spacing={10}>
-				<ActionIcon
-					variant="default"
-					color={isEnabled ? 'primary' : 'dimmed'}
-					onClick={() => {
-						setIsEnabled(true);
-					}}
-				>
-					{isEnabled ? 'Disable' : 'Enable'}
-				</ActionIcon>
+			<Group grow spacing={5}>
+				<Switch
+					checked={isEnabled}
+					onChange={(event) => setIsEnabled(event.currentTarget.checked)}
+					onLabel="ON"
+					offLabel="OFF"
+				/>
 				<ActionIcon
 					variant="default"
 					onClick={async () => {
-						await fetchStats();
+						await memoizedCallback();
 					}}
 				>
 					<Refresh />
