@@ -7,7 +7,7 @@ import { StatsResponse } from '@type/dto/stats';
 import { UserService } from '@user/user.service';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
-import { UserErrorCodes } from '../../types/error/user';
+import { UserErrorCodes } from '@type/error/user';
 import { JwtPayload } from '../auth/auth.service';
 
 interface UserStats {

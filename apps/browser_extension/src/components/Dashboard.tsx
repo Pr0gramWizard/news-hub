@@ -13,7 +13,9 @@ interface UserStatistic {
 	label: string;
 	value: number | string;
 }
+
 export function Dashboard({ mail }: DashboardProps) {
+	const SCRIPT_ENABLED_KEY = 'collection_script_enabled';
 	const { setState } = useStateContext();
 	const [stats, setStats] = React.useState<UserStatistic[]>([]);
 	const [isEnabled, setIsEnabled] = React.useState(false);
@@ -55,6 +57,7 @@ export function Dashboard({ mail }: DashboardProps) {
 			await memoizedCallback();
 			setIsEnabled(true);
 		}
+
 		fetchData();
 	}, [setStats, memoizedCallback]);
 
@@ -80,7 +83,10 @@ export function Dashboard({ mail }: DashboardProps) {
 			<Group grow spacing={5}>
 				<Switch
 					checked={isEnabled}
-					onChange={(event) => setIsEnabled(event.currentTarget.checked)}
+					onChange={(event) => {
+						setIsEnabled(event.currentTarget.checked);
+						localStorage.setItem(SCRIPT_ENABLED_KEY, event.currentTarget.checked ? 'true' : 'false');
+					}}
 					onLabel="ON"
 					offLabel="OFF"
 				/>

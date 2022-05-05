@@ -1,30 +1,10 @@
+console.log('Twitter content script loaded');
+
 document.body.appendChild(
 	Object.assign(document.createElement('style'), {
 		textContent: '.active { background-color: red; }',
 	})
 );
-
-async function storeLink(url: string, token: string) {
-	console.log(`Storing tweet: '${url}' for user: '${token}'`);
-	try {
-		const response = await fetch(`${process.env.API_URL}/api/tweet`, {
-			method: 'post',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				url,
-				token,
-			}),
-		});
-		if (response.status !== 201) {
-			const error = await response.json();
-			console.log(error);
-		}
-	} catch (e) {
-		console.error(e);
-	}
-}
 
 // Check if tweet is a promotion
 function isTweetPromoted(article: HTMLElement) {
@@ -32,90 +12,64 @@ function isTweetPromoted(article: HTMLElement) {
 	return [...articleSpans].filter((x) => x.textContent && x.textContent.includes('Promoted')).length > 0;
 }
 
-function stringOnlyContainsDigits(string: string) {
-	return /^\d+$/.test(string);
-}
-
 // Check if tweet scrolls into view
-const io = new IntersectionObserver(async (entries) => {
-	for (const entry of entries) {
-		if (entry.isIntersecting) {
-			const article = entry.target;
-			article.classList.add('active');
-			const url = article.getAttribute('data-status-id');
-			if (!url) {
-				console.log(`No data-status-id attribute found for article: ${article}`);
-				continue;
+const io = new IntersectionObserver(
+	async (entries) => {
+		for (const entry of entries) {
+			if (entry.isIntersecting) {
+				const article = entry.target;
+				const statusUrl = article.getAttribute('data-status-id');
+				article.classList.add('active');
+				console.log(`Article is in view`, article, statusUrl);
+				chrome.runtime.sendMessage({ type: 'tweet-in-view', statusUrl });
 			}
-			const { token } = await chrome.storage.sync.get('token');
-			await storeLink(url, token);
-		} else {
-			entry.target.classList.remove('active');
 		}
+	},
+	{
+		// Trigger when 50% of the element is in view
+		threshold: 0.5,
 	}
-});
+);
 
-// Observe all loaded tweets
-const nodeListOfLinks: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('article a');
-const listOfTwitterStatusLinks = [...nodeListOfLinks].filter((x) => x.href.includes('/status'));
-listOfTwitterStatusLinks.forEach((el) => {
-	const parentArticle = el.closest('article');
-	if (!parentArticle) {
-		console.log(`No parent article found for link: ${el}`);
-		return;
-	}
-	parentArticle.setAttribute('data-status-id', el.href);
-	io.observe(parentArticle);
-});
+function observeTwitterDOM() {
+	// Observe new tweets added to the DOM
+	// @ts-ignore
+	MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-// Observe new tweets added to the DOM
-// @ts-ignore
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+	const observer = new MutationObserver(function (mutations, observer) {
+		for (const mutation of mutations) {
+			for (const node of mutation.addedNodes) {
+				if (node instanceof HTMLElement) {
+					const tweet = node.querySelector('[data-testid=tweet]');
+					if (tweet && tweet instanceof HTMLElement) {
+						if (isTweetPromoted(tweet)) {
+							console.log('Skipping promoted article', tweet.innerText);
+							continue;
+						}
 
-const observer = new MutationObserver(function (mutations, observer) {
-	for (const mutation of mutations) {
-		for (const node of mutation.addedNodes) {
-			if (node instanceof HTMLElement) {
-				const article = node.querySelector('article');
-				if (article) {
-					if (isTweetPromoted(article)) {
-						console.log('Skipping promoted article');
-						console.log(article.innerText);
-						return;
+						const linksInArticle = tweet.querySelectorAll('a');
+						const links = [...linksInArticle].map((x) => x.href);
+						const onlyStatusLinks = links.filter((x) => x.includes('/status'));
+						// console.log(tweet, links, onlyStatusLinks);
+						if (onlyStatusLinks.length > 0) {
+							const url = onlyStatusLinks[0];
+							tweet.setAttribute('data-status-id', url);
+							io.observe(tweet);
+						}
 					}
-					const linkNodes = article.querySelectorAll('a');
-					const links = [...linkNodes].map((x) => x.href);
-					const onlyStatusLinks = links.filter((x) => x.includes('/status'));
-					const statusId = onlyStatusLinks[0];
-					if (statusId.length <= 0) {
-						console.log('Something went wrong. Skipping article.');
-						console.log(links, onlyStatusLinks);
-						console.log(`Status ID: '${statusId}' is not a number`);
-						// console.log(article.innerText);
-						return;
-					}
-					article.setAttribute('data-status-id', statusId);
-					io.observe(article);
 				}
 			}
 		}
-	}
-});
+	});
 
-(window as any).twitterContentObserver = observer;
+	(window as any).twitterContentObserver = observer;
 
-chrome.storage.local.get('observerState', (data) => {
-	if (data.observerState === 'enabled') {
-		console.log('Enabling observer');
-		observer.observe(document, {
-			subtree: true,
-			childList: true,
-		});
-	} else {
-		const existingObserver = (window as any).twitterContentObserver;
-		if (existingObserver) {
-			console.log('Disabling existing observer');
-			existingObserver.disconnect();
-		}
-	}
-});
+	const config = {
+		attributes: false,
+		childList: true,
+		subtree: true,
+	};
+	observer.observe(document, config);
+}
+
+observeTwitterDOM();
