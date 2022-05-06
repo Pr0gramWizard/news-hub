@@ -84,8 +84,15 @@ export function Dashboard({ mail }: DashboardProps) {
 				<Switch
 					checked={isEnabled}
 					onChange={(event) => {
-						setIsEnabled(event.currentTarget.checked);
-						localStorage.setItem(SCRIPT_ENABLED_KEY, event.currentTarget.checked ? 'true' : 'false');
+						const { checked } = event.target;
+						setIsEnabled(checked);
+						localStorage.setItem(SCRIPT_ENABLED_KEY, checked ? 'true' : 'false');
+						chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+							const activeTab = tabs[0];
+							if (activeTab && activeTab.id) {
+								chrome.tabs.sendMessage(activeTab.id, {type: "toggle_extension", enabled: checked});
+							}
+						});
 					}}
 					onLabel="ON"
 					offLabel="OFF"

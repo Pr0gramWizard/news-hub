@@ -35,8 +35,8 @@ function Conponent() {
 	const [token, setToken] = React.useState('No token');
 
 	useEffect(() => {
+		if (state === 'dashboard') return;
 		const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-		if (state === 'dasshboard') return;
 		if (token) {
 			setToken(token);
 			setState('dashboard');
