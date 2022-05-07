@@ -55,11 +55,25 @@ export function Dashboard({ mail }: DashboardProps) {
 	useEffect(() => {
 		async function fetchData() {
 			await memoizedCallback();
-			setIsEnabled(true);
+			const isEnabled = localStorage.getItem(SCRIPT_ENABLED_KEY);
+			if (isEnabled && isEnabled === 'true') {
+				toggleExtension(true);
+			}
 		}
 
 		fetchData();
 	}, [setStats, memoizedCallback]);
+
+	const toggleExtension = (isEnabled: boolean) => {
+		setIsEnabled(isEnabled);
+		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+			const activeTab = tabs[0];
+			if (activeTab && activeTab.id) {
+				chrome.tabs.sendMessage(activeTab.id, { type: 'toggle_extension', enabled: isEnabled });
+			}
+		});
+		localStorage.setItem(SCRIPT_ENABLED_KEY, isEnabled ? 'true' : 'false');
+	};
 
 	const items = stats.map((s) => (
 		<div key={s.label}>
@@ -85,14 +99,7 @@ export function Dashboard({ mail }: DashboardProps) {
 					checked={isEnabled}
 					onChange={(event) => {
 						const { checked } = event.target;
-						setIsEnabled(checked);
-						localStorage.setItem(SCRIPT_ENABLED_KEY, checked ? 'true' : 'false');
-						chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-							const activeTab = tabs[0];
-							if (activeTab && activeTab.id) {
-								chrome.tabs.sendMessage(activeTab.id, {type: "toggle_extension", enabled: checked});
-							}
-						});
+						toggleExtension(checked);
 					}}
 					onLabel="ON"
 					offLabel="OFF"
