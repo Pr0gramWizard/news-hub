@@ -20,7 +20,7 @@ const Popup = () => {
 		<MantineProvider>
 			<NotificationsProvider position="top-right">
 				<StateContextProvider>
-					<Conponent />
+					<Component />
 				</StateContextProvider>
 			</NotificationsProvider>
 		</MantineProvider>
@@ -29,22 +29,27 @@ const Popup = () => {
 
 export default Popup;
 
-function Conponent() {
+function Component() {
 	const { state, setState } = useStateContext();
 	const [mail, setMail] = React.useState('');
-	const [token, setToken] = React.useState('No token');
+	const [token, setToken] = React.useState('');
 
 	useEffect(() => {
 		if (state === 'dashboard') return;
-		const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-		if (token) {
-			setToken(token);
-			setState('dashboard');
-			const payload = jwt_decode<JWTPayload>(token);
-			setMail(payload.email);
-		} else {
+
+		async function fetchToken() {
+			const { token } = await chrome.storage.local.get([TOKEN_STORAGE_KEY]);
+			if (token && token.length > 0) {
+				const payload = jwt_decode<JWTPayload>(token);
+				setMail(payload.email);
+				setToken(token);
+				setState('dashboard');
+				return;
+			}
 			console.log('No token found');
 		}
+
+		fetchToken();
 	}, [state, setState]);
 
 	switch (state) {

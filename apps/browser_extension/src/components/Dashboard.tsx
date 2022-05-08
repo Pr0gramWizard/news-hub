@@ -23,16 +23,19 @@ export function Dashboard({ mail }: DashboardProps) {
 	const memoizedCallback = useCallback(async () => {
 		try {
 			console.log('Fetching stats');
+			const { token } = await chrome.storage.local.get([TOKEN_STORAGE_KEY]);
+			console.log('Token:', token);
+			return;
 			const response = await fetch(`${process.env.API_URL}/stats/me`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${localStorage.getItem(TOKEN_STORAGE_KEY)}`,
+					Authorization: `Bearer ${token}`,
 				},
 			});
 			const data = await response.json();
 			if (response.status === 403) {
-				localStorage.removeItem(TOKEN_STORAGE_KEY);
+				await chrome.storage.local.remove([TOKEN_STORAGE_KEY]);
 				showNotification({
 					autoClose: 5000,
 					title: 'Authentication error',
@@ -55,24 +58,18 @@ export function Dashboard({ mail }: DashboardProps) {
 	useEffect(() => {
 		async function fetchData() {
 			await memoizedCallback();
-			const isEnabled = localStorage.getItem(SCRIPT_ENABLED_KEY);
-			if (isEnabled && isEnabled === 'true') {
-				toggleExtension(true);
+			const { isEnabled } = await chrome.storage.local.get([SCRIPT_ENABLED_KEY]);
+			if (isEnabled) {
+				await toggleExtension(true);
 			}
 		}
 
 		fetchData();
 	}, [setStats, memoizedCallback]);
 
-	const toggleExtension = (isEnabled: boolean) => {
+	const toggleExtension = async (isEnabled: boolean) => {
 		setIsEnabled(isEnabled);
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			const activeTab = tabs[0];
-			if (activeTab && activeTab.id) {
-				chrome.tabs.sendMessage(activeTab.id, { type: 'toggle_extension', enabled: isEnabled });
-			}
-		});
-		localStorage.setItem(SCRIPT_ENABLED_KEY, isEnabled ? 'true' : 'false');
+		await chrome.storage.local.set({ [SCRIPT_ENABLED_KEY]: isEnabled });
 	};
 
 	const items = stats.map((s) => (
@@ -97,9 +94,9 @@ export function Dashboard({ mail }: DashboardProps) {
 			<Group grow spacing={5}>
 				<Switch
 					checked={isEnabled}
-					onChange={(event) => {
+					onChange={async (event) => {
 						const { checked } = event.target;
-						toggleExtension(checked);
+						await toggleExtension(checked);
 					}}
 					onLabel="ON"
 					offLabel="OFF"
@@ -114,8 +111,8 @@ export function Dashboard({ mail }: DashboardProps) {
 				</ActionIcon>
 				<ActionIcon
 					color={'red'}
-					onClick={() => {
-						localStorage.removeItem(TOKEN_STORAGE_KEY);
+					onClick={async () => {
+						await chrome.storage.local.remove([TOKEN_STORAGE_KEY]);
 						setState('login');
 					}}
 				>

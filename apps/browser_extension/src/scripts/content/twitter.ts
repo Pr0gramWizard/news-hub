@@ -12,9 +12,11 @@ const io = new IntersectionObserver(
 		for (const entry of entries) {
 			if (entry.isIntersecting) {
 				const article = entry.target;
-				const tweetUsername = Array.from(article.querySelectorAll('span')).find((x) => x.textContent && x.textContent.includes('@'))
+				const tweetUsername = Array.from(article.querySelectorAll('span')).find(
+					(x) => x.textContent && x.textContent.includes('@')
+				);
 				if (tweetUsername) {
-					tweetUsername.style.color = 'gold'
+					tweetUsername.style.color = 'gold';
 				}
 				const statusUrl = article.getAttribute('data-status-id');
 				chrome.runtime.sendMessage({ type: 'tweet-in-view', statusUrl });
@@ -81,3 +83,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		});
 	}
 });
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+	if (namespace === 'local') {
+		console.log(changes);
+	}
+});
+
+observeTwitterDOM();

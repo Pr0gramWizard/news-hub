@@ -43,7 +43,7 @@ export function AuthenticationForm() {
 				});
 			}
 			if (response.status === 201 && data.token) {
-				localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+				await chrome.storage.local.set({ [TOKEN_STORAGE_KEY]: data.token });
 				setState('dashboard');
 			}
 		} catch (e) {
