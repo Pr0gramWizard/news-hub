@@ -1,23 +1,41 @@
 {
-	"manifest_version": 3,
-	"name": "NewsHub Collector",
-	"description": "Browser extension that collects social media posts for NewsHub",
-	"background": {
-		"service_worker": "background.bundle.js"
-	},
-	"action": {
-		"default_popup": "popup.html",
-		"default_icon": "icon-48.png"
-	},
-	"host_permissions": ["https://api.mortaga.de/*"],
-	"permissions": ["activeTab", "clipboardWrite", "storage", "scripting"],
-	"icons": {
-		"128": "icon-128.png"
-	},
-	"web_accessible_resources": [
-		{
-			"resources": ["icon-128.png", "icon-48.png"],
-			"matches": []
-		}
-	]
+  "manifest_version": 3,
+  "name": "NewsHub Collector",
+  "description": "Browser extension that collects social media posts for NewsHub",
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.twitter.com/*", "https://*.twitter.de/*"],
+      "js": [
+        "content.bundle.js"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon-48.png"
+  },
+  "host_permissions": [
+    "https://api.mortaga.de/*"
+  ],
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage",
+    "scripting"
+  ],
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icon-128.png",
+        "icon-48.png"
+      ],
+      "matches": []
+    }
+  ]
 }

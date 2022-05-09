@@ -1,41 +1,26 @@
-const apiUrl = 'https://api.mortaga.de';
-const supportedWebsites = ['twitter.com'];
+import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
 
-chrome.action.onClicked.addListener(async (tab) => {
-	const tabUrl = tab.url;
-	if (!tabUrl) {
-		console.warn('No tab url found');
-		return;
-	}
-	const url = new URL(tabUrl);
-	if (!supportedWebsites.includes(url.hostname)) {
-		console.warn(`Links from '${url.hostname}' are not supported yet`);
-		return;
-	}
+console.log('Background script loaded');
 
-	const { token } = await chrome.storage.sync.get(['token']);
-	console.log(`User token: '${token}'`);
-	if (!token) {
-		const { token } = await getUserToken();
-		await chrome.storage.sync.set({ token });
-	}
-	const tabId = tab.id;
-	if (!tabId) {
-		console.warn('No tab id found');
-		return;
-	}
-	await chrome.scripting.executeScript({
-		target: { tabId },
-		files: ['twitter.ts'],
+chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
+	sendResponse({
+		message: 'Message received',
+	});
+	const { statusUrl } = request;
+	chrome.storage.local.get(TOKEN_STORAGE_KEY, async (result) => {
+		const token = result[TOKEN_STORAGE_KEY];
+		if (token) {
+			console.log(`Storing tweet ${statusUrl}`);
+			await fetch(`${process.env.API_URL}/tweet`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					url: statusUrl,
+				}),
+			});
+		}
 	});
 });
-
-async function getUserToken() {
-	const response = await fetch(`${apiUrl}/api/user`, {
-		method: 'post',
-		headers: {
-			'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-		},
-	});
-	return response.json();
-}

@@ -26,6 +26,15 @@ services:
       - ./api/python/.env
     ports:
       - "4000:4000"
+
+  newshub-browser-extension:
+    container_name: newshub-browser-extension
+    build: ./apps/browser_extension
+    restart: always
+    depends_on:
+      - newshub-api-node
+    volumes:
+      - ./apps/browser_extension:/srv/app
 #  newshub-dashboard:
 #    container_name: newshub-dashboard
 #    build: ./apps/dashboard

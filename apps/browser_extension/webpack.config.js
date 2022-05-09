@@ -4,6 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const dotenv = require('dotenv');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
@@ -31,19 +32,13 @@ const options = {
 	module: {
 		rules: [
 			{
-				test: /\.(css|scss)$/,
+				test: /\.(css)$/,
 				use: [
 					{
 						loader: 'style-loader',
 					},
 					{
 						loader: 'css-loader',
-					},
-					{
-						loader: 'sass-loader',
-						options: {
-							sourceMap: true,
-						},
 					},
 				],
 			},
@@ -79,6 +74,9 @@ const options = {
 	plugins: [
 		new CleanWebpackPlugin({ verbose: false }),
 		new webpack.ProgressPlugin(),
+		new webpack.DefinePlugin({
+			'process.env': JSON.stringify(dotenv.config().parsed),
+		}),
 		new CopyWebpackPlugin({
 			patterns: [
 				{
@@ -86,7 +84,7 @@ const options = {
 					to: path.join(__dirname, 'build'),
 					force: true,
 					transform: function (content, path) {
-						// generates the manifest file using the package.json informations
+						// generates the manifest file using the package.json information
 						return Buffer.from(
 							JSON.stringify({
 								description: process.env.npm_package_description,
@@ -101,7 +99,7 @@ const options = {
 		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: 'src/assets/img/icon-128.png',
+					from: 'src/assets/icon/icon-128.png',
 					to: path.join(__dirname, 'build'),
 					force: true,
 				},
@@ -110,7 +108,7 @@ const options = {
 		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: 'src/assets/img/icon-48.png',
+					from: 'src/assets/icon/icon-48.png',
 					to: path.join(__dirname, 'build'),
 					force: true,
 				},

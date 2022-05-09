@@ -35,7 +35,6 @@ export function LoginPage() {
     console.log(values);
     const { email, name, password, confirmPassword } = values;
     if (type === "login") {
-      console.log("login", email, password);
       const response = await fetch(`${import.meta.env.API_URL}/auth/login`, {
         method: "POST",
         headers: {
