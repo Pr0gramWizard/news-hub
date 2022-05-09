@@ -38,7 +38,12 @@ function Component() {
 		if (state === 'dashboard') return;
 
 		async function fetchToken() {
-			const { token } = await chrome.storage.local.get([TOKEN_STORAGE_KEY]);
+			chrome.storage.local.get([TOKEN_STORAGE_KEY]).then((result) => {
+				console.log(result);
+				if (result[TOKEN_STORAGE_KEY]) {
+					// setToken(result[TOKEN_STORAGE_KEY]);
+				}
+			});
 			if (token && token.length > 0) {
 				const payload = jwt_decode<JWTPayload>(token);
 				setMail(payload.email);
