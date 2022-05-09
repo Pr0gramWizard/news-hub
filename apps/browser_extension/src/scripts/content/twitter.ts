@@ -69,8 +69,8 @@ function observeTwitterDOM() {
 	observer.observe(document, config);
 }
 
+// Toggle content observer on/off
 chrome.storage.onChanged.addListener((changes, namespace) => {
-	console.log('Content script: Storage changed', changes, namespace);
 	if (namespace === 'local') {
 		if (changes.hasOwnProperty('collection_script_enabled')) {
 			if (changes.collection_script_enabled.newValue === true) {

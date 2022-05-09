@@ -32,7 +32,6 @@ export default Popup;
 function Component() {
 	const { state, setState } = useStateContext();
 	const [mail, setMail] = React.useState('');
-	const [token, setToken] = React.useState('');
 
 	useEffect(() => {
 		if (state === 'dashboard') return;
@@ -40,11 +39,9 @@ function Component() {
 		async function fetchToken() {
 			chrome.storage.local.get(TOKEN_STORAGE_KEY, (result) => {
 				const token = result[TOKEN_STORAGE_KEY];
-				console.log('Token:', token);
 				if (token) {
 					const payload = jwt_decode<JWTPayload>(token);
 					setMail(payload.email);
-					setToken(token);
 					setState('dashboard');
 				}
 			});

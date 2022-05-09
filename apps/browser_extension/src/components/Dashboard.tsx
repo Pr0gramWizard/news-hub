@@ -22,10 +22,8 @@ export function Dashboard({ mail }: DashboardProps) {
 
 	const memoizedCallback = useCallback(async () => {
 		try {
-			console.log('Fetching stats');
 			chrome.storage.local.get(TOKEN_STORAGE_KEY, async (result) => {
 				const token = result[TOKEN_STORAGE_KEY];
-				console.log('Token:', token);
 				const response = await fetch(`${process.env.API_URL}/stats/me`, {
 					method: 'GET',
 					headers: {
