@@ -8,16 +8,21 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 		message: 'Message received',
 	});
 	const { statusUrl } = request;
-	const { token } = await chrome.storage.local.get([TOKEN_STORAGE_KEY]);
-	console.log(token);
-
-	// await fetch(`status`, {
-	// 	method: 'POST',
-	// 	headers: {
-	// 		'Content-Type': 'application/json'
-	// 	},
-	// 	body: JSON.stringify({
-	// 		statusUrl: statusUrl
-	// 	})
-	// });
+	chrome.storage.local.get(TOKEN_STORAGE_KEY, async (result) => {
+		const token = result[TOKEN_STORAGE_KEY];
+		console.log('Background script:', result);
+		if (token) {
+			console.log(`Storing tweet ${statusUrl}`);
+			await fetch(`${process.env.API_URL}/tweet`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					url: statusUrl,
+				}),
+			});
+		}
+	});
 });

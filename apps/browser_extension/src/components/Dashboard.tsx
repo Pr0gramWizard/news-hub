@@ -23,30 +23,32 @@ export function Dashboard({ mail }: DashboardProps) {
 	const memoizedCallback = useCallback(async () => {
 		try {
 			console.log('Fetching stats');
-			const { token } = await chrome.storage.local.get([TOKEN_STORAGE_KEY]);
-			console.log('Token:', token);
-			return;
-			const response = await fetch(`${process.env.API_URL}/stats/me`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			const data = await response.json();
-			if (response.status === 403) {
-				await chrome.storage.local.remove([TOKEN_STORAGE_KEY]);
-				showNotification({
-					autoClose: 5000,
-					title: 'Authentication error',
-					message: 'Your session has expired. Please log in again.',
-					color: 'red',
-					icon: <X />,
+			chrome.storage.local.get(TOKEN_STORAGE_KEY, async (result) => {
+				const token = result[TOKEN_STORAGE_KEY];
+				console.log('Token:', token);
+				const response = await fetch(`${process.env.API_URL}/stats/me`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
 				});
-				setState('login');
-				return;
-			}
-			setStats(data);
+				const data = await response.json();
+				if (response.status === 403) {
+					chrome.storage.local.remove([TOKEN_STORAGE_KEY], () => {
+						showNotification({
+							autoClose: 5000,
+							title: 'Authentication error',
+							message: 'Your session has expired. Please log in again.',
+							color: 'red',
+							icon: <X />,
+						});
+						setState('login');
+					});
+					return;
+				}
+				setStats(data);
+			});
 		} catch (e) {
 			if (!(e instanceof Error)) {
 				throw e;
@@ -58,10 +60,11 @@ export function Dashboard({ mail }: DashboardProps) {
 	useEffect(() => {
 		async function fetchData() {
 			await memoizedCallback();
-			const { isEnabled } = await chrome.storage.local.get([SCRIPT_ENABLED_KEY]);
-			if (isEnabled) {
-				await toggleExtension(true);
-			}
+			chrome.storage.local.get(SCRIPT_ENABLED_KEY, async (result) => {
+				if (result[SCRIPT_ENABLED_KEY]) {
+					await toggleExtension(true);
+				}
+			});
 		}
 
 		fetchData();

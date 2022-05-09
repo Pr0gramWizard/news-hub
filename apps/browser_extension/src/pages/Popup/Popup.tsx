@@ -38,20 +38,16 @@ function Component() {
 		if (state === 'dashboard') return;
 
 		async function fetchToken() {
-			chrome.storage.local.get([TOKEN_STORAGE_KEY]).then((result) => {
-				console.log(result);
-				if (result[TOKEN_STORAGE_KEY]) {
-					// setToken(result[TOKEN_STORAGE_KEY]);
+			chrome.storage.local.get(TOKEN_STORAGE_KEY, (result) => {
+				const token = result[TOKEN_STORAGE_KEY];
+				console.log('Token:', token);
+				if (token) {
+					const payload = jwt_decode<JWTPayload>(token);
+					setMail(payload.email);
+					setToken(token);
+					setState('dashboard');
 				}
 			});
-			if (token && token.length > 0) {
-				const payload = jwt_decode<JWTPayload>(token);
-				setMail(payload.email);
-				setToken(token);
-				setState('dashboard');
-				return;
-			}
-			console.log('No token found');
 		}
 
 		fetchToken();

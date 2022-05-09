@@ -69,24 +69,16 @@ function observeTwitterDOM() {
 	observer.observe(document, config);
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (message.type === 'toggle_extension') {
-		if (message.enabled) {
-			console.log('Enabling Twitter content script');
-			observeTwitterDOM();
-		} else {
-			console.log('Disabling Twitter content script');
-			(window as any).twitterContentObserver.disconnect();
-		}
-		sendResponse({
-			success: true,
-		});
-	}
-});
-
 chrome.storage.onChanged.addListener((changes, namespace) => {
+	console.log('Content script: Storage changed', changes, namespace);
 	if (namespace === 'local') {
-		console.log(changes);
+		if (changes.hasOwnProperty('collection_script_enabled')) {
+			if (changes.collection_script_enabled.newValue === true) {
+				observeTwitterDOM();
+			} else {
+				(window as any).twitterContentObserver.disconnect();
+			}
+		}
 	}
 });
 
