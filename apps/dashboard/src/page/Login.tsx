@@ -11,7 +11,9 @@ import {
 } from "@mantine/core";
 import { upperFirst, useForm, useToggle } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import React from "react";
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/authProvider";
 import { handleFetchErrorResponse } from "../util/handleError";
 
 async function login(email: string, password: string) {
@@ -52,6 +54,8 @@ async function register(email: string, password: string, name: string) {
 
 export function LoginPage() {
   const [type, toggle] = useToggle("login", ["login", "register"]);
+  const { setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   const form = useForm({
     initialValues: {
       email: "",
@@ -71,11 +75,14 @@ export function LoginPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
-      if (type === "login") {
-        await login(values.email, values.password);
-      } else if (type === "register") {
-        await register(values.email, values.password, values.name);
-      }
+      const response =
+        type === "login"
+          ? await login(values.email, values.password)
+          : await register(values.email, values.password, values.name);
+      console.log(type, response);
+      setUser(response);
+      localStorage.setItem("user", JSON.stringify(response));
+      navigate("/dashboard");
     } catch (e) {
       if (!(e instanceof Error)) {
         throw e;

@@ -8,6 +8,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";
 import { BrowserRouter } from "react-router-dom";
 import "./App.css";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "./context/authProvider";
 import { AppRoutes } from "./routes";
 
@@ -23,22 +24,24 @@ function App() {
 
   useHotkeys([["mod+J", () => toggleColorScheme()]]);
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
-      <MantineProvider>
-        <ModalsProvider>
-          <NotificationsProvider position={"top-center"}>
-            <BrowserRouter>
-              <AuthProvider>
-                <AppRoutes />
-              </AuthProvider>
-            </BrowserRouter>
-          </NotificationsProvider>
-        </ModalsProvider>
-      </MantineProvider>
-    </ColorSchemeProvider>
+    <ErrorBoundary>
+      <ColorSchemeProvider
+        colorScheme={colorScheme}
+        toggleColorScheme={toggleColorScheme}
+      >
+        <MantineProvider>
+          <ModalsProvider>
+            <NotificationsProvider position={"top-center"}>
+              <BrowserRouter>
+                <AuthProvider>
+                  <AppRoutes />
+                </AuthProvider>
+              </BrowserRouter>
+            </NotificationsProvider>
+          </ModalsProvider>
+        </MantineProvider>
+      </ColorSchemeProvider>
+    </ErrorBoundary>
   );
 }
 
