@@ -10,7 +10,45 @@ import {
   TextInput,
 } from "@mantine/core";
 import { upperFirst, useForm, useToggle } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
 import React from "react";
+import { handleFetchErrorResponse } from "../util/handleError";
+
+async function login(email: string, password: string) {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+
+  await handleFetchErrorResponse(response);
+  return response.json();
+}
+
+async function register(email: string, password: string, name: string) {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    }
+  );
+
+  await handleFetchErrorResponse(response);
+  return response.json();
+}
 
 export function LoginPage() {
   const [type, toggle] = useToggle("login", ["login", "register"]);
@@ -24,7 +62,7 @@ export function LoginPage() {
     },
     validationRules: {
       email: (val) => /^\S+@\S+$/.test(val),
-      password: (val) => val.length >= 6,
+      password: (val) => val.length >= 4,
       terms: (val) => val,
       confirmPassword: (val, values) =>
         type === "register" ? val === values!.password : true,
@@ -32,37 +70,17 @@ export function LoginPage() {
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    console.log(values);
-    const { email, name, password, confirmPassword } = values;
-    if (type === "login") {
-      const response = await fetch(`${import.meta.env.API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-      const data = await response.json();
-      console.log(data);
-    }
-    if (type === "register") {
-      console.log("register", email, name, password, confirmPassword);
-      const response = await fetch(`${import.meta.env.API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-      const data = await response.json();
-      console.log(data);
+    try {
+      if (type === "login") {
+        await login(values.email, values.password);
+      } else if (type === "register") {
+        await register(values.email, values.password, values.name);
+      }
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        throw e;
+      }
+      showNotification(e);
     }
   };
 
@@ -107,7 +125,7 @@ export function LoginPage() {
               }
               error={
                 form.errors.password &&
-                "Password should include at least 6 characters"
+                "Password should include at least 4 characters"
               }
             />
 

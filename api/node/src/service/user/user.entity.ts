@@ -8,6 +8,9 @@ export class User {
 	id!: string;
 
 	@Column()
+	name!: string;
+
+	@Column()
 	password!: string;
 
 	@Column({ unique: true })
@@ -21,9 +24,10 @@ export class User {
 
 	constructor(props?: CreateUserDTO) {
 		if (props) {
-			const { password, email } = props;
+			const { password, email, name } = props;
 			this.password = password;
 			this.email = email;
+			this.name = name;
 			this.tweets = [];
 		}
 	}

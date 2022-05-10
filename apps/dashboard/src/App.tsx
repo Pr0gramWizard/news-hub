@@ -8,6 +8,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";
 import { BrowserRouter } from "react-router-dom";
 import "./App.css";
+import { AuthProvider } from "./context/authProvider";
 import { AppRoutes } from "./routes";
 
 function App() {
@@ -28,9 +29,11 @@ function App() {
     >
       <MantineProvider>
         <ModalsProvider>
-          <NotificationsProvider>
+          <NotificationsProvider position={"top-center"}>
             <BrowserRouter>
-              <AppRoutes />
+              <AuthProvider>
+                <AppRoutes />
+              </AuthProvider>
             </BrowserRouter>
           </NotificationsProvider>
         </ModalsProvider>

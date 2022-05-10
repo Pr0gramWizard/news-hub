@@ -1,5 +1,5 @@
-import {IsDate, IsEmail, IsNotEmpty, IsNumber, IsString, Min} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsDate, IsEmail, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 // Register DTOs
 
@@ -13,11 +13,19 @@ export class RegisterUserRequest {
 	@IsString()
 	@IsNotEmpty()
 	password!: string;
+
+	@ApiProperty({ example: 'Max Mustermann' })
+	@IsString()
+	@IsNotEmpty()
+	name!: string;
 }
 
 export class RegisterUserResponse {
 	@ApiProperty()
 	token!: string;
+
+	@ApiProperty()
+	name!: string;
 }
 
 // Login DTOs
@@ -37,6 +45,9 @@ export class LoginUserRequest {
 export class LoginUserResponse {
 	@ApiProperty()
 	token!: string;
+
+	@ApiProperty()
+	name!: string;
 }
 
 // Database DTOs
@@ -66,6 +77,10 @@ export class CreateUserDTO {
 	@IsString()
 	@IsNotEmpty()
 	password!: string;
+
+	@IsString()
+	@IsNotEmpty()
+	name!: string;
 
 	@IsString()
 	@IsNotEmpty()
