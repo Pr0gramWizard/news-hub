@@ -5,7 +5,7 @@ import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
 
@@ -62,6 +62,22 @@ export class TweetService {
 
 	async countByUserId(id: string): Promise<number> {
 		return this.tweetRepository.count({ where: { user: { id } } });
+	}
+
+	async countLastDayByUserId(id: string): Promise<number> {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+		return this.tweetRepository.count({ where: { user: { id }, createdAt: MoreThan(yesterday) } });
+	}
+
+	async countAuthors(id: string): Promise<number> {
+		return this.tweetRepository
+			.createQueryBuilder('tweet')
+			.addSelect('tweet.author.id')
+			.distinct()
+			.where('tweet.user = :id', { id })
+			.getCount();
 	}
 
 	async count(): Promise<number> {

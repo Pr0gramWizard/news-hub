@@ -1,12 +1,6 @@
-import {
-  Button,
-  Container,
-  createStyles,
-  Group,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Container, createStyles, Group, Text, Title } from "@mantine/core";
 import React from "react";
+import { ButtonLink } from "../components/ButtonLink";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -66,9 +60,9 @@ export function NotFound() {
         address, or the page has been moved to another URL.
       </Text>
       <Group position="center">
-        <Button variant="subtle" size="md">
+        <ButtonLink variant="subtle" size="md" to="/">
           Take me back to home page
-        </Button>
+        </ButtonLink>
       </Group>
     </Container>
   );

@@ -79,10 +79,9 @@ export function LoginPage() {
         type === "login"
           ? await login(values.email, values.password)
           : await register(values.email, values.password, values.name);
-      console.log(type, response);
       setUser(response);
       localStorage.setItem("user", JSON.stringify(response));
-      navigate("/dashboard");
+      navigate("/");
     } catch (e) {
       if (!(e instanceof Error)) {
         throw e;

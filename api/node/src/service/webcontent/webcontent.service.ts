@@ -18,9 +18,9 @@ export class WebContentService {
 	}
 
 	async create(webContentParams: ICreateWebContent) {
-		this.logger.debug(
+		/* 		this.logger.debug(
 			`Creating web content for tweet ${webContentParams.tweet.id} with data ${JSON.stringify(webContentParams)}`,
-		);
+		); */
 		const webContent = new WebContent(webContentParams);
 		return this.webContentRepository.save(webContent);
 	}

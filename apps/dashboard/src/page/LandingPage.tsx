@@ -7,7 +7,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import React from "react";
-import { Link } from "react-router-dom";
+import { ButtonLink } from "../components/ButtonLink";
 import { Dots } from "../components/Dots";
 
 const useStyles = createStyles((theme) => ({
@@ -118,16 +118,15 @@ export function LandingPage() {
         </Container>
 
         <div className={classes.controls}>
-          <Button<typeof Link>
-            className={classes.control}
+          <ButtonLink
+            to="/"
+            classes={classes.control}
             size="lg"
             variant="default"
             color="gray"
-            component={Link}
-            to="/dashboard"
           >
-            Go to dashboard
-          </Button>
+            Go to Dashboard
+          </ButtonLink>
 
           <Button
             className={classes.control}

@@ -44,7 +44,7 @@ export class Tweet {
 	@ManyToOne('User')
 	user!: User;
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'timestamp' })
 	createdAt!: Date;
 
 	constructor(props?: TweetProps) {

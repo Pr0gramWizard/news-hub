@@ -1,38 +1,40 @@
 import { useContext } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Page } from "./components/Page";
 import AuthContext, { User } from "./context/authProvider";
-import { Dashboard } from "./page/Dashbboard";
+import { Dashboard } from "./page/Dashboard";
 import { LandingPage } from "./page/LandingPage";
 import { LoginPage } from "./page/Login";
 import { NotFound } from "./page/NotFound";
+import { TweetDetails } from "./page/TweetDetails";
+import { TweetTable } from "./page/TweetTable";
+import { UserSettings } from "./page/UserSettings";
 
 export function AppRoutes() {
   const { user } = useContext(AuthContext);
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginRoute user={user} />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="home" element={<LandingPage />} />
+      <Route path="login" element={<LoginRoute user={user} />} />
+      <Route path="" element={<ProtectedRoute user={user} />}>
+        <Route path="" element={<Dashboard />} />
+        <Route path="tweets" element={<TweetTable />} />
+        <Route path="tweet/:id" element={<TweetDetails />} />
+        <Route path="user/settings" element={<UserSettings />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
 
 interface ProtectedRouteProps {
-  children: any;
+  children?: any;
   user: User | undefined;
 }
 
 const LoginRoute = ({ user }: { user: User | undefined }) => {
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <LoginPage />;
@@ -43,5 +45,13 @@ const ProtectedRoute = ({ user, children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  if (children) {
+    return children;
+  }
+
+  return (
+    <Page>
+      <Outlet />
+    </Page>
+  );
 };
