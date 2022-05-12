@@ -1,7 +1,9 @@
 import json
 import os
+import sys
 from urllib.parse import urlparse
 
+import newspaper
 import nltk
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, request
@@ -13,6 +15,7 @@ load_dotenv(find_dotenv())
 
 app = Flask(__name__)
 
+
 @app.route('/parse', methods=['POST'])
 def parse_tweet():
     data = request.get_json()
@@ -23,12 +26,15 @@ def parse_tweet():
 
     url = data['url']
 
+    print(f"Parsing url: {url}")
+
     try:
         article_source_domain = parse_url(url)
-        # source_info = extract_source(article_source_domain)
+        source_info = extract_source(article_source_domain)
         article_info = extract_article(url)
-        # return json.dumps({'article': article_info, 'source': source_info})
-        return json.dumps({'article': article_info})
+        return json.dumps({'article': article_info, 'source': source_info})
+        # return json.dumps({'article': article_info})
+        
     except Exception as e:
         return json.dumps({'error': str(e)}), 400
 

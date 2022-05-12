@@ -77,7 +77,7 @@ const data = [
 
 export function NavBar() {
   const { classes, cx } = useStyles();
-  const [active, setActive] = useState("Billing");
+  const [active, setActive] = useState("Dashboard");
   const navigate = useNavigate();
   const { user, setUser } = useContext(AuthContext);
   if (!user) {

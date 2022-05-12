@@ -60,7 +60,6 @@ export function TweetTable() {
         }
       );
       const json = await stats.json();
-      console.log(json);
       const newStats: Tweet[] = [];
       for (const stat of json) {
         newStats.push({

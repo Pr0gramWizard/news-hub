@@ -1,5 +1,5 @@
 import { User } from '@user/user.entity';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { TweetProps } from '../../types/dto/tweet';
 import { WebContent } from '../webcontent/webcontent.entity';
 import { Author } from './author/tweet.author.entity';
@@ -10,7 +10,7 @@ export class Tweet {
 	@PrimaryColumn({ unique: true })
 	id!: string;
 
-	@Column({ length: 300 })
+	@Column({ type: 'text' })
 	text!: string;
 
 	@Column()
@@ -44,7 +44,7 @@ export class Tweet {
 	@ManyToOne('User')
 	user!: User;
 
-	@CreateDateColumn({ type: 'timestamp' })
+	@Column()
 	createdAt!: Date;
 
 	constructor(props?: TweetProps) {
@@ -76,5 +76,6 @@ export class Tweet {
 			this.user = user;
 			this.webContents = webContents || [];
 		}
+		this.createdAt = new Date();
 	}
 }

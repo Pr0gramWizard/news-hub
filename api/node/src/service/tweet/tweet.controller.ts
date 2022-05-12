@@ -1,6 +1,8 @@
+import { NewsHubLogger } from '@common/logger.service';
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
 import { BadRequestException, Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -9,21 +11,18 @@ import {
 	ApiOkResponse,
 	ApiTags,
 } from '@nestjs/swagger';
+import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
+import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
+import axios from 'axios';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
-import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { JwtPayload } from '../auth/auth.service';
-import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetService } from './tweet.service';
-import { NewsHubLogger } from '@common/logger.service';
-import { TweetErrorCode } from '@type/error/tweet';
-import axios from 'axios';
-import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -35,7 +34,7 @@ export class TweetController {
 		private readonly userService: UserService,
 		private readonly twitterService: TwitterService,
 		private readonly authorService: TweetAuthorService,
-		private readonly webContentService: WebContentService,
+		// private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
 		private readonly configService: ConfigService,
 	) {
@@ -124,9 +123,21 @@ export class TweetController {
 		}
 
 		// Create new tweet entity
-		const tweet = await this.tweetService.create({ url, author, user, tweetData: data });
+		await this.tweetService.create({ url, author, user, tweetData: data });
+		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
+		// this.logger.debug(data.entities);
+		const response = await axios.post(
+			`${pythonApiUrl}:4000/parse`,
+			{ url },
+			{
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			},
+		);
+		this.logger.debug(response.data);
 		// Create web content entities for the tweet
-		await this.webContentService.createMany(data.entities.urls, tweet);
+		// await this.webContentService.createMany(data.entities.urls, tweet);
 	}
 
 	/* istanbul ignore next */

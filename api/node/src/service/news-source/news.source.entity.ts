@@ -18,7 +18,7 @@ export class NewsSource {
 	@Column({ default: '' })
 	description!: string;
 
-	@OneToMany((type) => Article, (article) => article.newsSource)
+	@OneToMany(() => Article, (article) => article.newsSource)
 	articles!: Article[];
 
 	@CreateDateColumn({ name: 'created_at' })

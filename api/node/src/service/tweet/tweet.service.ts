@@ -5,7 +5,7 @@ import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
-import { MoreThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
 
@@ -66,18 +66,26 @@ export class TweetService {
 
 	async countLastDayByUserId(id: string): Promise<number> {
 		const today = new Date();
-		today.setHours(0, 0, 0, 0);
 		const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-		return this.tweetRepository.count({ where: { user: { id }, createdAt: MoreThan(yesterday) } });
+		this.logger.debug(yesterday, today);
+		this.logger.debug(yesterday.toISOString());
+		this.logger.debug(today.toISOString());
+		const x = await this.tweetRepository
+			.createQueryBuilder('tweet')
+			.select('COUNT(*)', 'count')
+			.where(
+				`user_id = '${id}' AND created_at BETWEEN '${yesterday.toISOString()}' AND '${today.toISOString()}'`,
+			);
+		const result = await x.getRawOne();
+		this.logger.debug(x.getSql());
+		return result.count;
 	}
 
 	async countAuthors(id: string): Promise<number> {
-		return this.tweetRepository
-			.createQueryBuilder('tweet')
-			.addSelect('tweet.author.id')
-			.distinct()
-			.where('tweet.user = :id', { id })
-			.getCount();
+		const result = await this.tweetRepository.query(
+			`SELECT COUNT(DISTINCT author_id) as 'count' FROM tweet WHERE user_id = '${id}'`,
+		);
+		return result[0].count;
 	}
 
 	async count(): Promise<number> {
