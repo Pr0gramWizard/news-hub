@@ -1,5 +1,6 @@
-export interface CreateNewsSourceDto {
-	name: string;
-	brand: string;
-	description: string;
+export interface CreateNewsPageDto {
+	url: string;
+	language?: string;
+	topic?: string;
+	country?: string;
 }

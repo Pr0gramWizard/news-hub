@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { NewsSource } from '../news-source/news.source.entity';
+import { NewsPage } from '../news-source/news.page.entity';
 import { ArticleMetaData } from '@type/dto/article';
 
 @Entity()
@@ -46,8 +46,8 @@ export class Article {
 	@Column('simple-array')
 	videos!: string[];
 
-	@ManyToOne((type) => NewsSource, (newsSource) => newsSource.articles)
-	newsSource!: NewsSource;
+	@ManyToOne((type) => NewsPage, (newsPage) => newsPage.articles)
+	newsPage!: NewsPage;
 
 	@CreateDateColumn({ name: 'created_at' })
 	createdAt!: Date;

@@ -17,6 +17,7 @@ import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import axios from 'axios';
+import { NewsPageService } from 'service/news-source/news.page.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
@@ -37,6 +38,7 @@ export class TweetController {
 		// private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
 		private readonly configService: ConfigService,
+		private readonly newsSourceService: NewsPageService,
 	) {
 		this.logger.setContext(TweetController.name);
 	}
@@ -124,18 +126,25 @@ export class TweetController {
 
 		// Create new tweet entity
 		await this.tweetService.create({ url, author, user, tweetData: data });
+
 		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
-		// this.logger.debug(data.entities);
-		const response = await axios.post(
-			`${pythonApiUrl}:4000/parse`,
-			{ url },
-			{
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			},
-		);
-		this.logger.debug(response.data);
+		for (const url of data.entities.urls) {
+			this.logger.debug(url.expanded_url);
+			const { isNews, checkedUrl } = await this.newsSourceService.isNewsLink(url);
+			if (isNews) {
+				this.logger.debug(`Found news link: ${checkedUrl}`);
+				const pythonApiResponse = await axios.post(
+					`${pythonApiUrl}:4000/parse`,
+					{ url: checkedUrl },
+					{
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					},
+				);
+				this.logger.debug(pythonApiResponse.data);
+			}
+		}
 		// Create web content entities for the tweet
 		// await this.webContentService.createMany(data.entities.urls, tweet);
 	}
@@ -159,22 +168,5 @@ export class TweetController {
 		// });
 
 		return twitterApiResponse;
-	}
-
-	@Post('parse')
-	async parseUrl(@Body() requestBody: any): Promise<any> {
-		const { url } = requestBody;
-		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
-		this.logger.debug(`Calling python API at ${pythonApiUrl} with url '${url}'`);
-		const response = await axios.post(
-			`${pythonApiUrl}:4000/parse`,
-			{ url },
-			{
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			},
-		);
-		return response.data;
 	}
 }
