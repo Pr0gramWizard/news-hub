@@ -6,7 +6,7 @@ export class NewsPage {
 	@PrimaryGeneratedColumn()
 	id!: string;
 
-	@Column()
+	@Column({ unique: true })
 	url!: string;
 
 	@Column({ default: null, name: 'lang' })

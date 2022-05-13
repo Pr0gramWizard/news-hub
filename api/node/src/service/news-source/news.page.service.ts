@@ -4,8 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNewsPageDto } from '@type/dto/news.source';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
+import { URL } from 'url';
 import { NewsPage } from './news.page.entity';
-import * as psl from 'psl';
 
 interface CheckUrlResponse {
 	isNews: boolean;
@@ -25,8 +25,8 @@ export class NewsPageService {
 
 	async create(createNewsPageDto: CreateNewsPageDto): Promise<NewsPage> {
 		this.logger.debug(`Creating news page ${createNewsPageDto.url}`);
-		const newsSource = new NewsPage(createNewsPageDto);
-		return this.newsPageRepository.save(newsSource);
+		const newsPage = new NewsPage(createNewsPageDto);
+		return this.newsPageRepository.save(newsPage);
 	}
 
 	async findOneByUrl(url: string): Promise<NewsPage | undefined> {
@@ -34,12 +34,13 @@ export class NewsPageService {
 	}
 
 	async isNewsLink(url: TweetEntityUrlV2): Promise<CheckUrlResponse> {
-		this.logger.debug(`Checking if ${url.expanded_url} is a news link`);
 		const urlToCheck = url.unwound_url || url.expanded_url || url.url;
-		const urlDomain = psl.parse(urlToCheck).domain;
-		const newsSource = await this.findOneByUrl(urlDomain);
+		const urlDomain = new URL(urlToCheck).hostname;
+		const urlDomainWithoutSubdomain = urlDomain.indexOf('www') === 0 ? urlDomain.substring(4) : urlDomain;
+		this.logger.debug(`Checking if ${urlDomainWithoutSubdomain} is a news link`);
+		const newsPage = await this.findOneByUrl(urlDomainWithoutSubdomain);
 		return {
-			isNews: !!newsSource,
+			isNews: !!newsPage,
 			checkedUrl: urlToCheck,
 			urlDomain,
 		};

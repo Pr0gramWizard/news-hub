@@ -11,7 +11,7 @@ import { validationSchema } from './config/validation';
 import { RequestLoggerMiddleware } from './middleware/request.logger';
 import { ArticleModule } from './service/article/article.module';
 import { AuthModule } from './service/auth/auth.module';
-import { NewsSourceModule } from './service/news-source/news.source.module';
+import { NewsPageModule } from './service/news-source/news.source.module';
 import { StatsModule } from './service/stats/stats.module';
 import { WebContentModule } from './service/webcontent/webcontent.module';
 
@@ -47,7 +47,7 @@ import { WebContentModule } from './service/webcontent/webcontent.module';
 		WebContentModule,
 		OldTweetModule,
 		StatsModule,
-		NewsSourceModule,
+		NewsPageModule,
 		ArticleModule,
 	],
 })

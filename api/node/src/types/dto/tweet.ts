@@ -1,13 +1,13 @@
-import {User} from '@user/user.entity';
-import {TweetV2} from 'twitter-api-v2';
-import {Author} from '@tweet/author/tweet.author.entity';
-import {Hashtag} from '@tweet/hashtag/hashtag.entity';
-import {WebContent} from '../../service/webcontent/webcontent.entity';
-import {ApiProperty} from '@nestjs/swagger';
-import {WebContentResponse} from './webcontent';
-import {HashtagResponse} from './hashtag';
-import {AuthorResponse} from './author';
-import {IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Author } from '@tweet/author/tweet.author.entity';
+import { Hashtag } from '@tweet/hashtag/hashtag.entity';
+import { User } from '@user/user.entity';
+import { IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { TweetV2 } from 'twitter-api-v2';
+import { WebContent } from '../../service/webcontent/webcontent.entity';
+import { AuthorResponse } from './author';
+import { HashtagResponse } from './hashtag';
+import { WebContentResponse } from './webcontent';
 
 // Controller DTOs
 export class TweetResponse {
@@ -15,7 +15,7 @@ export class TweetResponse {
 	id!: string;
 
 	@ApiProperty()
-	text!: string;
+	text?: string;
 
 	@ApiProperty()
 	retweets!: number;
@@ -33,7 +33,7 @@ export class TweetResponse {
 	url!: string;
 
 	@ApiProperty()
-	language!: string;
+	language?: string;
 
 	@ApiProperty()
 	createdAt!: Date;
@@ -111,4 +111,19 @@ export class TweetProps {
 
 	@IsDefined()
 	user!: User;
+}
+
+export interface NewsParserResponse {
+	authors: string[];
+	html: string;
+	images: string[];
+	keywords: string[];
+	meta_data: Record<string, string>;
+	public_date: string;
+	summary: string;
+	tags: string[];
+	text: string;
+	title: string;
+	top_image: string;
+	videos: string[];
 }

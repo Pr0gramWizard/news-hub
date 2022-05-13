@@ -1,9 +1,9 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateArticleDto } from '@type/dto/article';
 import { Repository } from 'typeorm';
 import { Article } from './article.entity';
-import { CreateArticleDto } from '@type/dto/article';
 
 @Injectable()
 export class ArticleService {
@@ -23,6 +23,6 @@ export class ArticleService {
 
 	async findByUrl(url: string): Promise<Article | undefined> {
 		this.logger.debug(`Finding article by url: ${url}`);
-		return this.articleRepository.findOne({ url }, { relations: ['newsSource'] });
+		return this.articleRepository.findOne({ url }, { relations: ['newsPage'] });
 	}
 }

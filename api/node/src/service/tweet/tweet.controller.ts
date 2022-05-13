@@ -11,7 +11,7 @@ import {
 	ApiOkResponse,
 	ApiTags,
 } from '@nestjs/swagger';
-import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
+import { NewsParserResponse, StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
@@ -22,6 +22,7 @@ import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
 import { JwtPayload } from '../auth/auth.service';
+import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetService } from './tweet.service';
 
@@ -35,10 +36,10 @@ export class TweetController {
 		private readonly userService: UserService,
 		private readonly twitterService: TwitterService,
 		private readonly authorService: TweetAuthorService,
-		// private readonly webContentService: WebContentService,
+		private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
 		private readonly configService: ConfigService,
-		private readonly newsSourceService: NewsPageService,
+		private readonly newsPageService: NewsPageService,
 	) {
 		this.logger.setContext(TweetController.name);
 	}
@@ -125,28 +126,40 @@ export class TweetController {
 		}
 
 		// Create new tweet entity
-		await this.tweetService.create({ url, author, user, tweetData: data });
+		const tweet = await this.tweetService.create({ url, author, user, tweetData: data });
 
 		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
-		for (const url of data.entities.urls) {
-			this.logger.debug(url.expanded_url);
-			const { isNews, checkedUrl } = await this.newsSourceService.isNewsLink(url);
-			if (isNews) {
-				this.logger.debug(`Found news link: ${checkedUrl}`);
-				const pythonApiResponse = await axios.post(
-					`${pythonApiUrl}:4000/parse`,
-					{ url: checkedUrl },
-					{
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					},
-				);
-				this.logger.debug(pythonApiResponse.data);
+		// console.log(data.entities.urls);
+		if (data.entities.urls) {
+			for (const url of data.entities.urls) {
+				const { isNews, checkedUrl } = await this.newsPageService.isNewsLink(url);
+				if (isNews) {
+					this.logger.debug(`Found news link: ${checkedUrl}`);
+					try {
+						const pythonApiResponse = await axios.post<NewsParserResponse>(
+							`${pythonApiUrl}:4000/parse`,
+							{ url: checkedUrl },
+							{
+								headers: {
+									'Content-Type': 'application/json',
+								},
+							},
+						);
+						// this.logger.debug(pythonApiResponse.data);
+						const urlMedia = url.images;
+						const media = urlMedia ? [urlMedia[0].url] : [];
+						await this.webContentService.create({
+							url: checkedUrl,
+							content: url.description,
+							tweet,
+							media,
+						});
+					} catch (e) {
+						this.logger.error(e);
+					}
+				}
 			}
 		}
-		// Create web content entities for the tweet
-		// await this.webContentService.createMany(data.entities.urls, tweet);
 	}
 
 	/* istanbul ignore next */
