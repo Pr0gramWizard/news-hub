@@ -146,6 +146,7 @@ export class TweetController {
 							},
 						);
 						// this.logger.debug(pythonApiResponse.data);
+						this.logger.debug(pythonApiResponse.data);
 						const urlMedia = url.images;
 						const media = urlMedia ? [urlMedia[0].url] : [];
 						await this.webContentService.create({
