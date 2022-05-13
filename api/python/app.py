@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import sys
 from urllib.parse import urlparse
@@ -8,7 +9,6 @@ import nltk
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, request
 from newspaper import Article
-import logging
 
 nltk.download('punkt')
 
@@ -27,7 +27,7 @@ def parse_tweet():
 
     url = data['url']
 
-    print(f"Parsing url: {url}")
+    logging.info(f"Parsing url: {url}")
 
     try:
         article_info = extract_article(url)

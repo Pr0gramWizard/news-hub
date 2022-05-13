@@ -10,11 +10,11 @@ export class Author {
 	@Column()
 	username!: string;
 
-	@Column()
-	location!: string;
+	@Column({ nullable: true })
+	location?: string;
 
-	@Column({ type: 'text' })
-	bio!: string;
+	@Column({ type: 'text', nullable: true })
+	bio?: string;
 
 	@Column()
 	isVerified!: boolean;
@@ -36,8 +36,8 @@ export class Author {
 			const { userId, username, location, bio, isVerified, numberOfFollower, numberOfTweets } = props;
 			this.id = userId;
 			this.username = username;
-			this.location = location || 'unknown';
-			this.bio = bio || '';
+			this.location = location;
+			this.bio = bio;
 			this.isVerified = isVerified || false;
 			this.numberOfFollowers = numberOfFollower;
 			this.numberOfTweets = numberOfTweets;

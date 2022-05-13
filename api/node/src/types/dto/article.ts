@@ -14,7 +14,7 @@ export interface CreateArticleDto {
 	topImage?: string;
 	url: string;
 	videos?: string[];
-	newsSource: NewsPage;
+	newsPage: NewsPage;
 }
 
 export interface OpenGraph {

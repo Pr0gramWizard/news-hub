@@ -10,8 +10,8 @@ export class Tweet {
 	@PrimaryColumn({ unique: true })
 	id!: string;
 
-	@Column({ type: 'text' })
-	text!: string;
+	@Column({ type: 'text', nullable: true })
+	text?: string;
 
 	@Column()
 	retweets!: number;
@@ -28,8 +28,8 @@ export class Tweet {
 	@Column({ length: 500 })
 	url!: string;
 
-	@Column({ length: 50 })
-	language!: string;
+	@Column({ length: 50, nullable: true })
+	language?: string;
 
 	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets, { cascade: true })
 	@JoinTable({ name: 'tweet_hashtag' })
@@ -66,10 +66,10 @@ export class Tweet {
 			this.id = id;
 			this.author = author;
 			this.hashtags = hashtags;
-			this.language = language || 'no-lang';
+			this.language = language;
 			this.likes = likes || 0;
 			this.retweets = retweets || 0;
-			this.text = text || '';
+			this.text = text;
 			this.totalComments = totalComments || 0;
 			this.totalQuotes = totalQuotes || 0;
 			this.url = url;

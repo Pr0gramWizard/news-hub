@@ -8,11 +8,11 @@ export class AuthorResponse {
 
 	@ApiProperty()
 	@IsString()
-	location!: string;
+	location?: string;
 
 	@ApiProperty()
 	@IsString()
-	bio!: string;
+	bio?: string;
 
 	@ApiProperty()
 	@IsBoolean()

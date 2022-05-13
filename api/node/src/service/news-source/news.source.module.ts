@@ -8,4 +8,4 @@ import { NewsPageService } from './news.page.service';
 	providers: [NewsPageService],
 	exports: [NewsPageService],
 })
-export class NewsSourceModule {}
+export class NewsPageModule {}
