@@ -2,7 +2,6 @@ import { NewsHubLogger } from '@common/logger.service';
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
 import { BadRequestException, Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -11,16 +10,16 @@ import {
 	ApiOkResponse,
 	ApiTags,
 } from '@nestjs/swagger';
-import { NewsParserResponse, StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
+import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
-import axios from 'axios';
-import { NewsPageService } from 'service/news-source/news.page.service';
+import { NewsLinks, NewsPageService } from 'service/news-source/news.page.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
+import { ArticleService } from '../article/article.service';
 import { JwtPayload } from '../auth/auth.service';
 import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
@@ -38,7 +37,7 @@ export class TweetController {
 		private readonly authorService: TweetAuthorService,
 		private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
-		private readonly configService: ConfigService,
+		private readonly articleService: ArticleService,
 		private readonly newsPageService: NewsPageService,
 	) {
 		this.logger.setContext(TweetController.name);
@@ -125,41 +124,18 @@ export class TweetController {
 			this.logger.debug(`There was no author with id '${tweetAuthor.id}' in the database, created a new one`);
 		}
 
-		// Create new tweet entity
-		const tweet = await this.tweetService.create({ url, author, user, tweetData: data });
-
-		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
-		// console.log(data.entities.urls);
 		if (data.entities.urls) {
-			for (const url of data.entities.urls) {
-				const { isNews, checkedUrl } = await this.newsPageService.isNewsLink(url);
-				if (isNews) {
-					this.logger.debug(`Found news link: ${checkedUrl}`);
-					try {
-						const pythonApiResponse = await axios.post<NewsParserResponse>(
-							`${pythonApiUrl}:4000/parse`,
-							{ url: checkedUrl },
-							{
-								headers: {
-									'Content-Type': 'application/json',
-								},
-							},
-						);
-						// this.logger.debug(pythonApiResponse.data);
-						this.logger.debug(pythonApiResponse.data);
-						const urlMedia = url.images;
-						const media = urlMedia ? [urlMedia[0].url] : [];
-						await this.webContentService.create({
-							url: checkedUrl,
-							content: url.description,
-							tweet,
-							media,
-						});
-					} catch (e) {
-						this.logger.error(e);
-					}
-				}
-			}
+			const linksInTweet = this.tweetService.getLinksFromTweet(data.entities.urls);
+			const classifiedLinks = await this.newsPageService.areNewsLinks(linksInTweet);
+			const newsLinks = classifiedLinks.filter((l) => l.isNews && l.newsPage !== undefined) as NewsLinks[];
+			const tweet = await this.tweetService.create({
+				url,
+				author,
+				user,
+				tweetData: data,
+				isNews: newsLinks.length > 0,
+			});
+			const articles = await this.articleService.createManyByUrl(newsLinks, tweet);
 		}
 	}
 

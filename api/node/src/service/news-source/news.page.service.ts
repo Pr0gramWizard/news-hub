@@ -2,25 +2,34 @@ import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNewsPageDto } from '@type/dto/news.source';
-import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
-import { URL } from 'url';
+import { TweetLink } from '../tweet/tweet.service';
 import { NewsPage } from './news.page.entity';
 
-interface CheckUrlResponse {
+export interface CheckUrlResponse {
 	isNews: boolean;
 	checkedUrl: string;
-	urlDomain: string;
+	fullUrl: string;
+	newsPage?: NewsPage;
+}
+
+export interface NewsLinks {
+	isNews: boolean;
+	checkedUrl: string;
+	fullUrl: string;
+	newsPage: NewsPage;
 }
 
 @Injectable()
 export class NewsPageService {
+	private readonly excludedDomains: string[];
 	constructor(
 		@InjectRepository(NewsPage)
 		private readonly newsPageRepository: Repository<NewsPage>,
 		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(NewsPageService.name);
+		this.excludedDomains = ['twitter.com'];
 	}
 
 	async create(createNewsPageDto: CreateNewsPageDto): Promise<NewsPage> {
@@ -33,16 +42,26 @@ export class NewsPageService {
 		return this.newsPageRepository.findOne({ url });
 	}
 
-	async isNewsLink(url: TweetEntityUrlV2): Promise<CheckUrlResponse> {
-		const urlToCheck = url.unwound_url || url.expanded_url || url.url;
-		const urlDomain = new URL(urlToCheck).hostname;
-		const urlDomainWithoutSubdomain = urlDomain.indexOf('www') === 0 ? urlDomain.substring(4) : urlDomain;
-		this.logger.debug(`Checking if ${urlDomainWithoutSubdomain} is a news link`);
-		const newsPage = await this.findOneByUrl(urlDomainWithoutSubdomain);
+	async areNewsLinks(tweetLinks: TweetLink[]): Promise<CheckUrlResponse[]> {
+		return Promise.all(tweetLinks.map((tw) => this.isNewsLink(tw)));
+	}
+
+	async isNewsLink(url: TweetLink): Promise<CheckUrlResponse> {
+		if (this.excludedDomains.includes(url.urlDomain)) {
+			this.logger.debug(`URL ${url.urlDomain} is excluded`);
+			return {
+				isNews: false,
+				checkedUrl: url.urlDomain,
+				fullUrl: url.fullUrl,
+			};
+		}
+		this.logger.debug(`Checking if ${url.urlDomain} is a news link`);
+		const newsPage = await this.findOneByUrl(url.urlDomain);
 		return {
+			newsPage,
 			isNews: !!newsPage,
-			checkedUrl: urlToCheck,
-			urlDomain,
+			checkedUrl: url.urlDomain,
+			fullUrl: url.fullUrl,
 		};
 	}
 }

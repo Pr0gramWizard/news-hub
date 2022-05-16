@@ -5,9 +5,16 @@ import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
+import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
+import { URL } from 'url';
 import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet } from './tweet.entity';
+
+export interface TweetLink {
+	fullUrl: string;
+	urlDomain: string;
+}
 
 @Injectable()
 export class TweetService {
@@ -23,7 +30,7 @@ export class TweetService {
 		return this.tweetRepository.findOne({ id, user });
 	}
 
-	async create({ url, tweetData, author, user }: CreateTweet): Promise<Tweet> {
+	async create({ url, tweetData, author, user, isNews }: CreateTweet): Promise<Tweet> {
 		const { public_metrics, text, id, lang, entities } = tweetData;
 		if (!public_metrics) {
 			throw new TwitterApiException(TweetErrorCode.TWITTER_API_PUBLIC_METRICS_MISSING);
@@ -51,6 +58,7 @@ export class TweetService {
 			user,
 			author,
 			url,
+			isNews,
 		};
 		const tweet = new Tweet(tweetParams);
 		return await this.tweetRepository.save(tweet);
@@ -79,6 +87,18 @@ export class TweetService {
 		const result = await x.getRawOne();
 		this.logger.debug(x.getSql());
 		return result.count;
+	}
+
+	getLinksFromTweet(urls: TweetEntityUrlV2[]): TweetLink[] {
+		return urls.map((url) => {
+			const urlToCheck = url.unwound_url || url.expanded_url || url.url;
+			const urlDomain = new URL(urlToCheck).hostname;
+			const urlDomainWithoutSubdomain = urlDomain.indexOf('www') === 0 ? urlDomain.substring(4) : urlDomain;
+			return {
+				fullUrl: urlToCheck,
+				urlDomain: urlDomainWithoutSubdomain,
+			};
+		});
 	}
 
 	async countAuthors(id: string): Promise<number> {

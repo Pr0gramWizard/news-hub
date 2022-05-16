@@ -2,10 +2,12 @@ FROM node:16-alpine
 
 WORKDIR /srv/app
 
-COPY package*.json ./
+COPY package.json ./
 
-RUN npm install
+COPY yarn.lock ./
+
+RUN yarn install
 
 COPY . .
 
-CMD [ "npm", "run", "build:watch" ]
+CMD [ "yarn", "run", "build:watch" ]

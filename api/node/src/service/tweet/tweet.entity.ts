@@ -1,6 +1,7 @@
 import { User } from '@user/user.entity';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { TweetProps } from '../../types/dto/tweet';
+import { Article } from '../article/article.entity';
 import { WebContent } from '../webcontent/webcontent.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
@@ -13,16 +14,19 @@ export class Tweet {
 	@Column({ type: 'text', nullable: true })
 	text?: string;
 
-	@Column()
+	@Column({ default: 0 })
 	retweets!: number;
 
-	@Column()
+	@Column({ default: 0 })
 	likes!: number;
 
 	@Column()
+	isNews!: boolean;
+
+	@Column({ default: 0 })
 	totalComments!: number;
 
-	@Column()
+	@Column({ default: 0 })
 	totalQuotes!: number;
 
 	@Column({ length: 500 })
@@ -30,6 +34,9 @@ export class Tweet {
 
 	@Column({ length: 50, nullable: true })
 	language?: string;
+
+	@OneToMany(() => Article, (article) => article.tweet)
+	articles?: Article[];
 
 	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets, { cascade: true })
 	@JoinTable({ name: 'tweet_hashtag' })
@@ -48,34 +55,7 @@ export class Tweet {
 	createdAt!: Date;
 
 	constructor(props?: TweetProps) {
-		if (props) {
-			const {
-				id,
-				author,
-				hashtags,
-				language,
-				likes,
-				retweets,
-				text,
-				totalComments,
-				totalQuotes,
-				url,
-				user,
-				webContents,
-			} = props;
-			this.id = id;
-			this.author = author;
-			this.hashtags = hashtags;
-			this.language = language;
-			this.likes = likes || 0;
-			this.retweets = retweets || 0;
-			this.text = text;
-			this.totalComments = totalComments || 0;
-			this.totalQuotes = totalQuotes || 0;
-			this.url = url;
-			this.user = user;
-			this.webContents = webContents || [];
-		}
+		Object.assign(this, props);
 		this.createdAt = new Date();
 	}
 }

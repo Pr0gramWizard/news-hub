@@ -2,9 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Author } from '@tweet/author/tweet.author.entity';
 import { Hashtag } from '@tweet/hashtag/hashtag.entity';
 import { User } from '@user/user.entity';
-import { IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { TweetV2 } from 'twitter-api-v2';
 import { WebContent } from '../../service/webcontent/webcontent.entity';
+import { ArticleMetaData } from './article';
 import { AuthorResponse } from './author';
 import { HashtagResponse } from './hashtag';
 import { WebContentResponse } from './webcontent';
@@ -68,6 +69,9 @@ export class CreateTweet {
 
 	@IsDefined()
 	user!: User;
+
+	@IsDefined()
+	isNews!: boolean;
 }
 export class TweetProps {
 	@IsString()
@@ -111,6 +115,9 @@ export class TweetProps {
 
 	@IsDefined()
 	user!: User;
+
+	@IsBoolean()
+	isNews!: boolean;
 }
 
 export interface NewsParserResponse {
@@ -118,8 +125,8 @@ export interface NewsParserResponse {
 	html: string;
 	images: string[];
 	keywords: string[];
-	meta_data: Record<string, string>;
-	public_date: string;
+	meta_data: ArticleMetaData;
+	publish_date: string;
 	summary: string;
 	tags: string[];
 	text: string;

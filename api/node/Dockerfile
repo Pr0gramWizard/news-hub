@@ -1,14 +1,19 @@
-FROM node:14 AS development
+FROM node:16-alpine
+
+RUN apk update \
+  && apk add make g++ python3
 
 WORKDIR /srv/app
 
-COPY package*.json ./
+COPY package.json ./
 
-RUN npm install
+COPY yarn.lock ./
+
+RUN yarn install 
 
 COPY . .
 
-RUN npm run build
+RUN yarn run build
 
 EXPOSE 3000
 

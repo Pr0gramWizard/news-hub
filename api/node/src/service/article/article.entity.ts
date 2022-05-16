@@ -1,6 +1,7 @@
+import { ArticleMetaData } from '@type/dto/article';
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { NewsPage } from '../news-source/news.page.entity';
-import { ArticleMetaData } from '@type/dto/article';
+import { Tweet } from '../tweet/tweet.entity';
 
 @Entity()
 export class Article {
@@ -10,7 +11,7 @@ export class Article {
 	@Column('simple-array')
 	authors!: string[];
 
-	@Column('text', { default: '' })
+	@Column('longtext', { default: '' })
 	html!: string;
 
 	@Column('simple-array')
@@ -31,7 +32,7 @@ export class Article {
 	@Column('simple-array')
 	tags!: string[];
 
-	@Column({ default: '' })
+	@Column({ type: 'longtext', default: '' })
 	text!: string;
 
 	@Column({ default: '' })
@@ -46,8 +47,11 @@ export class Article {
 	@Column('simple-array')
 	videos!: string[];
 
-	@ManyToOne((type) => NewsPage, (newsPage) => newsPage.articles)
+	@ManyToOne(() => NewsPage, (newsPage) => newsPage.articles)
 	newsPage!: NewsPage;
+
+	@ManyToOne(() => Tweet, (tweet) => tweet.articles)
+	tweet!: Tweet;
 
 	@CreateDateColumn({ name: 'created_at' })
 	createdAt!: Date;

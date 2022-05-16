@@ -32,7 +32,6 @@
 		"cache-manager": "^3.6.1",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.13.1",
-		"date-fns": "^2.28.0",
 		"joi": "^17.6.0",
 		"mysql2": "^2.3.3",
 		"reflect-metadata": "^0.1.13",

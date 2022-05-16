@@ -1,7 +1,7 @@
 version: "3.7"
 services:
-  newshub-api-node:
-    container_name: newshub-api-node
+  api-node:
+    container_name: api-node
     build: ./api/node
     restart: always
     volumes:
@@ -10,13 +10,13 @@ services:
     env_file:
       - ./api/node/.env
     depends_on:
-      - newshub-api-python
+      - api-python
     command: npm run start:debug -- --preserveWatchOutput
     ports:
       - "3000:3000"
 
-  newshub-api-python:
-    container_name: newshub-api-python
+  api-python:
+    container_name: api-python
     build: ./api/python
     restart: always
     volumes:
@@ -27,23 +27,24 @@ services:
     ports:
       - "4000:4000"
 
-  newshub-browser-extension:
-    container_name: newshub-browser-extension
+  browser-extension:
+    container_name: browser-extension
     build: ./apps/browser_extension
     restart: always
     depends_on:
-      - newshub-api-node
+      - api-node
     volumes:
       - ./apps/browser_extension:/srv/app
-#  newshub-dashboard:
-#    container_name: newshub-dashboard
-#    build: ./apps/dashboard
-#    restart: always
-#    volumes:
-#      - ./apps/dashboard:/app
-#      - /app/node_modules/
-#    environment:
-#      - API_URL="http://newshub-api-node:3000"
-#    ports:
-#      - "8080:8080"
-#      - "3010:3010"
+
+  admin-dashboard:
+    container_name: admin-dashboard
+    build: ./apps/dashboard
+    restart: always
+    depends_on:
+      - api-node
+    volumes:
+      - ./apps/dashboard:/app
+      - /app/node_modules/
+    ports:
+      - "8080:8080"
+      - "3010:3010"
