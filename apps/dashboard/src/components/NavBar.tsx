@@ -7,7 +7,7 @@ import {
   Logout,
   Settings,
 } from "tabler-icons-react";
-import { NewsHubLogo } from "../components/NewsHubLogo";
+import { NewsHubLogo } from "./NewsHubLogo";
 import AuthContext from "../context/authProvider";
 
 const useStyles = createStyles((theme, _params, getRef) => {
@@ -103,12 +103,12 @@ export function NavBar() {
   ));
 
   return (
-    <Navbar width={{ sm: 300 }} p="md" className={classes.navbar}>
+    <Navbar width={{ sm: 200 }} p="md" className={classes.navbar}>
       <Navbar.Section grow>
         <Group className={classes.header} position="center">
           <NewsHubLogo variant="white" width={75} />
           <Code className={classes.version}>
-            v{import.meta.env.VITE_APP_VERSION}
+            v{import.meta.env.VITE_APP_VERSION || "0.0.0"}
           </Code>
         </Group>
         {links}

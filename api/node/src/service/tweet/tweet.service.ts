@@ -8,7 +8,6 @@ import { User } from '@user/user.entity';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
 import { URL } from 'url';
-import { Hashtag } from './hashtag/hashtag.entity';
 import { Tweet, TweetType } from './tweet.entity';
 
 export interface TweetLink {
@@ -24,6 +23,10 @@ export class TweetService {
 		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(TweetService.name);
+	}
+
+	async findAll(): Promise<Tweet[]> {
+		return await this.tweetRepository.find();
 	}
 
 	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
@@ -44,21 +47,13 @@ export class TweetService {
 			throw new TwitterApiException(TweetErrorCode.TWITTER_API_ENTITIES_MISSING);
 		}
 		const { retweet_count, like_count, reply_count, quote_count } = public_metrics;
-		const listOfTweetHashtags = entities.hashtags;
-		let hashtags: Hashtag[] = [];
-		if (listOfTweetHashtags && listOfTweetHashtags.length > 0) {
-			hashtags = entities.hashtags.map((h) => {
-				return new Hashtag(h.tag);
-			});
-		}
 		const tweetParams: TweetProps = {
-			hashtags,
 			language: lang,
 			totalQuotes: quote_count,
 			totalComments: reply_count,
 			likes: like_count,
 			retweets: retweet_count,
-			id,
+			tweetId: id,
 			text,
 			user,
 			author,
@@ -70,7 +65,7 @@ export class TweetService {
 	}
 
 	async findAllByUserId(id: string): Promise<TweetResponse[]> {
-		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags', 'webContents'] });
+		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags'] });
 	}
 
 	async countByUserId(id: string): Promise<number> {
@@ -80,9 +75,6 @@ export class TweetService {
 	async countLastDayByUserId(id: string): Promise<number> {
 		const today = new Date();
 		const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-		this.logger.debug(yesterday, today);
-		this.logger.debug(yesterday.toISOString());
-		this.logger.debug(today.toISOString());
 		const x = await this.tweetRepository
 			.createQueryBuilder('tweet')
 			.select('COUNT(*)', 'count')
@@ -90,7 +82,6 @@ export class TweetService {
 				`user_id = '${id}' AND created_at BETWEEN '${yesterday.toISOString()}' AND '${today.toISOString()}'`,
 			);
 		const result = await x.getRawOne();
-		this.logger.debug(x.getSql());
 		return result.count;
 	}
 

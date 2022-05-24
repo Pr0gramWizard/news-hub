@@ -1,14 +1,12 @@
 import json
 import logging
 import os
-import sys
-from urllib.parse import urlparse
-
 import newspaper
 import nltk
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, request
 from newspaper import Article
+from time import strftime
 
 nltk.download('punkt')
 
@@ -27,25 +25,27 @@ def parse_tweet():
 
     url = data['url']
 
-    logging.info(f"Parsing url: {url}")
+    app.logger.info('Parsing url: %s', url)
 
     try:
         article_info = extract_article(url)
         return json.dumps(article_info)
     except Exception as e:
+        app.logger.error('Error parsing url: %s', e)
         return json.dumps({'error': str(e)}), 400
 
 
 def extract_article(url):
     article = Article(url)
     article.build()
+    publish_date = article.publish_date.isoformat() if article.publish_date else None
     return {
         "authors": list(article.authors),
         "html": article.html,
         "images": list(article.images),
         "keywords": list(article.keywords),
         "meta_data": article.meta_data,
-        "publish_date": article.publish_date,
+        "publish_date": publish_date,
         "summary": article.summary,
         "tags": list(article.tags),
         "text": article.text,
@@ -56,5 +56,4 @@ def extract_article(url):
 
 if __name__ == "__main__":
     app_port = os.environ.get('APP_PORT')
-
     app.run(host='0.0.0.0',debug=True, port=app_port)

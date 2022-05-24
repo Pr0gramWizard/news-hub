@@ -34,10 +34,8 @@ export class ArticleService {
 
 	async createManyByUrl(newsLinks: NewsLinks[], tweet: Tweet): Promise<Article[]> {
 		const pythonApiUrl = this.configService.get('PYTHON_API_URL');
-		this.logger.debug(pythonApiUrl);
 		const articles: Article[] = [];
 		for (const url of newsLinks) {
-			this.logger.debug(`Creating article by url: ${url.fullUrl}`);
 			const article = await this.findByUrl(url.fullUrl);
 			if (article) {
 				this.logger.debug(`Article ${url.fullUrl} already exists`);
@@ -46,7 +44,7 @@ export class ArticleService {
 				this.logger.debug(`Article ${url.fullUrl} does not exist`);
 				try {
 					const pythonApiResponse = await axios.post<NewsParserResponse>(
-						`${pythonApiUrl}:4000/parse`,
+						`${pythonApiUrl}/parse`,
 						{ url: url.fullUrl },
 						{
 							headers: {

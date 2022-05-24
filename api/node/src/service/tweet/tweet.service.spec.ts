@@ -114,7 +114,7 @@ describe('TweetService', () => {
 			expect(tweets).toBe(tweets);
 			expect(repository.find).toHaveBeenCalledWith({
 				where: { user: { id: 'testId' } },
-				relations: ['author', 'hashtags', 'webContents'],
+				relations: ['author', 'hashtags'],
 			});
 		});
 	});

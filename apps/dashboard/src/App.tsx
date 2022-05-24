@@ -29,7 +29,7 @@ function App() {
         colorScheme={colorScheme}
         toggleColorScheme={toggleColorScheme}
       >
-        <MantineProvider>
+        <MantineProvider theme={{ loader: "bars" }}>
           <ModalsProvider>
             <NotificationsProvider position={"top-center"}>
               <BrowserRouter>

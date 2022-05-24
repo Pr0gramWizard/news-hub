@@ -9,7 +9,7 @@ import { TwitterApiException } from '@type/error/general';
 import * as util from '@common/util';
 import { NewsHubLogger } from '@common/logger.service';
 
-describe('WebContentService', () => {
+describe('Tweet Author Service', () => {
 	let service: TweetAuthorService;
 	let repository: Repository<Author>;
 	let author: Author;

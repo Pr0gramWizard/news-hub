@@ -1,7 +1,7 @@
 import { ArticleMetaData } from '@type/dto/article';
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { NewsPage } from '../news-source/news.page.entity';
-import { Tweet } from '../tweet/tweet.entity';
+import { Tweet } from '@tweet/tweet.entity';
 
 @Entity()
 export class Article {
@@ -38,7 +38,7 @@ export class Article {
 	@Column({ default: '' })
 	title!: string;
 
-	@Column({ name: 'top_image', default: '' })
+	@Column({ name: 'top_image', default: '', type: 'text' })
 	topImage!: string;
 
 	@Column({ length: 500 })

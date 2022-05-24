@@ -35,15 +35,16 @@ services:
       - api-node
     volumes:
       - ./apps/browser_extension:/srv/app
-#  admin-dashboard:
-#    container_name: admin-dashboard
-#    build: ./apps/dashboard
-#    restart: always
-#    depends_on:
-#      - api-node
-#    volumes:
-#      - ./apps/dashboard:/app
-#      - /app/node_modules/
-#    ports:
-#      - "8080:8080"
-#      - "3010:3010"
+
+
+  admin-dashboard:
+    container_name: admin-dashboard
+    build: ./apps/dashboard
+    restart: always
+    depends_on:
+      - api-node
+    volumes:
+      - ./apps/dashboard:/app
+      - /app/node_modules/
+    ports:
+      - "3001:3001"

@@ -21,11 +21,13 @@ import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
 import { ArticleService } from '../article/article.service';
 import { JwtPayload } from '../auth/auth.service';
-import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetType } from './tweet.entity';
 import { TweetService } from './tweet.service';
 import { AuthorType } from '@tweet/author/tweet.author.entity';
+import { RoleGuard } from '../../guard/role.guard';
+import { UserRole } from '@user/user.entity';
+import { HashtagService } from '@tweet/hashtag/hashtag.service';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -37,21 +39,57 @@ export class TweetController {
 		private readonly userService: UserService,
 		private readonly twitterService: TwitterService,
 		private readonly authorService: TweetAuthorService,
-		private readonly webContentService: WebContentService,
 		private readonly logger: NewsHubLogger,
 		private readonly articleService: ArticleService,
 		private readonly newsPageService: NewsPageService,
+		private readonly hashtagService: HashtagService,
 	) {
 		this.logger.setContext(TweetController.name);
 	}
 
-	@Get(':user_id')
+	@Get('user/:user_id')
+	@UseGuards(new AuthGuard())
 	@ApiOkResponse({
 		description: 'Get all tweets by a user id',
 		type: [TweetResponse],
 	})
 	async getTweetsByUserToken(@Param('user_id') id: string): Promise<TweetResponse[]> {
 		return this.tweetService.findAllByUserId(id);
+	}
+
+	@Get(':tweet_id')
+	@UseGuards(new AuthGuard())
+	@ApiOkResponse({
+		description: 'Get all tweets by a user id',
+		type: [TweetResponse],
+	})
+	async getTweetByUserAndTweetId(
+		@Param('tweet_id') tweetId: string,
+		@UserContext() jwtPayload: JwtPayload,
+	): Promise<TweetResponse> {
+		const { sub } = jwtPayload;
+		// Check if requesting user exists
+		const user = await this.userService.findById(sub);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		const tweet = await this.tweetService.findByIdAndUser(tweetId, user);
+		if (!tweet) {
+			throw new BadRequestException(TweetErrorCode.TWEET_NOT_FOUND);
+		}
+
+		return tweet;
+	}
+
+	@Get('')
+	@UseGuards(new AuthGuard())
+	@UseGuards(new RoleGuard(UserRole.ADMIN))
+	@ApiOkResponse({
+		description: 'Get all tweets',
+		type: [TweetResponse],
+	})
+	async getAllTweets(): Promise<TweetResponse[]> {
+		return this.tweetService.findAll();
 	}
 
 	@Post('')
@@ -128,6 +166,7 @@ export class TweetController {
 
 		const tweetType = [];
 		if (author.type === AuthorType.NEWS_OUTLET) {
+			this.logger.debug(`The author with id '${tweetAuthor.id}' is a news outlet`);
 			tweetType.push(TweetType.AUTHOR_IS_NEWS_OUTLET);
 		}
 
@@ -139,6 +178,17 @@ export class TweetController {
 			type: tweetType,
 		});
 
+		if (data.entities.hashtags) {
+			for (const hashtag of data.entities.hashtags) {
+				const hashtagEntity = await this.hashtagService.findByName(hashtag.tag);
+				if (!hashtagEntity) {
+					await this.hashtagService.create(hashtag.tag, [tweet]);
+				} else {
+					await this.hashtagService.addTweet(hashtagEntity, tweet);
+				}
+			}
+		}
+
 		if (data.entities.urls) {
 			const linksInTweet = this.tweetService.getLinksFromTweet(data.entities.urls);
 			const classifiedLinks = await this.newsPageService.areNewsLinks(linksInTweet);
@@ -147,28 +197,7 @@ export class TweetController {
 			if (classifiedLinks.length > 0) {
 				await this.tweetService.addTweetType(tweet, TweetType.CONTAINS_NEWS_ARTICLE);
 			}
-			const articles = await this.articleService.createManyByUrl(newsLinks, tweet);
+			await this.articleService.createManyByUrl(newsLinks, tweet);
 		}
-	}
-
-	/* istanbul ignore next */
-	@Get('hashtag/:hashtag')
-	async getTweetsByHashtag(@Param('hashtag') hashtag: string) {
-		// Search all is not available unless you get the Academic access
-		// Search only returns the tweets of the last 7 days
-		const twitterApiResponse = await this.twitterService.findTweetsByHashtag(hashtag);
-
-		const { data } = twitterApiResponse;
-
-		this.logger.debug(`Twitter API returned ${data}  for hashtag '${hashtag}'`);
-
-		// const tweets = data.data.map((t) => {
-		// 	const { id, text, created_at, author_id, entities } = t;
-		// 	const { media } = entities;
-		// 	const mediaType = media ? media[0].type : undefined;
-		// 	return { id, text, created_at, author_id, mediaType };
-		// });
-
-		return twitterApiResponse;
 	}
 }

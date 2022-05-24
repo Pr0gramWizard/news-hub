@@ -1,8 +1,7 @@
 import { User } from '@user/user.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TweetProps } from '../../types/dto/tweet';
 import { Article } from '../article/article.entity';
-import { WebContent } from '../webcontent/webcontent.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
 
@@ -14,8 +13,11 @@ export enum TweetType {
 
 @Entity()
 export class Tweet {
-	@PrimaryColumn({ unique: true })
+	@PrimaryGeneratedColumn('uuid')
 	id!: string;
+
+	@Column({ type: 'text' })
+	tweetId!: string;
 
 	@Column({ type: 'text', nullable: true })
 	text?: string;
@@ -55,9 +57,6 @@ export class Tweet {
 	@ManyToOne(() => Author, { cascade: true })
 	author!: Author;
 
-	@OneToMany(() => WebContent, (webContent) => webContent.tweet)
-	webContents!: WebContent[];
-
 	@ManyToOne('User')
 	user!: User;
 
@@ -65,6 +64,7 @@ export class Tweet {
 	createdAt!: Date;
 
 	constructor(props?: TweetProps) {
+		this.type = [TweetType.NORMAL];
 		Object.assign(this, props);
 		this.createdAt = new Date();
 	}

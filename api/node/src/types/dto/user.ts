@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEmail, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { UserRole } from '@user/user.entity';
 
 // Register DTOs
 
@@ -86,4 +87,8 @@ export class CreateUserDTO {
 	@IsNotEmpty()
 	@IsEmail()
 	email!: string;
+
+	@IsEnum(UserRole)
+	@IsOptional()
+	role?: UserRole;
 }

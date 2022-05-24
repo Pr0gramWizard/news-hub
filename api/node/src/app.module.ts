@@ -13,7 +13,6 @@ import { ArticleModule } from './service/article/article.module';
 import { AuthModule } from './service/auth/auth.module';
 import { NewsPageModule } from './service/news-source/news.source.module';
 import { StatsModule } from './service/stats/stats.module';
-import { WebContentModule } from './service/webcontent/webcontent.module';
 
 @Module({
 	imports: [
@@ -44,7 +43,6 @@ import { WebContentModule } from './service/webcontent/webcontent.module';
 		TweetModule,
 		UserModule,
 		AuthModule,
-		WebContentModule,
 		OldTweetModule,
 		StatsModule,
 		NewsPageModule,
