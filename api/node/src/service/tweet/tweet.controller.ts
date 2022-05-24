@@ -23,7 +23,9 @@ import { ArticleService } from '../article/article.service';
 import { JwtPayload } from '../auth/auth.service';
 import { WebContentService } from '../webcontent/webcontent.service';
 import { TweetAuthorService } from './author/tweet.author.service';
+import { TweetType } from './tweet.entity';
 import { TweetService } from './tweet.service';
+import { AuthorType } from '@tweet/author/tweet.author.entity';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -124,17 +126,27 @@ export class TweetController {
 			this.logger.debug(`There was no author with id '${tweetAuthor.id}' in the database, created a new one`);
 		}
 
+		const tweetType = [];
+		if (author.type === AuthorType.NEWS_OUTLET) {
+			tweetType.push(TweetType.AUTHOR_IS_NEWS_OUTLET);
+		}
+
+		const tweet = await this.tweetService.create({
+			url,
+			author,
+			user,
+			tweetData: data,
+			type: tweetType,
+		});
+
 		if (data.entities.urls) {
 			const linksInTweet = this.tweetService.getLinksFromTweet(data.entities.urls);
 			const classifiedLinks = await this.newsPageService.areNewsLinks(linksInTweet);
 			const newsLinks = classifiedLinks.filter((l) => l.isNews && l.newsPage !== undefined) as NewsLinks[];
-			const tweet = await this.tweetService.create({
-				url,
-				author,
-				user,
-				tweetData: data,
-				isNews: newsLinks.length > 0,
-			});
+
+			if (classifiedLinks.length > 0) {
+				await this.tweetService.addTweetType(tweet, TweetType.CONTAINS_NEWS_ARTICLE);
+			}
 			const articles = await this.articleService.createManyByUrl(newsLinks, tweet);
 		}
 	}

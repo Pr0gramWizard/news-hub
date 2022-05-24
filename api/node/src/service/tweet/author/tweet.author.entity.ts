@@ -2,6 +2,11 @@ import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CreateAuthor } from '../../../types/dto/author';
 
+export enum AuthorType {
+	NEWS_OUTLET = 'NEWS_OUTLET',
+	DEFAULT = 'DEFAULT',
+}
+
 @Entity()
 export class Author {
 	@PrimaryGeneratedColumn('uuid')
@@ -18,6 +23,9 @@ export class Author {
 
 	@Column()
 	isVerified!: boolean;
+
+	@Column({ type: 'enum', enum: AuthorType, default: AuthorType.DEFAULT })
+	type!: AuthorType;
 
 	@Column()
 	numberOfTweets!: number;

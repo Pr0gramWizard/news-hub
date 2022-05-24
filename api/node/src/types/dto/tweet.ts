@@ -2,8 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Author } from '@tweet/author/tweet.author.entity';
 import { Hashtag } from '@tweet/hashtag/hashtag.entity';
 import { User } from '@user/user.entity';
-import { IsArray, IsBoolean, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { TweetV2 } from 'twitter-api-v2';
+import { TweetType } from '../../service/tweet/tweet.entity';
 import { WebContent } from '../../service/webcontent/webcontent.entity';
 import { ArticleMetaData } from './article';
 import { AuthorResponse } from './author';
@@ -70,9 +71,11 @@ export class CreateTweet {
 	@IsDefined()
 	user!: User;
 
-	@IsDefined()
-	isNews!: boolean;
+	@IsOptional()
+	@IsArray()
+	type?: TweetType[] = [];
 }
+
 export class TweetProps {
 	@IsString()
 	id!: string;
@@ -116,8 +119,9 @@ export class TweetProps {
 	@IsDefined()
 	user!: User;
 
-	@IsBoolean()
-	isNews!: boolean;
+	@IsOptional()
+	@IsArray()
+	type?: TweetType[] = [];
 }
 
 export interface NewsParserResponse {

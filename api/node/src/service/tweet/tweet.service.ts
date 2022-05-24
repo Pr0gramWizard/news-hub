@@ -9,7 +9,7 @@ import { TweetEntityUrlV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
 import { URL } from 'url';
 import { Hashtag } from './hashtag/hashtag.entity';
-import { Tweet } from './tweet.entity';
+import { Tweet, TweetType } from './tweet.entity';
 
 export interface TweetLink {
 	fullUrl: string;
@@ -30,7 +30,12 @@ export class TweetService {
 		return this.tweetRepository.findOne({ id, user });
 	}
 
-	async create({ url, tweetData, author, user, isNews }: CreateTweet): Promise<Tweet> {
+	async addTweetType(tweet: Tweet, tweetType: TweetType): Promise<Tweet> {
+		tweet.type = [...tweet.type, tweetType];
+		return this.tweetRepository.save(tweet);
+	}
+
+	async create({ url, tweetData, author, user, type }: CreateTweet): Promise<Tweet> {
 		const { public_metrics, text, id, lang, entities } = tweetData;
 		if (!public_metrics) {
 			throw new TwitterApiException(TweetErrorCode.TWITTER_API_PUBLIC_METRICS_MISSING);
@@ -58,7 +63,7 @@ export class TweetService {
 			user,
 			author,
 			url,
-			isNews,
+			type,
 		};
 		const tweet = new Tweet(tweetParams);
 		return await this.tweetRepository.save(tweet);

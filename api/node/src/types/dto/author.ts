@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
+import { AuthorType } from '@tweet/author/tweet.author.entity';
 
 export class AuthorResponse {
 	@ApiProperty()
@@ -13,6 +14,10 @@ export class AuthorResponse {
 	@ApiProperty()
 	@IsString()
 	bio?: string;
+
+	@ApiProperty()
+	@IsEnum(AuthorType)
+	type!: AuthorType;
 
 	@ApiProperty()
 	@IsBoolean()

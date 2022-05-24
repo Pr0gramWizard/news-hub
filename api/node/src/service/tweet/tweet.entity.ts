@@ -6,6 +6,12 @@ import { WebContent } from '../webcontent/webcontent.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
 
+export enum TweetType {
+	NORMAL = 'NORMAL',
+	CONTAINS_NEWS_ARTICLE = 'CONTAINS_NEWS_ARTICLE',
+	AUTHOR_IS_NEWS_OUTLET = 'AUTHOR_IS_NEWS_OUTLET',
+}
+
 @Entity()
 export class Tweet {
 	@PrimaryColumn({ unique: true })
@@ -20,8 +26,12 @@ export class Tweet {
 	@Column({ default: 0 })
 	likes!: number;
 
-	@Column()
-	isNews!: boolean;
+	@Column({
+		type: 'set',
+		enum: TweetType,
+		default: [TweetType.NORMAL],
+	})
+	type!: TweetType[];
 
 	@Column({ default: 0 })
 	totalComments!: number;
