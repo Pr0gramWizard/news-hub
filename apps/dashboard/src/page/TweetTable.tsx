@@ -1,9 +1,9 @@
-import { Center, createStyles, Loader, Menu, ScrollArea, Table, Text, Tooltip } from '@mantine/core';
+import { Badge, Center, createStyles, Loader, Menu, ScrollArea, Table, Text, Tooltip } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import ReactCountryFlag from 'react-country-flag';
-import AuthContext from '../context/authProvider';
-import { BrandTwitter, Search } from 'tabler-icons-react';
 import { useNavigate } from 'react-router-dom';
+import { BrandTwitter, Search } from 'tabler-icons-react';
+import AuthContext from '../context/authProvider';
 import { Tweet } from '../types/tweet';
 
 const useStyles = createStyles((theme) => ({
@@ -89,17 +89,17 @@ export function TweetTable() {
 				</Center>
 			) : (
 				<Table sx={{ minWidth: 700 }} highlightOnHover>
-					<thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
+					<thead>
 						<tr>
 							<th style={{ width: 200, textAlign: 'center' }}>Seen at</th>
-							<th style={{ textAlign: 'center' }}>Author</th>
-							<th style={{ textAlign: 'center' }}>Verified</th>
-							<th style={{ textAlign: 'center' }}>Text</th>
-							<th style={{ textAlign: 'center' }}>Language</th>
-							<th style={{ textAlign: 'center' }}>Likes</th>
-							<th style={{ textAlign: 'center' }}>Retweets</th>
-							<th style={{ textAlign: 'center' }}>Comments</th>
-							<th style={{ textAlign: 'center' }}>Actions</th>
+							<th>Author</th>
+							<th>Verified</th>
+							<th>Text</th>
+							<th>Language</th>
+							<th>Likes</th>
+							<th>Retweets</th>
+							<th>Comments</th>
+							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -110,9 +110,9 @@ export function TweetTable() {
 									<Text>{row.author.username} </Text>
 								</td>
 								<td>
-									<Text color={row.author.isVerified ? 'blue' : 'red'}>
+									<Badge color={row.author.isVerified ? 'blue' : 'red'} variant="filled">
 										{row.author.isVerified ? 'Yes' : 'No'}
-									</Text>
+									</Badge>
 								</td>
 								<td>
 									<Text lineClamp={1}>{row.text}</Text>

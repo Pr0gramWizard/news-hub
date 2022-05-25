@@ -33,6 +33,10 @@ export class TweetService {
 		return this.tweetRepository.findOne({ id, user });
 	}
 
+	async findByTweetIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
+		return this.tweetRepository.findOne({ tweetId: id, user });
+	}
+
 	async addTweetType(tweet: Tweet, tweetType: TweetType): Promise<Tweet> {
 		tweet.type = [...tweet.type, tweetType];
 		return this.tweetRepository.save(tweet);

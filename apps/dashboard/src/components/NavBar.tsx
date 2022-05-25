@@ -1,9 +1,9 @@
 import { Code, createStyles, Group, Navbar } from '@mantine/core';
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BrandTwitter, LayoutDashboard, Logout, Settings } from 'tabler-icons-react';
-import { NewsHubLogo } from './NewsHubLogo';
+import React, { useContext, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowBigUpLines, BrandTwitter, LayoutDashboard, Logout, Settings, Users } from 'tabler-icons-react';
 import AuthContext from '../context/authProvider';
+import { NewsHubLogo } from './NewsHubLogo';
 
 const useStyles = createStyles((theme, _params, getRef) => {
 	const icon = getRef('icon');
@@ -65,6 +65,8 @@ const useStyles = createStyles((theme, _params, getRef) => {
 const data = [
 	{ link: '/', label: 'Dashboard', icon: LayoutDashboard },
 	{ link: '/tweets', label: 'Tweets', icon: BrandTwitter },
+	{ link: '/parse/tweet', label: 'Parse Tweet', icon: ArrowBigUpLines },
+	{ link: '/authors', label: 'Authors', icon: Users },
 	{ link: '/user/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -76,6 +78,12 @@ export function NavBar() {
 	if (!user) {
 		throw new Error('User is not logged in');
 	}
+
+	const { pathname } = useLocation();
+
+	useEffect(() => {
+		console.log(pathname);
+	});
 
 	const links = data.map((item) => (
 		<a

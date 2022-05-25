@@ -10,24 +10,24 @@ import {
 	ApiOkResponse,
 	ApiTags,
 } from '@nestjs/swagger';
+import { AuthorType } from '@tweet/author/tweet.author.entity';
+import { HashtagService } from '@tweet/hashtag/hashtag.service';
 import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
+import { UserRole } from '@user/user.entity';
 import { UserService } from '@user/user.service';
 import { NewsLinks, NewsPageService } from 'service/news-source/news.page.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
+import { RoleGuard } from '../../guard/role.guard';
 import { ArticleService } from '../article/article.service';
 import { JwtPayload } from '../auth/auth.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetType } from './tweet.entity';
 import { TweetService } from './tweet.service';
-import { AuthorType } from '@tweet/author/tweet.author.entity';
-import { RoleGuard } from '../../guard/role.guard';
-import { UserRole } from '@user/user.entity';
-import { HashtagService } from '@tweet/hashtag/hashtag.service';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -127,7 +127,7 @@ export class TweetController {
 		}
 
 		// If the requesting user already has an entry in the database we just return nothing
-		const existingTweet = await this.tweetService.findByIdAndUser(tweetId, user);
+		const existingTweet = await this.tweetService.findByTweetIdAndUser(tweetId, user);
 		if (existingTweet) {
 			this.logger.warn('There is already a tweet with this id for the given user');
 			return;

@@ -22,7 +22,21 @@ function App() {
 	return (
 		<ErrorBoundary>
 			<ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-				<MantineProvider theme={{ loader: 'bars' }}>
+				<MantineProvider
+					theme={{ loader: 'bars' }}
+					styles={{
+						table: {
+							thead: {
+								tr: {
+									th: {
+										textAlign: 'center',
+										verticalAlign: 'middle',
+									},
+								},
+							},
+						},
+					}}
+				>
 					<ModalsProvider>
 						<NotificationsProvider position={'top-center'}>
 							<BrowserRouter>

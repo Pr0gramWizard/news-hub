@@ -45,13 +45,10 @@ export function NewsHubLogo({ variant = 'default', width = 500, height = 110, ..
 					/>
 				</g>
 				<text
-					stroke-width="0"
-					font-weight="bold"
 					transform="matrix(3.33052 0 0 2.81361 -290.931 20.3572)"
 					stroke={variant}
-					text-anchor="start"
-					font-family="'Catamaran'"
-					font-size="24"
+					fontFamily="'Catamaran'"
+					fontSize="24"
 					id="svg_9"
 					y="22.77875"
 					x="132.08264"
