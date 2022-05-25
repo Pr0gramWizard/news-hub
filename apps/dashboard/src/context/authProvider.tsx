@@ -1,39 +1,33 @@
-import { createContext, useState } from "react";
+import { createContext, useState } from 'react';
 
 interface AuthProviderProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export interface User {
-  token: string;
-  name: string;
+	token: string;
+	name: string;
 }
 
 interface AuthContextProps {
-  user: User | undefined;
-  setUser: (user: User | undefined) => void;
-  isLoading: boolean | undefined;
-  setIsLoading: (isLoading: boolean) => void;
+	user: User | undefined;
+	setUser: (user: User | undefined) => void;
+	isLoading: boolean | undefined;
+	setIsLoading: (isLoading: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
-  user: undefined,
-  setUser: () => {},
-  isLoading: undefined,
-  setIsLoading: () => {},
+	user: undefined,
+	setUser: () => {},
+	isLoading: undefined,
+	setIsLoading: () => {},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | undefined>(
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
-  const [isLoading, setIsLoading] = useState(true);
+	const [user, setUser] = useState<User | undefined>(JSON.parse(localStorage.getItem('user') || 'null'));
+	const [isLoading, setIsLoading] = useState(true);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	return <AuthContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;
