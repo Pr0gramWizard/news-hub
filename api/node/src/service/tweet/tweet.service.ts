@@ -1,12 +1,12 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTweet, TweetProps, TweetResponse } from '@type/dto/tweet';
+import { CreateTweet, TweetProps, TweetQueryParamter, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { URL } from 'url';
 import { Tweet, TweetType } from './tweet.entity';
 
@@ -68,8 +68,55 @@ export class TweetService {
 		return await this.tweetRepository.save(tweet);
 	}
 
-	async findAllByUserId(id: string): Promise<TweetResponse[]> {
-		return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags'] });
+	async findAllByUserId(id: string, queryParameter?: TweetQueryParamter): Promise<TweetResponse[]> {
+		if (!queryParameter) {
+			return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags'] });
+		}
+		const page = queryParameter.page || 1;
+		const limit = queryParameter.limit || 20;
+		const offset = (page - 1) * limit;
+		const order = queryParameter.order || 'DESC';
+		const orderBy = queryParameter.sort || 'createdAt';
+		const searchTerm = queryParameter.searchTerm;
+		this.logger.debug(
+			`findAllByUserId: Fetching tweets for user ${id} with page ${page} and limit ${limit} and order ${order} and orderBy ${orderBy} and searchTerm ${searchTerm}`,
+		);
+		const whereOptions: FindManyOptions<Tweet> = {
+			relations: ['author', 'hashtags'],
+			order: { [orderBy]: order },
+			skip: offset,
+			take: limit,
+		};
+		// TODO: Refactor this
+		if (searchTerm) {
+			if (searchTerm.startsWith('author:')) {
+				whereOptions.where = {
+					user: { id },
+					author: { username: Like(`%${searchTerm.split(':')[1]}%`) },
+				};
+			} else if (searchTerm.startsWith('lang:') || searchTerm.startsWith('language:')) {
+				whereOptions.where = {
+					user: { id },
+					language: Like(`%${searchTerm.split(':')[1]}%`),
+				};
+			} else if (searchTerm.startsWith('verified:')) {
+				const verifiedStatus = searchTerm.split(':')[1] === 'true' ? true : false;
+				whereOptions.where = {
+					user: { id },
+					author: {
+						isVerified: verifiedStatus,
+					},
+				};
+			} else {
+				whereOptions.where = {
+					text: Like(`%${searchTerm}%`),
+					user: { id },
+				};
+			}
+		} else {
+			whereOptions.where = { user: { id } };
+		}
+		return this.tweetRepository.find(whereOptions);
 	}
 
 	async countByUserId(id: string): Promise<number> {

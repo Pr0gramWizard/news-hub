@@ -62,7 +62,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
 	};
 });
 
-const data = [
+export const navbarLinks = [
 	{ link: '/', label: 'Dashboard', icon: LayoutDashboard },
 	{ link: '/tweets', label: 'Tweets', icon: BrandTwitter },
 	{ link: '/parse/tweet', label: 'Parse Tweet', icon: ArrowBigUpLines },
@@ -82,10 +82,14 @@ export function NavBar() {
 	const { pathname } = useLocation();
 
 	useEffect(() => {
-		console.log(pathname);
+		navbarLinks.find((link) => {
+			if (link.link === pathname) {
+				setActive(link.label);
+			}
+		});
 	});
 
-	const links = data.map((item) => (
+	const links = navbarLinks.map((item) => (
 		<a
 			className={cx(classes.link, {
 				[classes.linkActive]: item.label === active,

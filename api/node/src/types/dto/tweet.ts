@@ -47,6 +47,14 @@ export class TweetResponse {
 	author!: AuthorResponse;
 }
 
+export class PaginatedTweetResponse {
+	@ApiProperty({ type: [TweetResponse] })
+	tweets!: TweetResponse[];
+
+	@ApiProperty()
+	total!: number;
+}
+
 export class StoreTweetRequest {
 	@ApiProperty()
 	@IsString()
@@ -127,4 +135,12 @@ export interface NewsParserResponse {
 	title: string;
 	top_image: string;
 	videos: string[];
+}
+
+export interface TweetQueryParamter {
+	searchTerm?: string;
+	limit?: number;
+	page?: number;
+	sort?: string;
+	order?: 'asc' | 'desc';
 }

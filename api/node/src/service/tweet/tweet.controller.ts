@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
-import { BadRequestException, Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -12,7 +12,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthorType } from '@tweet/author/tweet.author.entity';
 import { HashtagService } from '@tweet/hashtag/hashtag.service';
-import { StoreTweetRequest, TweetResponse } from '@type/dto/tweet';
+import { PaginatedTweetResponse, StoreTweetRequest, TweetQueryParamter, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
@@ -47,20 +47,31 @@ export class TweetController {
 		this.logger.setContext(TweetController.name);
 	}
 
-	@Get('user/:user_id')
+	@Get('user')
 	@UseGuards(new AuthGuard())
 	@ApiOkResponse({
-		description: 'Get all tweets by a user id',
-		type: [TweetResponse],
+		description: 'Get all tweetsof requesting user',
+		type: PaginatedTweetResponse,
 	})
-	async getTweetsByUserToken(@Param('user_id') id: string): Promise<TweetResponse[]> {
-		return this.tweetService.findAllByUserId(id);
+	async getTweetsByUserToken(
+		@UserContext() jwtPayload: JwtPayload,
+		@Query() queryParameter: TweetQueryParamter,
+	): Promise<PaginatedTweetResponse> {
+		const { sub } = jwtPayload;
+		// Check if requesting user exists
+		const user = await this.userService.findById(sub);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		const tweets = await this.tweetService.findAllByUserId(user.id, queryParameter);
+		const total = await this.tweetService.countByUserId(user.id);
+		return { tweets, total };
 	}
 
 	@Get(':tweet_id')
 	@UseGuards(new AuthGuard())
 	@ApiOkResponse({
-		description: 'Get all tweets by a user id',
+		description: 'Get tweet info by id',
 		type: [TweetResponse],
 	})
 	async getTweetByUserAndTweetId(

@@ -60,7 +60,7 @@ export class Tweet {
 	@ManyToOne('User')
 	user!: User;
 
-	@Column()
+	@Column({ name: 'created_at' })
 	createdAt!: Date;
 
 	constructor(props?: TweetProps) {
