@@ -63,9 +63,11 @@ export class TweetController {
 		if (!user) {
 			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
-		const tweets = await this.tweetService.findAllByUserId(user.id, queryParameter);
-		const total = await this.tweetService.countByUserId(user.id);
-		return { tweets, total };
+		const {tweets, total} = await this.tweetService.findAllByUserId(user.id, queryParameter);
+		return {
+			tweets,
+			total,
+		};
 	}
 
 	@Get(':tweet_id')

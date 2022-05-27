@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTweet, TweetProps, TweetQueryParamter, TweetResponse } from '@type/dto/tweet';
+import {CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParamter, TweetResponse} from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
@@ -30,7 +30,7 @@ export class TweetService {
 	}
 
 	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne({ id, user });
+		return this.tweetRepository.findOne({ id, user }, { relations: ['user'] });
 	}
 
 	async findByTweetIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
@@ -68,16 +68,13 @@ export class TweetService {
 		return await this.tweetRepository.save(tweet);
 	}
 
-	async findAllByUserId(id: string, queryParameter?: TweetQueryParamter): Promise<TweetResponse[]> {
-		if (!queryParameter) {
-			return this.tweetRepository.find({ where: { user: { id } }, relations: ['author', 'hashtags'] });
-		}
-		const page = queryParameter.page || 1;
-		const limit = queryParameter.limit || 20;
+	async findAllByUserId(id: string, queryParameter?: TweetQueryParamter): Promise<PaginatedTweetResponse> {
+		const page = queryParameter?.page || 1;
+		const limit = queryParameter?.limit || 20;
 		const offset = (page - 1) * limit;
-		const order = queryParameter.order || 'DESC';
-		const orderBy = queryParameter.sort || 'createdAt';
-		const searchTerm = queryParameter.searchTerm;
+		const order = queryParameter?.order || 'DESC';
+		const orderBy = queryParameter?.sort || 'createdAt';
+		const searchTerm = queryParameter?.searchTerm;
 		this.logger.debug(
 			`findAllByUserId: Fetching tweets for user ${id} with page ${page} and limit ${limit} and order ${order} and orderBy ${orderBy} and searchTerm ${searchTerm}`,
 		);
@@ -116,7 +113,8 @@ export class TweetService {
 		} else {
 			whereOptions.where = { user: { id } };
 		}
-		return this.tweetRepository.find(whereOptions);
+		const [tweets, total] = await this.tweetRepository.findAndCount(whereOptions);
+		return { tweets, total };
 	}
 
 	async countByUserId(id: string): Promise<number> {

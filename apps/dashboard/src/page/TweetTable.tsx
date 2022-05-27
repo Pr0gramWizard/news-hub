@@ -1,6 +1,6 @@
 import {
 	Badge,
-	Center,
+	Center, Container,
 	Loader,
 	Menu,
 	Pagination,
@@ -117,75 +117,75 @@ export function TweetTable() {
 						</Center>
 					) : (
 						<>
-							<Table sx={{ minWidth: 700, height: '75vh' }} highlightOnHover>
+							<Table highlightOnHover>
 								<thead>
-									<tr>
-										<CenteredTableHeader>Seen at</CenteredTableHeader>
-										<CenteredTableHeader>Author</CenteredTableHeader>
-										<CenteredTableHeader>Verified</CenteredTableHeader>
-										<CenteredTableHeader>Text</CenteredTableHeader>
-										<CenteredTableHeader>Language</CenteredTableHeader>
-										<CenteredTableHeader>Likes</CenteredTableHeader>
-										<CenteredTableHeader>Retweets</CenteredTableHeader>
-										<CenteredTableHeader>Comments</CenteredTableHeader>
-										<CenteredTableHeader>Actions</CenteredTableHeader>
-									</tr>
+								<tr>
+									<CenteredTableHeader>Seen at</CenteredTableHeader>
+									<CenteredTableHeader>Author</CenteredTableHeader>
+									<CenteredTableHeader>Verified</CenteredTableHeader>
+									<CenteredTableHeader>Text</CenteredTableHeader>
+									<CenteredTableHeader>Language</CenteredTableHeader>
+									<CenteredTableHeader>Likes</CenteredTableHeader>
+									<CenteredTableHeader>Retweets</CenteredTableHeader>
+									<CenteredTableHeader>Comments</CenteredTableHeader>
+									<CenteredTableHeader>Actions</CenteredTableHeader>
+								</tr>
 								</thead>
 								<tbody>
-									{data.map((row) => (
-										<tr key={row.id} style={{ cursor: 'pointer', textAlign: 'center' }}>
-											<td>{new Date(row.createdAt).toLocaleString('de-De')}</td>
-											<td>
-												<Text>{row.author.username} </Text>
-											</td>
-											<td>
-												<Badge color={row.author.isVerified ? 'blue' : 'red'} variant="filled">
-													{row.author.isVerified ? 'Yes' : 'No'}
-												</Badge>
-											</td>
-											<td>
-												<Text lineClamp={1}>{row.text}</Text>
-											</td>
-											<td>
-												{row.language && row.language !== 'und' ? (
-													<Tooltip label={getLanguageDisplayName(row.language)} withArrow>
-														<ReactCountryFlag
-															countryCode={getCountryFlag(row.language)}
-															svg
-														/>
-													</Tooltip>
-												) : (
-													'-'
-												)}
-											</td>
-											<td>{row.likes}</td>
-											<td>{row.retweets}</td>
-											<td>{row.totalComments}</td>
-											<td>
-												<Menu>
-													<Menu.Item
-														icon={<BrandTwitter size={14} />}
-														onClick={() => {
-															window.open(
-																`https://twitter.com/${row.author.username}/status/${row.tweetId}`,
-																'_blank',
-															);
-														}}
-													>
-														View Tweet on Twitter
-													</Menu.Item>
-													<Menu.Item
-														icon={<Search size={14} />}
-														onClick={() => {
-															navigate(`/tweet/${row.id}`);
-														}}
-													>
-														View Tweet details
-													</Menu.Item>
-												</Menu>
-											</td>
-										</tr>
-									))}
+								{data.map((row) => (
+									<tr key={row.id} style={{ cursor: 'pointer', textAlign: 'center' }}>
+										<td>{new Date(row.createdAt).toLocaleString('de-De')}</td>
+										<td>
+											<Text>{row.author.username} </Text>
+										</td>
+										<td>
+											<Badge color={row.author.isVerified ? 'blue' : 'red'} variant="filled">
+												{row.author.isVerified ? 'Yes' : 'No'}
+											</Badge>
+										</td>
+										<td>
+											<Text lineClamp={1}>{row.text}</Text>
+										</td>
+										<td>
+											{row.language && row.language !== 'und' ? (
+												<Tooltip label={getLanguageDisplayName(row.language)} withArrow>
+													<ReactCountryFlag
+														countryCode={getCountryFlag(row.language)}
+														svg
+													/>
+												</Tooltip>
+											) : (
+												'-'
+											)}
+										</td>
+										<td>{row.likes}</td>
+										<td>{row.retweets}</td>
+										<td>{row.totalComments}</td>
+										<td>
+											<Menu>
+												<Menu.Item
+													icon={<BrandTwitter size={14} />}
+													onClick={() => {
+														window.open(
+															`https://twitter.com/${row.author.username}/status/${row.tweetId}`,
+															'_blank',
+														);
+													}}
+												>
+													View Tweet on Twitter
+												</Menu.Item>
+												<Menu.Item
+													icon={<Search size={14} />}
+													onClick={() => {
+														navigate(`/tweet/${row.id}`);
+													}}
+												>
+													View Tweet details
+												</Menu.Item>
+											</Menu>
+										</td>
+									</tr>
+								))}
 								</tbody>
 							</Table>
 							<Space h="xl" />
