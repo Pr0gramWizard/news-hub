@@ -11,7 +11,7 @@ import { validationSchema } from './config/validation';
 import { RequestLoggerMiddleware } from './middleware/request.logger';
 import { ArticleModule } from './service/article/article.module';
 import { AuthModule } from './service/auth/auth.module';
-import { NewsPageModule } from './service/news-source/news.source.module';
+import { NewsPageModule } from './service/news-page/news.page.module';
 import { StatsModule } from './service/stats/stats.module';
 
 @Module({
@@ -37,6 +37,8 @@ import { StatsModule } from './service/stats/stats.module';
 				charset: 'utf8mb4',
 				namingStrategy: new SnakeNamingStrategy(),
 				synchronize: configService.get('env') !== 'production',
+				logger: 'advanced-console',
+				// logging: configService.get('env') !== 'production',
 			}),
 		}),
 		CommonModule,

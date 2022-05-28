@@ -1,6 +1,6 @@
 import { ArticleMetaData } from '@type/dto/article';
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { NewsPage } from '../news-source/news.page.entity';
+import { NewsPage } from '../news-page/news.page.entity';
 import { Tweet } from '@tweet/tweet.entity';
 
 @Entity()

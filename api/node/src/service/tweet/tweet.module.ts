@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from '@user/user.module';
-import { NewsPageModule } from 'service/news-source/news.source.module';
+import { NewsPageModule } from 'service/news-page/news.page.module';
 import { ArticleModule } from '../article/article.module';
 import { Author } from './author/tweet.author.entity';
 import { TweetAuthorService } from './author/tweet.author.service';

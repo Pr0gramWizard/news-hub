@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParamter, TweetResponse} from '@type/dto/tweet';
+import { CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParamter } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
@@ -30,7 +30,7 @@ export class TweetService {
 	}
 
 	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne({ id, user }, { relations: ['user'] });
+		return this.tweetRepository.findOne({ id, user }, { relations: ['user', 'author', 'hashtags', 'articles'] });
 	}
 
 	async findByTweetIdAndUser(id: string, user: User): Promise<Tweet | undefined> {

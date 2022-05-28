@@ -16,7 +16,7 @@ describe('Tweet Author Service', () => {
 
 	beforeEach(async () => {
 		author = new Author({
-			userId: '12345',
+			id: '12345',
 			bio: 'Author description',
 			isVerified: true,
 			location: 'de',

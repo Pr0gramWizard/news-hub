@@ -1,6 +1,5 @@
 import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateAuthor } from '../../../types/dto/author';
 
 export enum AuthorType {
 	NEWS_OUTLET = 'NEWS_OUTLET',
@@ -14,6 +13,9 @@ export class Author {
 
 	@Column()
 	username!: string;
+
+	@Column({ nullable: true })
+	avatar!: string;
 
 	@Column({ nullable: true })
 	location?: string;
@@ -39,16 +41,11 @@ export class Author {
 	@CreateDateColumn()
 	createdAt!: Date;
 
-	constructor(props?: CreateAuthor) {
-		if (props) {
-			const { userId, username, location, bio, isVerified, numberOfFollower, numberOfTweets } = props;
-			this.id = userId;
-			this.username = username;
-			this.location = location;
-			this.bio = bio;
-			this.isVerified = isVerified || false;
-			this.numberOfFollowers = numberOfFollower;
-			this.numberOfTweets = numberOfTweets;
-		}
+	@Column({ nullable: true, name: 'updated_at' })
+	updatedAt?: Date;
+
+	constructor(props?: Partial<Author>) {
+		Object.assign(this, props);
+		this.updatedAt = new Date();
 	}
 }

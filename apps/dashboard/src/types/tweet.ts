@@ -8,6 +8,7 @@ export interface Author {
 	numberOfTweets: number;
 	type: string;
 	username: string;
+	avatar?: string;
 }
 
 export interface Tweet {

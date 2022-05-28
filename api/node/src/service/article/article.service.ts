@@ -6,7 +6,7 @@ import { CreateArticleDto } from '@type/dto/article';
 import axios from 'axios';
 import { Repository } from 'typeorm';
 import { NewsParserResponse } from '../../types/dto/tweet';
-import { NewsLinks } from '../news-source/news.page.service';
+import { NewsLinks } from '../news-page/news.page.service';
 import { Tweet } from '../tweet/tweet.entity';
 import { Article } from './article.entity';
 

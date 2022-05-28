@@ -18,7 +18,7 @@ import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
 import { UserRole } from '@user/user.entity';
 import { UserService } from '@user/user.service';
-import { NewsLinks, NewsPageService } from 'service/news-source/news.page.service';
+import { NewsLinks, NewsPageService } from 'service/news-page/news.page.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
@@ -63,7 +63,7 @@ export class TweetController {
 		if (!user) {
 			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
-		const {tweets, total} = await this.tweetService.findAllByUserId(user.id, queryParameter);
+		const { tweets, total } = await this.tweetService.findAllByUserId(user.id, queryParameter);
 		return {
 			tweets,
 			total,
@@ -169,12 +169,20 @@ export class TweetController {
 			this.logger.error(`The twitter API did not return any author object for url '${url}'`);
 			throw new TwitterApiException(TweetErrorCode.TWITTER_API_AUTHOR_MISSING);
 		}
-
 		// Create author entity if it does not exist
 		let author = await this.authorService.findById(tweetAuthor.id);
 		if (!author) {
 			author = await this.authorService.create(tweetAuthor);
 			this.logger.debug(`There was no author with id '${tweetAuthor.id}' in the database, created a new one`);
+		} else {
+			const authorUpdatedAt = author.updatedAt?.getTime() || 0;
+			const now = new Date().getTime();
+			if (now - authorUpdatedAt > 30 * 24 * 60 * 60 * 1000) {
+				this.logger.debug(
+					`The author with id '${tweetAuthor.id}' was updated more than 30 days ago, updating it`,
+				);
+				await this.authorService.update(author, tweetAuthor);
+			}
 		}
 
 		const tweetType = [];

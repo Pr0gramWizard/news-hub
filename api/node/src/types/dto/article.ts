@@ -1,4 +1,4 @@
-import { NewsPage } from '../../service/news-source/news.page.entity';
+import { NewsPage } from '../../service/news-page/news.page.entity';
 import { Tweet } from '../../service/tweet/tweet.entity';
 
 export interface CreateArticleDto {

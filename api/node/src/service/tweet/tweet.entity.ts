@@ -50,11 +50,11 @@ export class Tweet {
 	@OneToMany(() => Article, (article) => article.tweet)
 	articles?: Article[];
 
-	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets, { cascade: true })
+	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets)
 	@JoinTable({ name: 'tweet_hashtag' })
 	hashtags!: Hashtag[];
 
-	@ManyToOne(() => Author, { cascade: true })
+	@ManyToOne(() => Author)
 	author!: Author;
 
 	@ManyToOne('User')

@@ -12,9 +12,14 @@ export class HashtagService {
 	) {}
 
 	async findByName(name: string): Promise<Hashtag | undefined> {
-		return this.hashtagRepository.findOne({
-			name,
-		});
+		return this.hashtagRepository.findOne(
+			{
+				name,
+			},
+			{
+				relations: ['tweets'],
+			},
+		);
 	}
 
 	async create(hashtag: string, tweets: Tweet[]): Promise<Hashtag> {
