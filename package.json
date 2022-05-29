@@ -9,6 +9,7 @@
     "stop": "docker-compose -p newshub down",
     "restart": "docker-compose -p newshub restart",
     "build": "docker-compose -p newshub build",
+    "rebuild": "yarn stop && yarn build",
     "image:prune": "docker image prune",
     "volume:prune": "docker volume prune"
   }

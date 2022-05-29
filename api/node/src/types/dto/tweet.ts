@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Author } from '@tweet/author/tweet.author.entity';
 import { User } from '@user/user.entity';
 import { IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { TweetV2 } from 'twitter-api-v2';
+import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
 import { TweetType } from '../../service/tweet/tweet.entity';
 import { ArticleMetaData } from './article';
 import { AuthorResponse } from './author';
@@ -120,6 +120,9 @@ export class TweetProps {
 	@IsOptional()
 	@IsArray()
 	type?: TweetType[] = [];
+
+	@IsOptional()
+	entities?: TweetEntitiesV2;
 }
 
 export interface NewsParserResponse {

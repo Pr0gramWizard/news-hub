@@ -63,6 +63,7 @@ export class TweetService {
 			author,
 			url,
 			type,
+			entities,
 		};
 		const tweet = new Tweet(tweetParams);
 		return await this.tweetRepository.save(tweet);

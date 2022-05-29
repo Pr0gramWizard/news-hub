@@ -50,7 +50,7 @@ export class TweetController {
 	@Get('user')
 	@UseGuards(new AuthGuard())
 	@ApiOkResponse({
-		description: 'Get all tweetsof requesting user',
+		description: 'Get all tweets of requesting user',
 		type: PaginatedTweetResponse,
 	})
 	async getTweetsByUserToken(

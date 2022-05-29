@@ -1,7 +1,7 @@
+import { Center, Container, Grid, Loader, ScrollArea, SimpleGrid } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AuthContext from '../context/authProvider';
-import { Avatar, Card, Center, Grid, Loader, ScrollArea } from '@mantine/core';
 import { Tweet } from '../types/tweet';
 
 export function TweetDetails() {
@@ -37,25 +37,23 @@ export function TweetDetails() {
 
 	return (
 		<ScrollArea>
-			{loading ? (
+			{loading || !tweet ? (
 				<Center sx={{ height: '100vh' }}>
 					<Loader />
 				</Center>
 			) : (
 				<div>
 					<h1>Tweet Details</h1>
-					<p>{id}</p>
-					<Card withBorder radius="md" p="md">
-						<Card.Section>
-							<Grid>
-								<Grid.Col span={1}>
-									<Avatar size="md" src={tweet?.author.avatar} />
-								</Grid.Col>
-								<Grid.Col span={10}>2</Grid.Col>
-								<Grid.Col span={1}>3</Grid.Col>
+					<Container my="md">
+						<SimpleGrid cols={2} spacing="md" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
+							asjk
+							<Grid gutter="md">
+								<Grid.Col>Test</Grid.Col>
+								<Grid.Col span={6}>Bla1</Grid.Col>
+								<Grid.Col span={6}>Bla2</Grid.Col>
 							</Grid>
-						</Card.Section>
-					</Card>
+						</SimpleGrid>
+					</Container>
 				</div>
 			)}
 		</ScrollArea>

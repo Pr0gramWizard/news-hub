@@ -1,4 +1,5 @@
 import { User } from '@user/user.entity';
+import { TweetEntitiesV2 } from 'twitter-api-v2';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TweetProps } from '../../types/dto/tweet';
 import { Article } from '../article/article.entity';
@@ -56,6 +57,9 @@ export class Tweet {
 
 	@ManyToOne(() => Author)
 	author!: Author;
+
+	@Column({ type: 'json', nullable: true })
+	entities?: TweetEntitiesV2;
 
 	@ManyToOne('User')
 	user!: User;
