@@ -24,22 +24,44 @@ export class TweetAuthorService {
 	}
 
 	async create(tweetAuthor: UserV2): Promise<Author> {
-		const { id, description, verified, location, username, public_metrics } = tweetAuthor;
+		const { id, description, verified, location, username, public_metrics, profile_image_url, created_at } =
+			tweetAuthor;
 		if (isUndefinedOrEmptyObject(public_metrics)) {
 			throw new TwitterApiException(TwitterApiErrorCode.NO_PUBLIC_METRIC);
 		}
 		const { tweet_count, followers_count } = public_metrics;
 		const authorParams: CreateAuthor = {
-			userId: id,
+			id: id,
 			bio: description,
 			isVerified: verified,
 			location,
 			username,
-			numberOfFollower: followers_count || 0,
+			numberOfFollowers: followers_count || 0,
 			numberOfTweets: tweet_count || 0,
+			avatar: profile_image_url,
 		};
 		const author = new Author(authorParams);
 		return this.authorRepository.save(author);
+	}
+
+	async update(oldAuthor: Author, tweetAuthor: UserV2): Promise<void> {
+		const { description, verified, location, username, public_metrics, profile_image_url } = tweetAuthor;
+		if (isUndefinedOrEmptyObject(public_metrics)) {
+			throw new TwitterApiException(TwitterApiErrorCode.NO_PUBLIC_METRIC);
+		}
+		const { tweet_count, followers_count } = public_metrics;
+		const updatedAuthor: Partial<Author> = {
+			bio: description,
+			isVerified: verified,
+			location,
+			username,
+			numberOfFollowers: followers_count || 0,
+			numberOfTweets: tweet_count || 0,
+			avatar: profile_image_url,
+			updatedAt: new Date(),
+		};
+		this.logger.debug(updatedAuthor);
+		await this.authorRepository.update(oldAuthor.id, updatedAuthor);
 	}
 
 	async count(): Promise<number> {

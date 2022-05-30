@@ -1,4 +1,5 @@
-import { NewsSource } from '../../service/news-source/news.source.entity';
+import { NewsPage } from '../../service/news-page/news.page.entity';
+import { Tweet } from '../../service/tweet/tweet.entity';
 
 export interface CreateArticleDto {
 	authors?: string[];
@@ -14,7 +15,8 @@ export interface CreateArticleDto {
 	topImage?: string;
 	url: string;
 	videos?: string[];
-	newsSource: NewsSource;
+	newsPage: NewsPage;
+	tweet: Tweet;
 }
 
 export interface OpenGraph {

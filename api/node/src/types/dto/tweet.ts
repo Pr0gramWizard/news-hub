@@ -1,13 +1,12 @@
-import {User} from '@user/user.entity';
-import {TweetV2} from 'twitter-api-v2';
-import {Author} from '@tweet/author/tweet.author.entity';
-import {Hashtag} from '@tweet/hashtag/hashtag.entity';
-import {WebContent} from '../../service/webcontent/webcontent.entity';
-import {ApiProperty} from '@nestjs/swagger';
-import {WebContentResponse} from './webcontent';
-import {HashtagResponse} from './hashtag';
-import {AuthorResponse} from './author';
-import {IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Author } from '@tweet/author/tweet.author.entity';
+import { User } from '@user/user.entity';
+import { IsArray, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
+import { TweetType } from '../../service/tweet/tweet.entity';
+import { ArticleMetaData } from './article';
+import { AuthorResponse } from './author';
+import { HashtagResponse } from './hashtag';
 
 // Controller DTOs
 export class TweetResponse {
@@ -15,7 +14,10 @@ export class TweetResponse {
 	id!: string;
 
 	@ApiProperty()
-	text!: string;
+	tweetId!: string;
+
+	@ApiProperty()
+	text?: string;
 
 	@ApiProperty()
 	retweets!: number;
@@ -33,7 +35,7 @@ export class TweetResponse {
 	url!: string;
 
 	@ApiProperty()
-	language!: string;
+	language?: string;
 
 	@ApiProperty()
 	createdAt!: Date;
@@ -44,8 +46,16 @@ export class TweetResponse {
 	@ApiProperty({ type: [AuthorResponse] })
 	author!: AuthorResponse;
 
-	@ApiProperty({ type: [WebContentResponse] })
-	webContents!: WebContentResponse[];
+	@ApiProperty()
+	seenAt!: Date;
+}
+
+export class PaginatedTweetResponse {
+	@ApiProperty({ type: [TweetResponse] })
+	tweets!: TweetResponse[];
+
+	@ApiProperty()
+	total!: number;
 }
 
 export class StoreTweetRequest {
@@ -68,10 +78,15 @@ export class CreateTweet {
 
 	@IsDefined()
 	user!: User;
+
+	@IsOptional()
+	@IsArray()
+	type?: TweetType[] = [];
 }
+
 export class TweetProps {
 	@IsString()
-	id!: string;
+	tweetId!: string;
 
 	@IsString()
 	text!: string;
@@ -99,16 +114,47 @@ export class TweetProps {
 	@IsOptional()
 	language?: string;
 
-	@IsArray()
-	@IsArray()
-	hashtags!: Hashtag[];
-
 	@IsDefined()
 	author!: Author;
 
-	@IsOptional()
-	webContents?: WebContent[];
-
 	@IsDefined()
 	user!: User;
+
+	@IsOptional()
+	@IsArray()
+	type?: TweetType[] = [];
+
+	@IsOptional()
+	entities?: TweetEntitiesV2;
+
+	@IsDefined()
+	@IsDate()
+	seenAt!: Date;
+
+	@IsDefined()
+	@IsDate()
+	createdAt!: Date;
+}
+
+export interface NewsParserResponse {
+	authors: string[];
+	html: string;
+	images: string[];
+	keywords: string[];
+	meta_data: ArticleMetaData;
+	publish_date: string;
+	summary: string;
+	tags: string[];
+	text: string;
+	title: string;
+	top_image: string;
+	videos: string[];
+}
+
+export interface TweetQueryParameter {
+	searchTerm?: string;
+	limit?: number;
+	page?: number;
+	sort?: string;
+	order?: 'asc' | 'desc';
 }

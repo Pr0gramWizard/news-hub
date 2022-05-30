@@ -9,14 +9,14 @@ import { TwitterApiException } from '@type/error/general';
 import * as util from '@common/util';
 import { NewsHubLogger } from '@common/logger.service';
 
-describe('WebContentService', () => {
+describe('Tweet Author Service', () => {
 	let service: TweetAuthorService;
 	let repository: Repository<Author>;
 	let author: Author;
 
 	beforeEach(async () => {
 		author = new Author({
-			userId: '12345',
+			id: '12345',
 			bio: 'Author description',
 			isVerified: true,
 			location: 'de',

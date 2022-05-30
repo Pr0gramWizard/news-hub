@@ -1,80 +1,76 @@
 import { User } from '@user/user.entity';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { TweetEntitiesV2 } from 'twitter-api-v2';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TweetProps } from '../../types/dto/tweet';
-import { WebContent } from '../webcontent/webcontent.entity';
+import { Article } from '../article/article.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
 
+export enum TweetType {
+	NORMAL = 'NORMAL',
+	CONTAINS_NEWS_ARTICLE = 'CONTAINS_NEWS_ARTICLE',
+	AUTHOR_IS_NEWS_OUTLET = 'AUTHOR_IS_NEWS_OUTLET',
+}
+
 @Entity()
 export class Tweet {
-	@PrimaryColumn({ unique: true })
+	@PrimaryGeneratedColumn('uuid')
 	id!: string;
 
-	@Column({ length: 300 })
-	text!: string;
+	@Column({ type: 'text' })
+	tweetId!: string;
 
-	@Column()
+	@Column({ type: 'text', nullable: true })
+	text?: string;
+
+	@Column({ default: 0 })
 	retweets!: number;
 
-	@Column()
+	@Column({ default: 0 })
 	likes!: number;
 
-	@Column()
+	@Column({
+		type: 'set',
+		enum: TweetType,
+		default: [TweetType.NORMAL],
+	})
+	type!: TweetType[];
+
+	@Column({ default: 0 })
 	totalComments!: number;
 
-	@Column()
+	@Column({ default: 0 })
 	totalQuotes!: number;
 
 	@Column({ length: 500 })
 	url!: string;
 
-	@Column({ length: 50 })
-	language!: string;
+	@Column({ length: 50, nullable: true })
+	language?: string;
 
-	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets, { cascade: true })
+	@OneToMany(() => Article, (article) => article.tweet)
+	articles?: Article[];
+
+	@ManyToMany(() => Hashtag, (hashtag) => hashtag.tweets)
 	@JoinTable({ name: 'tweet_hashtag' })
 	hashtags!: Hashtag[];
 
-	@ManyToOne(() => Author, { cascade: true })
+	@ManyToOne(() => Author)
 	author!: Author;
 
-	@OneToMany(() => WebContent, (webContent) => webContent.tweet)
-	webContents!: WebContent[];
+	@Column({ type: 'json', nullable: true })
+	entities?: TweetEntitiesV2;
 
 	@ManyToOne('User')
 	user!: User;
 
-	@CreateDateColumn()
+	@Column({ name: 'created_at' })
 	createdAt!: Date;
 
+	@Column({ name: 'seen_at' })
+	seenAt!: Date;
+
 	constructor(props?: TweetProps) {
-		if (props) {
-			const {
-				id,
-				author,
-				hashtags,
-				language,
-				likes,
-				retweets,
-				text,
-				totalComments,
-				totalQuotes,
-				url,
-				user,
-				webContents,
-			} = props;
-			this.id = id;
-			this.author = author;
-			this.hashtags = hashtags;
-			this.language = language || 'no-lang';
-			this.likes = likes || 0;
-			this.retweets = retweets || 0;
-			this.text = text || '';
-			this.totalComments = totalComments || 0;
-			this.totalQuotes = totalQuotes || 0;
-			this.url = url;
-			this.user = user;
-			this.webContents = webContents || [];
-		}
+		Object.assign(this, props);
 	}
 }

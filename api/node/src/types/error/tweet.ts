@@ -7,4 +7,5 @@ export enum TweetErrorCode {
 	TWITTER_API_INCLUDES_MISSING = 'Twitter API did not return includes for the tweet',
 	TWITTER_API_RELATED_USERS_MISSING = 'Twitter API did not return related users for the tweet',
 	TWITTER_API_AUTHOR_MISSING = 'Twitter API did not return author for the tweet',
+	TWEET_NOT_FOUND = 'Tweet not found',
 }

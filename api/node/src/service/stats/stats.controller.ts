@@ -4,10 +4,10 @@ import { TweetAuthorService } from '@tweet/author/tweet.author.service';
 import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
 import { TweetService } from '@tweet/tweet.service';
 import { StatsResponse } from '@type/dto/stats';
+import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
-import { UserErrorCodes } from '@type/error/user';
 import { JwtPayload } from '../auth/auth.service';
 
 interface UserStats {
@@ -54,7 +54,13 @@ export class StatsController {
 		if (!user) {
 			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
-		const numberOfCollectedTweets = await this.tweetService.countByUserId(sub);
-		return [{ label: 'Collected tweets', value: numberOfCollectedTweets }];
+		const totalTweetsCollected = await this.tweetService.countByUserId(sub);
+		const tweetsCollectedInTheLast24Hours = await this.tweetService.countLastDayByUserId(sub);
+		const numberOfAuthors = await this.tweetService.countAuthors(sub);
+		return [
+			{ label: 'Collected tweets', value: totalTweetsCollected },
+			{ label: 'Collected tweets in the last 24 hours', value: tweetsCollectedInTheLast24Hours },
+			{ label: 'Unique Authors', value: numberOfAuthors },
+		];
 	}
 }

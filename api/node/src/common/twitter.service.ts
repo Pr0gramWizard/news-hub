@@ -17,7 +17,16 @@ export class TwitterService {
 		return await this.client.v2.singleTweet(id, {
 			expansions: ['author_id', 'attachments.media_keys'],
 			'tweet.fields': ['public_metrics', 'source', 'text', 'created_at', 'lang', 'entities'],
-			'user.fields': ['id', 'username', 'public_metrics', 'verified', 'name', 'description', 'location'],
+			'user.fields': [
+				'id',
+				'username',
+				'public_metrics',
+				'verified',
+				'name',
+				'description',
+				'location',
+				'profile_image_url',
+			],
 		});
 	}
 

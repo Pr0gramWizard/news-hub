@@ -112,9 +112,10 @@ export function Dashboard({ mail }: DashboardProps) {
 				</ActionIcon>
 				<ActionIcon
 					color={'red'}
-					onClick={async () => {
-						await chrome.storage.local.remove([TOKEN_STORAGE_KEY]);
-						setState('login');
+					onClick={() => {
+						chrome.storage.local.remove([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], () => {
+							setState('login');
+						});
 					}}
 				>
 					<Logout />

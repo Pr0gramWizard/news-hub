@@ -5,7 +5,6 @@ import { TweetService } from './tweet.service';
 import { UserService } from '../user/user.service';
 import { TwitterService } from '../../common/twitter.service';
 import { TweetAuthorService } from './author/tweet.author.service';
-import { WebContentService } from '../webcontent/webcontent.service';
 import { StoreTweetRequest } from '../../types/dto/tweet';
 import { JwtPayload } from '../auth/auth.service';
 import { TweetV2SingleResult } from 'twitter-api-v2';
@@ -21,7 +20,6 @@ describe('TweetController', () => {
 	let userService: UserService;
 	let twitterService: TwitterService;
 	let authorService: TweetAuthorService;
-	let webContentService: WebContentService;
 	let authorId: string;
 	let twitterApiMockResponse: TweetV2SingleResult;
 
@@ -77,12 +75,6 @@ describe('TweetController', () => {
 					},
 				},
 				{
-					provide: WebContentService,
-					useValue: {
-						createMany: jest.fn().mockResolvedValue([]),
-					},
-				},
-				{
 					provide: NewsHubLogger,
 					useValue: {
 						log: jest.fn(),
@@ -100,7 +92,6 @@ describe('TweetController', () => {
 		userService = moduleRef.get(UserService);
 		twitterService = moduleRef.get(TwitterService);
 		authorService = moduleRef.get(TweetAuthorService);
-		webContentService = moduleRef.get(WebContentService);
 	});
 
 	afterEach(() => {
@@ -147,7 +138,6 @@ describe('TweetController', () => {
 				user: {},
 				tweetData: twitterApiMockResponse.data,
 			});
-			expect(webContentService.createMany).toHaveBeenCalledWith([], {});
 		});
 
 		it('should create a new tweet and author entity', async () => {
@@ -165,7 +155,6 @@ describe('TweetController', () => {
 				user: {},
 				tweetData: twitterApiMockResponse.data,
 			});
-			expect(webContentService.createMany).toHaveBeenCalledWith([], {});
 		});
 
 		it('should do nothing if the tweet is already stored in the database', async () => {

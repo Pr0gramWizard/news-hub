@@ -3,6 +3,7 @@ import { BadRequestException, Body, ConflictException, Controller, Post } from '
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { LoginUserRequest, LoginUserResponse, RegisterUserRequest, RegisterUserResponse } from '@type/dto/user';
 import { UserService } from '@user/user.service';
+import { AuthErrorCodes } from '../../types/error/auth';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
@@ -22,18 +23,19 @@ export class AuthController {
 		type: RegisterUserResponse,
 	})
 	@ApiConflictResponse({
-		description: 'There is already a user with given mail',
+		description: AuthErrorCodes.USER_ALREADY_EXISTS,
 	})
 	async register(@Body() body: RegisterUserRequest): Promise<RegisterUserResponse> {
-		const { password, email } = body;
+		const { password, email, name } = body;
 		const existingUser = await this.userService.findByMail(email);
 		if (existingUser) {
-			throw new ConflictException('There is already a user with given mail');
+			throw new ConflictException(AuthErrorCodes.USER_ALREADY_EXISTS);
 		}
-		const user = await this.userService.create({ email, password });
+		const user = await this.userService.create({ email, password, name });
 		const jwtToken = await this.authService.login(user);
 		return {
 			token: jwtToken,
+			name: user.name,
 		};
 	}
 
@@ -43,23 +45,24 @@ export class AuthController {
 		type: LoginUserResponse,
 	})
 	@ApiBadRequestResponse({
-		description: 'Either email or password is wrong',
+		description: AuthErrorCodes.USER_CREDENTIALS_INVALID,
 	})
 	async login(@Body() body: LoginUserRequest): Promise<LoginUserResponse> {
 		const { email, password } = body;
 		const user = await this.userService.findByMail(email);
 		if (!user) {
 			this.logger.debug(`There is no user with mail ${email}`);
-			throw new BadRequestException();
+			throw new BadRequestException(AuthErrorCodes.USER_CREDENTIALS_INVALID);
 		}
 		const isPasswordCorrect = await this.authService.validateUser(user, password);
 		if (!isPasswordCorrect) {
 			this.logger.debug(`Password is not correct for user with mail ${email}`);
-			throw new BadRequestException();
+			throw new BadRequestException(AuthErrorCodes.USER_CREDENTIALS_INVALID);
 		}
 		const jwtToken = await this.authService.login(user);
 		return {
 			token: jwtToken,
+			name: user.name,
 		};
 	}
 }
