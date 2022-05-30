@@ -8,11 +8,22 @@ import {
 	ApiCreatedResponse,
 	ApiNotFoundResponse,
 	ApiOkResponse,
+	ApiQuery,
 	ApiTags,
 } from '@nestjs/swagger';
 import { AuthorType } from '@tweet/author/tweet.author.entity';
 import { HashtagService } from '@tweet/hashtag/hashtag.service';
-import { PaginatedTweetResponse, StoreTweetRequest, TweetQueryParameter, TweetResponse } from '@type/dto/tweet';
+import {
+	LimitQuery,
+	OrderQuery,
+	PageQuery,
+	PaginatedTweetResponse,
+	SearchTermQuery,
+	SortQuery,
+	StoreTweetRequest,
+	TweetQueryParameter,
+	TweetResponse,
+} from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
@@ -53,6 +64,12 @@ export class TweetController {
 		description: 'Get all tweets of requesting user',
 		type: PaginatedTweetResponse,
 	})
+	@ApiBearerAuth()
+	@ApiQuery({ name: 'searchTerm', type: SearchTermQuery })
+	@ApiQuery({ name: 'limit', type: LimitQuery })
+	@ApiQuery({ name: 'page', type: PageQuery })
+	@ApiQuery({ name: 'sort', type: SortQuery })
+	@ApiQuery({ name: 'order', type: OrderQuery })
 	async getTweetsByUserToken(
 		@UserContext() jwtPayload: JwtPayload,
 		@Query() queryParameter: TweetQueryParameter,
@@ -72,9 +89,13 @@ export class TweetController {
 
 	@Get(':tweet_id')
 	@UseGuards(new AuthGuard())
+	@ApiBearerAuth()
 	@ApiOkResponse({
 		description: 'Get tweet info by id',
 		type: [TweetResponse],
+	})
+	@ApiBadRequestResponse({
+		description: TweetErrorCode.TWEET_NOT_FOUND,
 	})
 	async getTweetByUserAndTweetId(
 		@Param('tweet_id') tweetId: string,
@@ -90,13 +111,35 @@ export class TweetController {
 		if (!tweet) {
 			throw new BadRequestException(TweetErrorCode.TWEET_NOT_FOUND);
 		}
-
 		return tweet;
+	}
+
+	@Get('is/news')
+	@UseGuards(new AuthGuard())
+	@ApiBearerAuth()
+	@ApiOkResponse({
+		description: 'Get all tweets of requesting user by type',
+		type: [TweetResponse],
+	})
+	@ApiBadRequestResponse({
+		description: 'User not found',
+	})
+	async getAllNewsRelatedTweetsByUser(@UserContext() jwtPayload: JwtPayload): Promise<TweetResponse[]> {
+		const { sub } = jwtPayload;
+		// Check if requesting user exists
+		const user = await this.userService.findById(sub);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		const tweets = await this.tweetService.findAllNewsRelatedTweetsByUser(user);
+		this.logger.debug(`Found ${tweets.length} news related tweets`);
+		return tweets;
 	}
 
 	@Get('')
 	@UseGuards(new AuthGuard())
 	@UseGuards(new RoleGuard(UserRole.ADMIN))
+	@ApiBearerAuth()
 	@ApiOkResponse({
 		description: 'Get all tweets',
 		type: [TweetResponse],

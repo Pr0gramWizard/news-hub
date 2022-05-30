@@ -72,8 +72,8 @@ export function TweetAuthorDetailCard({ author }: TweetAuthorDetailCardProps) {
 			<Divider className={classes.divider} />
 			<Table className={classes.table}>
 				<tbody>
-					{tweetAuthorDetails.map(({ label, value }) => {
-						return <DetailTableRow label={label} value={value} />;
+					{tweetAuthorDetails.map(({ label, value }, index) => {
+						return <DetailTableRow key={`dtr-a-${index}`} label={label} value={value} />;
 					})}
 				</tbody>
 			</Table>

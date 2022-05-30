@@ -36,6 +36,9 @@ export class Tweet {
 	})
 	type!: TweetType[];
 
+	@Column({ type: 'boolean', default: false, name: 'is_news_related' })
+	isNewsRelated!: boolean;
+
 	@Column({ default: 0 })
 	totalComments!: number;
 

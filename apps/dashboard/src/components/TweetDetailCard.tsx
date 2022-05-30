@@ -123,8 +123,8 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 			<Divider className={classes.divider} />
 			<Table className={classes.table}>
 				<tbody>
-					{tweetDetails.map(({ label, value }) => {
-						return <DetailTableRow label={label} value={value} />;
+					{tweetDetails.map(({ label, value }, index) => {
+						return <DetailTableRow key={`dtr-t-${index}`} label={label} value={value} />;
 					})}
 				</tbody>
 			</Table>

@@ -41,8 +41,8 @@ export class Author {
 	@CreateDateColumn()
 	createdAt!: Date;
 
-	@Column({ nullable: true, name: 'updated_at' })
-	updatedAt?: Date;
+	@Column({ type: 'datetime', nullable: true, name: 'updated_at' })
+	updatedAt: Date | null;
 
 	constructor(props?: Partial<Author>) {
 		Object.assign(this, props);

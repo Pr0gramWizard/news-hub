@@ -9,14 +9,22 @@ import { UserService } from '@user/user.service';
 import { UserContext } from '../../decorator/user.decorator';
 import { AuthGuard } from '../../guard/auth.guard';
 import { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiOkResponse, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { IsNumber, IsString } from 'class-validator';
 
-interface UserStats {
-	value: string | number;
-	label: string;
+class UserStats {
+	@ApiProperty()
+	@IsNumber()
+	value!: number;
+
+	@ApiProperty()
+	@IsString()
+	label!: string;
 }
 
 @Injectable()
 @Controller('stats')
+@ApiTags('Stats')
 export class StatsController {
 	constructor(
 		private readonly tweetService: TweetService,
@@ -28,7 +36,8 @@ export class StatsController {
 		this.logger.setContext(StatsController.name);
 	}
 
-	@Get('')
+	@Get('old/tweets')
+	@ApiOkResponse({ type: StatsResponse })
 	async getStats(): Promise<StatsResponse> {
 		const numberOfTweets = await this.tweetService.count();
 		const numberOfOldTweets = await this.oldTweetService.count();
@@ -48,6 +57,8 @@ export class StatsController {
 
 	@Get('/me')
 	@UseGuards(new AuthGuard())
+	@ApiOkResponse({ type: [UserStats] })
+	@ApiBearerAuth()
 	async getOwnStats(@UserContext() jwtPayload: JwtPayload): Promise<UserStats[]> {
 		const { sub } = jwtPayload;
 		const user = await this.userService.findById(sub);
