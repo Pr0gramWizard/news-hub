@@ -1,39 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { AuthorType } from '@tweet/author/tweet.author.entity';
 
 export class AuthorResponse {
-	@ApiProperty()
-	@IsString()
-	username!: string;
+	@ApiProperty({ type: String, nullable: true })
+	avatar!: string | null;
 
 	@ApiProperty()
-	@IsString()
-	location?: string;
-
-	@ApiProperty()
-	@IsString()
 	bio?: string;
 
 	@ApiProperty()
-	@IsEnum(AuthorType)
-	type!: AuthorType;
+	createdAt!: Date;
 
 	@ApiProperty()
-	@IsBoolean()
+	id!: string;
+
+	@ApiProperty()
 	isVerified!: boolean;
 
 	@ApiProperty()
-	@IsNumber()
-	numberOfTweets!: number;
+	location?: string;
 
 	@ApiProperty()
-	@IsNumber()
 	numberOfFollowers!: number;
 
 	@ApiProperty()
-	@IsDate()
-	createdAt!: Date;
+	numberOfTweets!: number;
+
+	@ApiProperty({ enum: ['NEWS_OUTLET', 'DEFAULT'] })
+	type!: AuthorType;
+
+	@ApiProperty({ type: Date, nullable: true })
+	updatedAt!: Date | null;
+
+	@ApiProperty()
+	username!: string;
 }
 
 // Database DTOs

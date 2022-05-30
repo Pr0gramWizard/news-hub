@@ -30,7 +30,23 @@ export class TweetService {
 	}
 
 	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne({ id, user }, { relations: ['user', 'author', 'hashtags', 'articles'] });
+		return this.tweetRepository.findOne(
+			{
+				id,
+				user,
+			},
+			{ relations: ['author', 'hashtags', 'articles', 'articles.newsPage'] },
+		);
+	}
+
+	async findAllNewsRelatedTweetsByUser(user: User): Promise<Tweet[]> {
+		return this.tweetRepository.find({
+			where: {
+				user,
+				isNewsRelated: true,
+			},
+			relations: ['author', 'hashtags', 'articles.newsPage'],
+		});
 	}
 
 	async findByTweetIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
@@ -64,6 +80,7 @@ export class TweetService {
 			url,
 			type,
 			entities,
+			isNewsRelated: type.length > 1,
 			seenAt: new Date(),
 			createdAt: created_at ? new Date(created_at) : new Date(),
 		};
@@ -76,13 +93,13 @@ export class TweetService {
 		const limit = queryParameter?.limit || 20;
 		const offset = (page - 1) * limit;
 		const order = queryParameter?.order || 'DESC';
-		const orderBy = queryParameter?.sort || 'createdAt';
+		const orderBy = queryParameter?.sort || 'seenAt';
 		const searchTerm = queryParameter?.searchTerm;
 		this.logger.debug(
 			`findAllByUserId: Fetching tweets for user ${id} with page ${page} and limit ${limit} and order ${order} and orderBy ${orderBy} and searchTerm ${searchTerm}`,
 		);
 		const whereOptions: FindManyOptions<Tweet> = {
-			relations: ['author', 'hashtags'],
+			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
 			order: { [orderBy]: order },
 			skip: offset,
 			take: limit,
@@ -100,7 +117,7 @@ export class TweetService {
 					language: Like(`%${searchTerm.split(':')[1]}%`),
 				};
 			} else if (searchTerm.startsWith('verified:')) {
-				const verifiedStatus = searchTerm.split(':')[1] === 'true' ? true : false;
+				const verifiedStatus = searchTerm.split(':')[1] === 'true';
 				whereOptions.where = {
 					user: { id },
 					author: {
