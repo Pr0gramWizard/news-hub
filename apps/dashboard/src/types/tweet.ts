@@ -24,10 +24,16 @@ export interface Tweet {
 	url: string;
 	createdAt: string;
 	seenAt: string;
-	hashtags: string[];
+	hashtags: Hashtag[];
 	author: Author;
 	entities?: Entities;
 	type: TweetType[];
+}
+
+interface Hashtag {
+	id: string;
+	createdAt: string;
+	name: string;
 }
 
 enum TweetType {

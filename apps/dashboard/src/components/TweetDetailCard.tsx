@@ -105,7 +105,7 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 				tweet.hashtags.length > 0 ? (
 					<div>
 						{tweet.hashtags.map((hashtag) => (
-							<Badge>{hashtag}</Badge>
+							<Badge>{hashtag.name}</Badge>
 						))}
 					</div>
 				) : (

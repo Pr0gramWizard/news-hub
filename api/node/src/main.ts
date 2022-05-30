@@ -19,11 +19,6 @@ async function bootstrap() {
 	const port = config.get('port');
 	const environment = config.get('env');
 
-	await app.listen(port);
-
-	logger.log(`Application is running on: http://localhost:${port}/${globalPrefix}`);
-	logger.log(`Environment: ${environment}`);
-
 	const swaggerConfig = new DocumentBuilder()
 		.setTitle('NewsHub API')
 		.setDescription('This is the auto-generated documentation for the NewsHub API')
@@ -32,10 +27,15 @@ async function bootstrap() {
 		.build();
 
 	const document = SwaggerModule.createDocument(app, swaggerConfig);
-	SwaggerModule.setup('api/docs', app, document, {
+	SwaggerModule.setup('docs', app, document, {
 		customSiteTitle: 'NewsHub API',
 		swaggerOptions: { tagsSorter: 'alpha', operationsSorter: 'alpha' },
 	});
+
+	await app.listen(port);
+
+	logger.log(`Application is running on: http://localhost:${port}/${globalPrefix}`);
+	logger.log(`Environment: ${environment}`);
 }
 
 bootstrap();
