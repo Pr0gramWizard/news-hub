@@ -1,7 +1,7 @@
 import { Code, createStyles, Group, Navbar } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowBigUpLines, BrandTwitter, LayoutDashboard, Logout, Settings, Users } from 'tabler-icons-react';
+import { ArrowBigUpLines, BrandTwitter, LayoutDashboard, Logout, Settings } from 'tabler-icons-react';
 import AuthContext from '../context/authProvider';
 import { NewsHubLogo } from './NewsHubLogo';
 
@@ -66,7 +66,6 @@ export const navbarLinks = [
 	{ link: '/', label: 'Dashboard', icon: LayoutDashboard },
 	{ link: '/tweets', label: 'Tweets', icon: BrandTwitter },
 	{ link: '/parse/tweet', label: 'Parse Tweet', icon: ArrowBigUpLines },
-	{ link: '/authors', label: 'Authors', icon: Users },
 	{ link: '/user/settings', label: 'Settings', icon: Settings },
 ];
 

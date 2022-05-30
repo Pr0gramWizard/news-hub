@@ -71,7 +71,6 @@ export class Tweet {
 	seenAt!: Date;
 
 	constructor(props?: TweetProps) {
-		this.type = [TweetType.NORMAL];
 		Object.assign(this, props);
 	}
 }

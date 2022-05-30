@@ -34,7 +34,7 @@ export function ParseTweet() {
 			if (!user) {
 				throw new Error('User is not logged in');
 			}
-			const response = await fetch(`${import.meta.env.VITE_API_URL}/tweet/user?limit=10&sort=seenAt`, {
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/tweet/user?limit=5&sort=seenAt`, {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${user.token}`,
@@ -107,12 +107,15 @@ export function ParseTweet() {
 				<Title>Parse a new tweet</Title>
 				<Text>Enter a link to a status tweet and we try to parse it</Text>
 				<Divider />
-				<form onSubmit={form.onSubmit(async (values) => await handleSubmit(values))}>
-					<div style={{ paddingTop: 10 }}>
+				<form
+					style={{ marginTop: '5%' }}
+					onSubmit={form.onSubmit(async (values) => await handleSubmit(values))}
+				>
+					<div>
 						<TextInput
 							placeholder="https://twitter.com/Jack/status/20"
 							label="Tweet URL"
-							size="xl"
+							size="lg"
 							required
 							{...form.getInputProps('url')}
 						/>
@@ -124,9 +127,11 @@ export function ParseTweet() {
 					</div>
 				</form>
 			</div>
-			<Stack>
-				<Title>Recently parsed tweets</Title>
-				<TweetHistory tweets={latestTweets} />
+			<Stack style={{ marginTop: '5%' }}>
+				<Title style={{ marginBottom: 20 }} order={2}>
+					Recently parsed tweets
+				</Title>
+				{latestTweets ? <TweetHistory tweets={latestTweets} /> : <Text>No tweets parsed yet</Text>}
 			</Stack>
 		</Container>
 	);

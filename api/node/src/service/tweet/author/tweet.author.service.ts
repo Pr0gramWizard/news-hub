@@ -24,7 +24,8 @@ export class TweetAuthorService {
 	}
 
 	async create(tweetAuthor: UserV2): Promise<Author> {
-		const { id, description, verified, location, username, public_metrics, profile_image_url } = tweetAuthor;
+		const { id, description, verified, location, username, public_metrics, profile_image_url, created_at } =
+			tweetAuthor;
 		if (isUndefinedOrEmptyObject(public_metrics)) {
 			throw new TwitterApiException(TwitterApiErrorCode.NO_PUBLIC_METRIC);
 		}

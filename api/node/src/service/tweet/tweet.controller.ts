@@ -185,7 +185,7 @@ export class TweetController {
 			}
 		}
 
-		const tweetType = [];
+		const tweetType = [TweetType.NORMAL];
 		if (author.type === AuthorType.NEWS_OUTLET) {
 			this.logger.debug(`The author with id '${tweetAuthor.id}' is a news outlet`);
 			tweetType.push(TweetType.AUTHOR_IS_NEWS_OUTLET);
