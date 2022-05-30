@@ -20,6 +20,8 @@ export interface Tweet {
 	retweets: number;
 	totalComments: number;
 	totalQuotes: number;
+	url: string;
 	createdAt: string;
+	seenAt: string;
 	author: Author;
 }

@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParamter } from '@type/dto/tweet';
+import { CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParameter } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
@@ -43,7 +43,7 @@ export class TweetService {
 	}
 
 	async create({ url, tweetData, author, user, type }: CreateTweet): Promise<Tweet> {
-		const { public_metrics, text, id, lang, entities } = tweetData;
+		const { public_metrics, text, id, lang, entities, created_at } = tweetData;
 		if (!public_metrics) {
 			throw new TwitterApiException(TweetErrorCode.TWITTER_API_PUBLIC_METRICS_MISSING);
 		}
@@ -64,12 +64,14 @@ export class TweetService {
 			url,
 			type,
 			entities,
+			seenAt: new Date(),
+			createdAt: created_at ? new Date(created_at) : new Date(),
 		};
 		const tweet = new Tweet(tweetParams);
 		return await this.tweetRepository.save(tweet);
 	}
 
-	async findAllByUserId(id: string, queryParameter?: TweetQueryParamter): Promise<PaginatedTweetResponse> {
+	async findAllByUserId(id: string, queryParameter?: TweetQueryParameter): Promise<PaginatedTweetResponse> {
 		const page = queryParameter?.page || 1;
 		const limit = queryParameter?.limit || 20;
 		const offset = (page - 1) * limit;

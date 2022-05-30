@@ -1,10 +1,11 @@
 import {
 	Badge,
+	Box,
 	Center,
+	Grid,
 	Loader,
 	Menu,
 	Pagination,
-	ScrollArea,
 	Space,
 	Table,
 	Text,
@@ -49,6 +50,7 @@ export function TweetTable() {
 	const [search, setSearch] = useState('');
 	const [debouncedSearch] = useDebouncedValue(search, 750);
 	const [totalNumberOfTweets, setTotalNumberOfTweets] = useState(0);
+	const [maxPages, setMaxPages] = useState(0);
 	const [activePage, setPage] = useState(1);
 
 	const fetchTweets = async () => {
@@ -75,6 +77,7 @@ export function TweetTable() {
 		const newStats: Tweet[] = data.tweets;
 		setData(newStats);
 		setTotalNumberOfTweets(data.total);
+		setMaxPages(Math.ceil(data.total / 15));
 		setLoading(false);
 	};
 
@@ -97,7 +100,7 @@ export function TweetTable() {
 	};
 
 	return (
-		<ScrollArea>
+		<Box>
 			{loading ? (
 				<Center sx={{ height: '100vh' }}>
 					<Loader />
@@ -189,17 +192,22 @@ export function TweetTable() {
 								</tbody>
 							</Table>
 							<Space h="xl" />
-							<Center>
-								<Pagination
-									page={activePage}
-									onChange={setPage}
-									total={Math.ceil(totalNumberOfTweets / 15)}
-								/>
-							</Center>
+							<Grid style={{ marginLeft: 10, overflowX: 'hidden' }}>
+								<Grid.Col span={6}>
+									Showing {(activePage - 1) * 15 + 1} to{' '}
+									{Math.min(activePage * 15, totalNumberOfTweets)} from {totalNumberOfTweets} Tweets
+								</Grid.Col>
+
+								<Grid.Col span={3} offset={3}>
+									<Grid justify="flex-end">
+										<Pagination page={activePage} onChange={setPage} total={maxPages} />
+									</Grid>
+								</Grid.Col>
+							</Grid>
 						</>
 					)}
 				</>
 			)}
-		</ScrollArea>
+		</Box>
 	);
 }

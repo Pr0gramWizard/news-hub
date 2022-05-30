@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Author } from '@tweet/author/tweet.author.entity';
 import { User } from '@user/user.entity';
-import { IsArray, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
 import { TweetType } from '../../service/tweet/tweet.entity';
 import { ArticleMetaData } from './article';
@@ -45,6 +45,9 @@ export class TweetResponse {
 
 	@ApiProperty({ type: [AuthorResponse] })
 	author!: AuthorResponse;
+
+	@ApiProperty()
+	seenAt!: Date;
 }
 
 export class PaginatedTweetResponse {
@@ -123,6 +126,14 @@ export class TweetProps {
 
 	@IsOptional()
 	entities?: TweetEntitiesV2;
+
+	@IsDefined()
+	@IsDate()
+	seenAt!: Date;
+
+	@IsDefined()
+	@IsDate()
+	createdAt!: Date;
 }
 
 export interface NewsParserResponse {
@@ -140,7 +151,7 @@ export interface NewsParserResponse {
 	videos: string[];
 }
 
-export interface TweetQueryParamter {
+export interface TweetQueryParameter {
 	searchTerm?: string;
 	limit?: number;
 	page?: number;

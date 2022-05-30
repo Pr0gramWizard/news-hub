@@ -9,6 +9,7 @@ import { NotFound } from './page/NotFound';
 import { TweetDetails } from './page/TweetDetails';
 import { TweetTable } from './page/TweetTable';
 import { UserSettings } from './page/UserSettings';
+import { ParseTweet } from './page/ParseTweet';
 
 export function AppRoutes() {
 	const { user } = useContext(AuthContext);
@@ -20,6 +21,7 @@ export function AppRoutes() {
 				<Route path="" element={<Dashboard />} />
 				<Route path="tweets" element={<TweetTable />} />
 				<Route path="tweet/:id" element={<TweetDetails />} />
+				<Route path="parse/tweet" element={<ParseTweet />} />
 				<Route path="user/settings" element={<UserSettings />} />
 			</Route>
 			<Route path="*" element={<NotFound />} />

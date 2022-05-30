@@ -12,6 +12,7 @@ function observeTwitterDOM() {
 		async (entries) => {
 			for (const entry of entries) {
 				if (entry.isIntersecting) {
+
 					const article = entry.target;
 					const tweetUsername = Array.from(article.querySelectorAll('span')).find(
 						(x) => x.textContent && x.textContent.includes('@')
@@ -34,7 +35,7 @@ function observeTwitterDOM() {
 	// @ts-ignore
 	const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-	const observer = new MutationObserver(function (mutations) {
+	const observer = new MutationObserver(function(mutations) {
 		for (const mutation of mutations) {
 			for (const node of mutation.addedNodes) {
 				if (node instanceof HTMLElement) {

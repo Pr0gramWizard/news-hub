@@ -12,7 +12,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthorType } from '@tweet/author/tweet.author.entity';
 import { HashtagService } from '@tweet/hashtag/hashtag.service';
-import { PaginatedTweetResponse, StoreTweetRequest, TweetQueryParamter, TweetResponse } from '@type/dto/tweet';
+import { PaginatedTweetResponse, StoreTweetRequest, TweetQueryParameter, TweetResponse } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
@@ -55,7 +55,7 @@ export class TweetController {
 	})
 	async getTweetsByUserToken(
 		@UserContext() jwtPayload: JwtPayload,
-		@Query() queryParameter: TweetQueryParamter,
+		@Query() queryParameter: TweetQueryParameter,
 	): Promise<PaginatedTweetResponse> {
 		const { sub } = jwtPayload;
 		// Check if requesting user exists

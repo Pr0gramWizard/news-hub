@@ -67,9 +67,11 @@ export class Tweet {
 	@Column({ name: 'created_at' })
 	createdAt!: Date;
 
+	@Column({ name: 'seen_at' })
+	seenAt!: Date;
+
 	constructor(props?: TweetProps) {
 		this.type = [TweetType.NORMAL];
 		Object.assign(this, props);
-		this.createdAt = new Date();
 	}
 }
