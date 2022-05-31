@@ -45,7 +45,7 @@ export class TweetService {
 				user,
 				isNewsRelated: true,
 			},
-			relations: ['author', 'hashtags', 'articles.newsPage'],
+			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
 		});
 	}
 
