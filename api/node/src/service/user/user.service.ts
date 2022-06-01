@@ -13,11 +13,28 @@ export class UserService {
 	) {}
 
 	async findById(id: string): Promise<User | undefined> {
-		return this.userRepository.findOne(id);
+		return this.userRepository.findOne(id, {
+			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
+		});
 	}
 
 	async findAll(): Promise<User[]> {
-		return this.userRepository.find();
+		return this.userRepository.find({
+			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
+		});
+	}
+
+	async findAllWithNewsTweets(): Promise<User[]> {
+		return this.userRepository
+			.createQueryBuilder('user')
+			.select(['user.id', 'user.name', 'user.email', 'user.createdAt'])
+			.leftJoinAndSelect('user.tweets', 'tweet')
+			.leftJoinAndSelect('tweet.author', 'author')
+			.leftJoinAndSelect('tweet.hashtags', 'hashtags')
+			.leftJoinAndSelect('tweet.articles', 'article')
+			.leftJoinAndSelect('article.newsPage', 'newsPage')
+			.where('tweet.isNewsRelated = :isNews', { isNews: true })
+			.getMany();
 	}
 
 	async findByMail(email: string): Promise<User | undefined> {

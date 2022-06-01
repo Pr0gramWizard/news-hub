@@ -1,5 +1,5 @@
 import { NewsHubLogger } from '@common/logger.service';
-import { BadRequestException, Controller, Get, Injectable, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Injectable } from '@nestjs/common';
 import { TweetAuthorService } from '@tweet/author/tweet.author.service';
 import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
 import { TweetService } from '@tweet/tweet.service';
@@ -7,10 +7,10 @@ import { StatsResponse } from '@type/dto/stats';
 import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import { UserContext } from '../../decorator/user.decorator';
-import { AuthGuard } from '../../guard/auth.guard';
 import { JwtPayload } from '../auth/auth.service';
-import { ApiBearerAuth, ApiOkResponse, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
+import { Auth } from '../../decorator/auth.decorator';
 
 class UserStats {
 	@ApiProperty()
@@ -56,9 +56,8 @@ export class StatsController {
 	}
 
 	@Get('/me')
-	@UseGuards(new AuthGuard())
+	@Auth()
 	@ApiOkResponse({ type: [UserStats] })
-	@ApiBearerAuth()
 	async getOwnStats(@UserContext() jwtPayload: JwtPayload): Promise<UserStats[]> {
 		const { sub } = jwtPayload;
 		const user = await this.userService.findById(sub);

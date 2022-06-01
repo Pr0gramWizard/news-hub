@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -27,18 +27,16 @@ import {
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { UserErrorCodes } from '@type/error/user';
-import { UserRole } from '@user/user.entity';
 import { UserService } from '@user/user.service';
 import { NewsLinks, NewsPageService } from 'service/news-page/news.page.service';
 import { URL } from 'url';
 import { UserContext } from '../../decorator/user.decorator';
-import { AuthGuard } from '../../guard/auth.guard';
-import { RoleGuard } from '../../guard/role.guard';
 import { ArticleService } from '../article/article.service';
 import { JwtPayload } from '../auth/auth.service';
 import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetType } from './tweet.entity';
 import { TweetService } from './tweet.service';
+import { Auth } from '../../decorator/auth.decorator';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -59,7 +57,7 @@ export class TweetController {
 	}
 
 	@Get('user')
-	@UseGuards(new AuthGuard())
+	@Auth()
 	@ApiOkResponse({
 		description: 'Get all tweets of requesting user',
 		type: PaginatedTweetResponse,
@@ -88,8 +86,7 @@ export class TweetController {
 	}
 
 	@Get(':tweet_id')
-	@UseGuards(new AuthGuard())
-	@ApiBearerAuth()
+	@Auth()
 	@ApiOkResponse({
 		description: 'Get tweet info by id',
 		type: [TweetResponse],
@@ -115,8 +112,7 @@ export class TweetController {
 	}
 
 	@Get('is/news')
-	@UseGuards(new AuthGuard())
-	@ApiBearerAuth()
+	@Auth()
 	@ApiOkResponse({
 		description: 'Get all tweets of requesting user by type',
 		type: [TweetResponse],
@@ -137,9 +133,7 @@ export class TweetController {
 	}
 
 	@Get('')
-	@UseGuards(new AuthGuard())
-	@UseGuards(new RoleGuard(UserRole.ADMIN))
-	@ApiBearerAuth()
+	@Auth()
 	@ApiOkResponse({
 		description: 'Get all tweets',
 		type: [TweetResponse],
@@ -149,8 +143,7 @@ export class TweetController {
 	}
 
 	@Post('')
-	@UseGuards(new AuthGuard())
-	@ApiBearerAuth()
+	@Auth()
 	@ApiCreatedResponse({
 		description: 'Stored the tweet in the database',
 	})

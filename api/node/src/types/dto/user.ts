@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { UserRole } from '@user/user.entity';
+import { TweetResponse } from '@type/dto/tweet';
 
 // Register DTOs
 
@@ -91,4 +92,21 @@ export class CreateUserDTO {
 	@IsEnum(UserRole)
 	@IsOptional()
 	role?: UserRole;
+}
+
+export class UserResponse {
+	@ApiProperty()
+	id!: string;
+
+	@ApiProperty()
+	name!: string;
+
+	@ApiProperty()
+	email!: string;
+
+	@ApiProperty()
+	createdAt!: Date;
+
+	@ApiProperty({ type: [TweetResponse] })
+	tweets!: TweetResponse[];
 }

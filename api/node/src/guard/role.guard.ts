@@ -1,20 +1,28 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { User } from '@user/user.entity';
 import { NewsHubLogger } from '@common/logger.service';
-import { UserRole } from '@user/user.entity';
 
 @Injectable()
-export class RoleGuard implements CanActivate {
+export class RolesGuard implements CanActivate {
 	private readonly logger: NewsHubLogger;
-	private readonly role: UserRole;
 
-	constructor(role: UserRole) {
+	constructor(private reflector: Reflector) {
 		this.logger = new NewsHubLogger();
-		this.role = role;
+		this.logger.setContext(RolesGuard.name);
 	}
 
-	async canActivate(context: ExecutionContext): Promise<boolean> {
+	canActivate(context: ExecutionContext): boolean {
+		const roles = this.reflector.get<string[]>('roles', context.getHandler());
+		if (!roles) {
+			return true;
+		}
 		const request = context.switchToHttp().getRequest();
-		const user = request.user;
-		return user && user.role === this.role;
+		const user: User = request.user;
+		if (!user) {
+			this.logger.debug('User not found');
+			return false;
+		}
+		return roles.includes(user.role);
 	}
 }

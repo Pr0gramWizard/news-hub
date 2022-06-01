@@ -3,7 +3,7 @@ import { BadRequestException, Body, ConflictException, Controller, Post } from '
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { LoginUserRequest, LoginUserResponse, RegisterUserRequest, RegisterUserResponse } from '@type/dto/user';
 import { UserService } from '@user/user.service';
-import { AuthErrorCodes } from '../../types/error/auth';
+import { AuthErrorCodes } from '@type/error/auth';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')

@@ -1,6 +1,6 @@
 import { Tweet } from '@tweet/tweet.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateUserDTO } from '../../types/dto/user';
+import { CreateUserDTO } from '@type/dto/user';
 
 export enum UserRole {
 	USER = 'USER',
@@ -21,7 +21,7 @@ export class User {
 	@Column({ unique: true })
 	email!: string;
 
-	@OneToMany(() => Tweet, (tweet) => tweet.user, { eager: true })
+	@OneToMany(() => Tweet, (tweet) => tweet.user)
 	tweets!: Tweet[];
 
 	@Column({
