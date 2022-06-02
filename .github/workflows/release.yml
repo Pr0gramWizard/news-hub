@@ -23,9 +23,9 @@ jobs:
         run: cd ./apps/browser_extension && yarn build
 
       - name: Zip build folder
-        run: zip -r ./apps/browser_extension/build_${{ GITHUB_REF_NAME }}.zip ./apps/browser_extension/build
+        run: zip -r ./apps/browser_extension/build_${{github.ref}}.zip ./apps/browser_extension/build
 
       - name: Create Release
-        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${{ GITHUB_REF_NAME }.zip#Browser Extension'
+        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${{github.ref}}.zip#Browser Extension'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
