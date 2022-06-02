@@ -1,44 +1,58 @@
 # NewsHub Browser Extension
 
+The browser extension allows the user to login in and auto-collect the tweets while they scroll through Twitter.
+
 #### Forked from [this repository](https://github.com/lxieyang/chrome-extension-boilerplate-react)
 
 ## Installing and Running
 
-### Procedures:
+## Setup
 
-1. Run `npm install` to install the dependencies.
-2. Run `npm start`
-3. Load your extension on Chrome following:
-    1. Access `chrome://extensions/`
-    2. Check `Developer mode`
-    3. Click on `Load unpacked extension`
-    4. Select the `build` folder.
-
-## Packing
-
-After the development of your extension run the command
+Create a new `.env` file and add the following lines:
 
 ```
-$ NODE_ENV=production npm run build
+API_URL="http://localhost:3000/api"
+```  
+
+Be sure to change the value if you are using a remote endpoint or other port.
+
+### Local development
+
+You can start the browser extension using webpack.  
+For that make sure that you have `node` installed (any version `> 14.x`).
+
+Install dependencies:
+
+```bash
+$ yarn install
 ```
 
-Now, the content of `build` folder will be the extension ready to be submitted to the Chrome Web Store. Just take a look at the [official guide](https://developer.chrome.com/webstore/publish) to more infos about publishing.
+Build once:
 
-## Secrets
-
-If you are developing an extension that talks with some API you probably are using different keys for testing and production. Is a good practice you not commit your secret keys and expose to anyone that have access to the repository.
-
-To this task this boilerplate import the file `./secrets.<THE-NODE_ENV>.js` on your modules through the module named as `secrets`, so you can do things like this:
-
-_./secrets.development.js_
-
-```js
-export default { key: '123' };
+```bash
+$ yarn run build
 ```
 
-_./src/popup.js_
+Build and recompile on changes:
 
-```js
-import secrets from 'secrets';
-ApiCall({ key: secrets.key });
+```bash
+$ yarn run build:watch
 ```
+
+## Add extension to Chrome
+
+In your Chrome browser navigate to `chrome://extensions/`.  
+Somewhere on the page there should be a `Developer mode` toggle.  
+If not already enabled, enable it.
+You should find a `Load unpacked` button then where you can select a path.  
+Navigate to the `build` folder of the browser extension code folder.
+
+## Login and usage
+
+When clicking on the Popup of the browser extension you should be greeted with a login panel the first time.  
+There you can log in with your credentials.  
+Unfortunately, there is no possibility to register a new account over the browser extension yet.  
+For that, you have to use the Dashboard.  
+Once you are logged in you can just enable the extension and scroll through your Twitter timeline.  
+Each tweet that is collected the twitter handle of collected tweet is marked golden.    
+
