@@ -26,18 +26,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'yarn'
 
       - name: Add SHORT_SHA env property with commit short sha
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: npm install
+        run: yarn install --frozen-lockfile
 
       - name: Create .env file
         run: touch .env && echo 'API_URL="https://newshub.mortaga.de/api"' > .env
 
       - name: Build browser extension
-        run: npm run build
+        run: yarn build
 
       - name: Zip build folder
         run: zip -r build_${SHORT_SHA}.zip build
