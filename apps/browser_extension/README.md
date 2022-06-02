@@ -56,4 +56,3 @@ Unfortunately, there is no possibility to register a new account over the browse
 For that, you have to use the Dashboard.  
 Once you are logged in you can just enable the extension and scroll through your Twitter timeline.  
 Each tweet that is collected the Twitter handle of collected tweet is marked golden.    
-

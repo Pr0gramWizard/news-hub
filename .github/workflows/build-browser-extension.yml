@@ -37,12 +37,12 @@ jobs:
         run: npm run build
 
       - name: Zip build folder
-        run: zip -r build_${GITHUB_SHA::6}.zip build
+        run: zip -r build_${{ GITHUB_SHA::6 }}.zip build
 
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
           name: browser_extension_build
-          path: ./apps/browser_extension/build_${GITHUB_SHA::6}.zip
+          path: ./apps/browser_extension/build_${{ GITHUB_SHA::6 }}.zip
 
 
