@@ -1,30 +1,30 @@
 {
-  "name": "newshub",
-  "version": "1.0.1",
-  "repository": "git@github.com:Pr0gramWizard/news-hub.git",
-  "author": "Maged Mortaga <18315564+Pr0gramWizard@users.noreply.github.com>",
-  "license": "MIT",
-  "scripts": {
-    "start": "docker-compose -p newshub up -d",
-    "start:api": "docker-compose -p newshub up -d api-node api-python",
-    "start:dashboard": "docker-compose -p newshub up -d admin-dashboard",
-    "stop:dashboard": "docker-compose -p newshub rm -s -v admin-dashboard",
-    "stop": "docker-compose -p newshub down",
-    "restart": "docker-compose -p newshub restart",
-    "build": "docker-compose -p newshub build",
-    "rebuild": "yarn stop && yarn build",
-    "image:prune": "docker image prune",
-    "volume:prune": "docker volume prune"
-  },
-  "devDependencies": {
-    "cz-conventional-changelog": "3.3.0"
-  },
-  "resolutions": {
-    "minimist": "1.2.6"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+    "name": "newshub",
+    "version": "1.0.1",
+    "repository": "git@github.com:Pr0gramWizard/news-hub.git",
+    "author": "Maged Mortaga <18315564+Pr0gramWizard@users.noreply.github.com>",
+    "license": "MIT",
+    "scripts": {
+        "start": "docker-compose -p newshub up -d",
+        "start:api": "docker-compose -p newshub up -d api-node api-python",
+        "start:dashboard": "docker-compose -p newshub up -d admin-dashboard",
+        "stop:dashboard": "docker-compose -p newshub rm -s -v admin-dashboard",
+        "stop": "docker-compose -p newshub down",
+        "restart": "docker-compose -p newshub restart",
+        "build": "docker-compose -p newshub build",
+        "rebuild": "yarn stop && yarn build",
+        "image:prune": "docker image prune",
+        "volume:prune": "docker volume prune"
+    },
+    "devDependencies": {
+        "cz-conventional-changelog": "3.3.0"
+    },
+    "resolutions": {
+        "minimist": "1.2.6"
+    },
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
     }
-  }
 }

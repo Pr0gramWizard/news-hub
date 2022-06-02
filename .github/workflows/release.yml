@@ -12,7 +12,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Create .env file
+        run: touch .env && echo 'API_URL="https://newshub.mortaga.de/api"' > .env
+
+      - name: Build browser extension
+        run: yarn build
+
+      - name: Zip build folder
+        run: zip -r ./apps/browser_extension/build_${ github.ref_name }.zip ./apps/browser_extension/build
+        
       - name: Create Release
-        run: gh release create ${{ github.ref }} --generate-notes
+        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${ github.ref_name }.zip#Browser Extension'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
