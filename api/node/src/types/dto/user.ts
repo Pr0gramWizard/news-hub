@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDate, IsDefined, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { UserRole } from '@user/user.entity';
 import { TweetResponse } from '@type/dto/tweet';
 
@@ -109,4 +109,40 @@ export class UserResponse {
 
 	@ApiProperty({ type: [TweetResponse] })
 	tweets!: TweetResponse[];
+}
+
+export class ResetPasswordRequest {
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	oldPassword!: string;
+
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	newPassword!: string;
+}
+
+export class ChangeBasicInformationRequest {
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	name!: string;
+
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	email!: string;
+}
+
+export class ChangeUserRoleRequest {
+	@ApiProperty()
+	@IsEnum(UserRole)
+	@IsDefined()
+	role!: UserRole;
+
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	userId!: string;
 }

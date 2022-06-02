@@ -1,5 +1,5 @@
 import { Tweet } from '@tweet/tweet.entity';
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { CreateUserDTO } from '@type/dto/user';
 
 export enum UserRole {
@@ -33,6 +33,9 @@ export class User {
 
 	@CreateDateColumn()
 	createdAt!: Date;
+
+	@UpdateDateColumn()
+	updatedAt!: Date;
 
 	constructor(props?: CreateUserDTO) {
 		if (props) {

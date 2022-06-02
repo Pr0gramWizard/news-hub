@@ -1,12 +1,12 @@
 import { Anchor, Button, Checkbox, Container, Group, Paper, PasswordInput, Text, TextInput } from '@mantine/core';
-import { upperFirst, useForm, useToggle } from '@mantine/hooks';
+import { upperFirst, useToggle } from '@mantine/hooks';
+import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AuthContext from '../context/authProvider';
+import AuthContext, { LoginResponse } from '../context/authProvider';
 import { handleFetchErrorResponse } from '../util/handleError';
 
-async function login(email: string, password: string) {
+async function login(email: string, password: string): Promise<LoginResponse> {
 	const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
 		method: 'POST',
 		headers: {
@@ -22,7 +22,7 @@ async function login(email: string, password: string) {
 	return response.json();
 }
 
-async function register(email: string, password: string, name: string) {
+async function register(email: string, password: string, name: string): Promise<LoginResponse> {
 	const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
 		method: 'POST',
 		headers: {
@@ -42,7 +42,6 @@ async function register(email: string, password: string, name: string) {
 export function LoginPage() {
 	const [type, toggle] = useToggle('login', ['login', 'register']);
 	const { setUser } = useContext(AuthContext);
-	const navigate = useNavigate();
 	const form = useForm({
 		initialValues: {
 			email: '',
@@ -51,11 +50,12 @@ export function LoginPage() {
 			confirmPassword: '',
 			terms: true,
 		},
-		validationRules: {
-			email: (val) => /^\S+@\S+$/.test(val),
-			password: (val) => val.length >= 4,
-			terms: (val) => val,
-			confirmPassword: (val, values) => (type === 'register' ? val === values!.password : true),
+		validate: {
+			email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
+			password: (val) => (val.length >= 4 ? null : 'Password must be at least 4 characters'),
+			terms: (val) => (val === true ? null : 'You must accept the terms and conditions'),
+			confirmPassword: (val, values) =>
+				(type === 'register' ? val === values!.password : true) ? null : 'Passwords do not match',
 		},
 	});
 
@@ -66,8 +66,6 @@ export function LoginPage() {
 					? await login(values.email, values.password)
 					: await register(values.email, values.password, values.name);
 			setUser(response);
-			localStorage.setItem('user', JSON.stringify(response));
-			navigate('/');
 		} catch (e) {
 			if (!(e instanceof Error)) {
 				throw e;
@@ -86,30 +84,23 @@ export function LoginPage() {
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Group direction="column" grow>
 						{type === 'register' && (
-							<TextInput
-								label="Name"
-								placeholder="Your name"
-								value={form.values.name}
-								onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
-							/>
+							<TextInput label="Name" placeholder="Your name" {...form.getInputProps('name')} />
 						)}
 
 						<TextInput
 							required
 							label="Email"
 							placeholder="hello@mantine.dev"
-							value={form.values.email}
-							onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
-							error={form.errors.email && 'Invalid email'}
+							autoComplete="username"
+							{...form.getInputProps('email')}
 						/>
 
 						<PasswordInput
 							required
 							label="Password"
 							placeholder="Your password"
-							value={form.values.password}
-							onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
-							error={form.errors.password && 'Password should include at least 4 characters'}
+							autoComplete={type === 'register' ? 'new-password' : 'current-password'}
+							{...form.getInputProps('password')}
 						/>
 
 						{type === 'register' && (
@@ -117,18 +108,13 @@ export function LoginPage() {
 								required
 								label="Confirm password"
 								placeholder="Confirm password"
-								value={form.values.confirmPassword}
-								onChange={(event) => form.setFieldValue('confirmPassword', event.currentTarget.value)}
-								error={form.errors.confirmPassword && 'Passwords did not match'}
+								autoComplete="new-password"
+								{...form.getInputProps('confirmPassword')}
 							/>
 						)}
 
 						{type === 'register' && (
-							<Checkbox
-								label="I accept terms and conditions"
-								checked={form.values.terms}
-								onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
-							/>
+							<Checkbox label="I accept terms and conditions" {...form.getInputProps('terms')} />
 						)}
 					</Group>
 

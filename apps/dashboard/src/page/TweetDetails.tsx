@@ -60,7 +60,7 @@ const useStyles = createStyles((theme) => ({
 
 export function TweetDetails() {
 	const navigate = useNavigate();
-	const { user } = useContext(AuthContext);
+	const { user, setUser } = useContext(AuthContext);
 	let { id } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [tweetHTML, setTweetHTML] = useState<string | undefined>(undefined);
@@ -101,6 +101,10 @@ export function TweetDetails() {
 					ContentType: 'application/json',
 				},
 			});
+			if (tweetDetails.status === 403) {
+				setUser(undefined);
+				return;
+			}
 			if (tweetDetails.status !== 200) {
 				const response = await tweetDetails.json();
 				showNotification({

@@ -66,7 +66,7 @@ export const navbarLinks = [
 	{ link: '/', label: 'Dashboard', icon: LayoutDashboard },
 	{ link: '/tweets', label: 'Tweets', icon: BrandTwitter },
 	{ link: '/parse/tweet', label: 'Parse Tweet', icon: ArrowBigUpLines },
-	{ link: '/user/settings', label: 'Settings', icon: Settings },
+	{ link: '/account', label: 'Settings', icon: Settings },
 ];
 
 export function NavBar() {
