@@ -62,7 +62,7 @@ function getIconByLabel(label: string): keyof typeof icons {
 }
 
 export function Dashboard() {
-	const { user } = useContext(AuthContext);
+	const { user, setUser } = useContext(AuthContext);
 	const { classes } = useStyles();
 	const [stats, setStats] = React.useState<StatCardProps[]>([]);
 
@@ -78,6 +78,10 @@ export function Dashboard() {
 					ContentType: 'application/json',
 				},
 			});
+			if (stats.status === 403) {
+				setUser(undefined);
+				return;
+			}
 			const json = (await stats.json()) as StatsRepoonse[];
 			const newStats = [];
 			for (const stat of json) {
@@ -89,6 +93,7 @@ export function Dashboard() {
 			}
 			setStats(newStats);
 		}
+
 		fetchStats();
 	}, [user]);
 

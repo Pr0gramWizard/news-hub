@@ -66,8 +66,6 @@ export function LoginPage() {
 					? await login(values.email, values.password)
 					: await register(values.email, values.password, values.name);
 			setUser(response);
-			localStorage.setItem('user', JSON.stringify(response));
-			navigate('/');
 		} catch (e) {
 			if (!(e instanceof Error)) {
 				throw e;

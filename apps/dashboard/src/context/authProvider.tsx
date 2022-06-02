@@ -1,4 +1,5 @@
 import { createContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthProviderProps {
 	children: React.ReactNode;
@@ -24,10 +25,26 @@ const AuthContext = createContext<AuthContextProps>({
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+	const navigate = useNavigate();
 	const [user, setUser] = useState<User | undefined>(JSON.parse(localStorage.getItem('user') || 'null'));
 	const [isLoading, setIsLoading] = useState(true);
 
-	return <AuthContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>{children}</AuthContext.Provider>;
+	const setUserCallback = (user: User | undefined) => {
+		setUser(user);
+		if (!user) {
+			localStorage.removeItem('user');
+			navigate('/login');
+			return;
+		}
+		localStorage.setItem('user', JSON.stringify(user));
+		navigate('/');
+	};
+
+	return (
+		<AuthContext.Provider value={{ user, setUser: setUserCallback, isLoading, setIsLoading }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
 
 export default AuthContext;

@@ -14,7 +14,7 @@ export class RolesGuard implements CanActivate {
 
 	canActivate(context: ExecutionContext): boolean {
 		const roles = this.reflector.get<string[]>('roles', context.getHandler());
-		if (!roles) {
+		if (!roles || roles.length === 0) {
 			return true;
 		}
 		const request = context.switchToHttp().getRequest();
@@ -23,6 +23,7 @@ export class RolesGuard implements CanActivate {
 			this.logger.debug('User not found');
 			return false;
 		}
+		this.logger.debug(user, roles);
 		return roles.includes(user.role);
 	}
 }

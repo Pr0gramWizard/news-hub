@@ -110,3 +110,15 @@ export class UserResponse {
 	@ApiProperty({ type: [TweetResponse] })
 	tweets!: TweetResponse[];
 }
+
+export class ResetPasswordRequest {
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	oldPassword!: string;
+
+	@ApiProperty()
+	@IsString()
+	@IsNotEmpty()
+	newPassword!: string;
+}

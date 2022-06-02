@@ -68,9 +68,7 @@ export function TweetTable() {
 			},
 		);
 		if (response.status === 403) {
-			localStorage.removeItem('user');
 			setUser(undefined);
-			navigate('/home');
 			return;
 		}
 		const data = await response.json();

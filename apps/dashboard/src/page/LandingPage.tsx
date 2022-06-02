@@ -1,4 +1,4 @@
-import { Button, Container, createStyles, Text, Title, useMantineTheme } from '@mantine/core';
+import { Button, Container, createStyles, Text, Title } from '@mantine/core';
 import React from 'react';
 import { ButtonLink } from '../components/ButtonLink';
 import { Dots } from '../components/Dots';
@@ -88,8 +88,6 @@ const useStyles = createStyles((theme) => ({
 
 export function LandingPage() {
 	const { classes } = useStyles();
-	const theme = useMantineTheme();
-
 	return (
 		<Container className={classes.wrapper} size={1400}>
 			<Dots className={classes.dots} style={{ left: 0, top: 0 }} />

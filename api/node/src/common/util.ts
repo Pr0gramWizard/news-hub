@@ -1,8 +1,5 @@
 import { strict as assert } from 'assert';
 
-export type Nullable<T> = T | null;
-export type ControllerResponse<T> = Nullable<T> | Error | never;
-
 export function assertMany(...variables: unknown[]): void {
 	variables.forEach((x) => assert(x));
 }
