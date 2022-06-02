@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { CreateUserDTO } from '../../types/dto/user';
-import { User } from './user.entity';
+import { ChangeBasicInformationRequest, CreateUserDTO, GetUserResponse } from '../../types/dto/user';
+import { User, UserRole } from './user.entity';
 import { InternalServerException } from '@type/error/general';
 import { NewsHubLogger } from '@common/logger.service';
 import { UserErrorCodes } from '@type/error/user';
@@ -72,11 +72,30 @@ export class UserService {
 		}
 	}
 
-	async updateEmail(id: string, email: string): Promise<void> {
-		const result = await this.userRepository.update(id, { email });
+	async updateEmail(id: string, payload: ChangeBasicInformationRequest): Promise<void> {
+		const { email, name } = payload;
+		const result = await this.userRepository.update(id, { email, name });
 		if (result.affected === 0) {
 			this.logger.debug(result);
 			throw new InternalServerException();
 		}
+	}
+
+	async updateRole(id: string, role: UserRole): Promise<void> {
+		const result = await this.userRepository.update(id, { role });
+		if (result.affected === 0) {
+			this.logger.debug(result);
+			throw new InternalServerException();
+		}
+	}
+
+	transformUserToUserResponse(user: User): GetUserResponse {
+		const { id, createdAt, email } = user;
+		return {
+			id,
+			createdAt,
+			email,
+			numberOfCollectedTweets: user.tweets.length,
+		};
 	}
 }

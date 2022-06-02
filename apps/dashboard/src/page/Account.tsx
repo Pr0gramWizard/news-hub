@@ -1,7 +1,9 @@
-import { Container, createStyles } from '@mantine/core';
+import { Container, createStyles, Title } from '@mantine/core';
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/authProvider';
+import { BasicInformation } from '../components/BasicInformation';
+import { ChangePassword } from '../components/ChangePassword';
 
 const useStyles = createStyles((theme) => ({
 	comment: {
@@ -37,9 +39,12 @@ const useStyles = createStyles((theme) => ({
 	backArrow: {
 		textAlign: 'end',
 	},
+	title: {
+		marginBottom: '2%',
+	},
 }));
 
-export function UserSettings() {
+export function Account() {
 	const navigate = useNavigate();
 	const { user, setUser } = useContext(AuthContext);
 	const { classes } = useStyles();
@@ -47,5 +52,14 @@ export function UserSettings() {
 		throw new Error('User is not logged in');
 	}
 
-	return <Container size="lg"></Container>;
+	return (
+		<Container size="lg">
+			<div className={classes.title}>
+				<Title>Account</Title>
+			</div>
+
+			<BasicInformation />
+			<ChangePassword />
+		</Container>
+	);
 }

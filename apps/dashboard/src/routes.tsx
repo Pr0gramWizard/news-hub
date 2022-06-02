@@ -8,7 +8,7 @@ import { LoginPage } from './page/Login';
 import { NotFound } from './page/NotFound';
 import { TweetDetails } from './page/TweetDetails';
 import { TweetTable } from './page/TweetTable';
-import { UserSettings } from './page/UserSettings';
+import { Account } from './page/Account';
 import { ParseTweet } from './page/ParseTweet';
 
 export function AppRoutes() {
@@ -22,7 +22,7 @@ export function AppRoutes() {
 				<Route path="tweets" element={<TweetTable />} />
 				<Route path="tweet/:id" element={<TweetDetails />} />
 				<Route path="parse/tweet" element={<ParseTweet />} />
-				<Route path="user/settings" element={<UserSettings />} />
+				<Route path="account" element={<Account />} />
 			</Route>
 			<Route path="*" element={<NotFound />} />
 		</Routes>

@@ -1,9 +1,15 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GetUserResponse, ResetPasswordRequest, UserResponse } from '@type/dto/user';
+import {
+	ChangeBasicInformationRequest,
+	ChangeUserRoleRequest,
+	GetUserResponse,
+	ResetPasswordRequest,
+	UserResponse,
+} from '@type/dto/user';
 import { UserErrorCodes } from '@type/error/user';
-import { User, UserRole } from '@user/user.entity';
+import { UserRole } from '@user/user.entity';
 import { UserService } from './user.service';
 import { Auth } from '../../decorator/auth.decorator';
 import { UserContext } from '../../decorator/user.decorator';
@@ -26,7 +32,7 @@ export class UserController {
 			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
 		this.logger.log(`User with id ${userId} was found`);
-		return this.transformUserToUserResponse(user);
+		return this.userService.transformUserToUserResponse(user);
 	}
 
 	@Get('')
@@ -34,7 +40,7 @@ export class UserController {
 	@ApiOkResponse({ description: 'User entities', type: [GetUserResponse] })
 	async getAllUsers(): Promise<GetUserResponse[]> {
 		const rawUsers = await this.userService.findAll();
-		return rawUsers.map(this.transformUserToUserResponse);
+		return rawUsers.map(this.userService.transformUserToUserResponse);
 	}
 
 	@Get('news/tweets')
@@ -50,7 +56,7 @@ export class UserController {
 		return users;
 	}
 
-	@Post('change/password')
+	@Post('update/password')
 	@Auth()
 	@ApiOkResponse({ description: 'Password reset' })
 	async resetPassword(@Body() body: ResetPasswordRequest, @UserContext() jwtPayload: JwtPayload): Promise<void> {
@@ -63,21 +69,32 @@ export class UserController {
 		await this.userService.updatePassword(user, oldPassword, newPassword);
 	}
 
-	@Post('change/email')
+	@Post('update/basic-info')
 	@Auth()
-	@ApiOkResponse({ description: 'Email changed' })
-	async changeEmail(@Body() body: { email: string }, @UserContext() jwtPayload: JwtPayload): Promise<void> {
+	@ApiOkResponse({ description: 'Basic information changed' })
+	async changeEmail(
+		@Body() body: ChangeBasicInformationRequest,
+		@UserContext() jwtPayload: JwtPayload,
+	): Promise<void> {
 		const { sub } = jwtPayload;
-		await this.userService.updateEmail(sub, body.email);
+		await this.userService.updateEmail(sub, body);
 	}
 
-	transformUserToUserResponse(user: User): GetUserResponse {
-		const { id, createdAt, email } = user;
-		return {
-			id,
-			createdAt,
-			email,
-			numberOfCollectedTweets: user.tweets.length,
-		};
+	@Post('change/role')
+	@Auth(UserRole.ADMIN)
+	@ApiOkResponse({ description: 'Changed role of user' })
+	async changeUserRole(@Body() body: ChangeUserRoleRequest): Promise<void> {
+		const { userId, role } = body;
+		const user = await this.userService.findById(userId);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		if (user.role === role) {
+			return;
+		}
+		if (user.role === UserRole.ADMIN) {
+			throw new BadRequestException(UserErrorCodes.USER_IS_ADMIN);
+		}
+		await this.userService.updateRole(userId, role);
 	}
 }
