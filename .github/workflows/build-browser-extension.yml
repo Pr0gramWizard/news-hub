@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Add SHORT_SHA env property with commit short sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: npm install
 
@@ -37,12 +40,12 @@ jobs:
         run: npm run build
 
       - name: Zip build folder
-        run: zip -r build_${{ GITHUB_SHA::6 }}.zip build
+        run: zip -r build_${SHORT_SHA}.zip build
 
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
           name: browser_extension_build
-          path: ./apps/browser_extension/build_${{ GITHUB_SHA::6 }}.zip
+          path: ./apps/browser_extension/build_${SHORT_SHA}.zip
 
 
