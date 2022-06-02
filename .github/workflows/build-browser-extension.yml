@@ -11,6 +11,9 @@ on:
     paths:
       - "apps/browser_extension/**"
 
+defaults:
+  run:
+    working-directory: ./apps/browser_extension
 
 jobs:
   build-browser-extension:
@@ -27,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file
+        run: touch .env && echo 'API_URL="https://newshub.mortaga.de/api"' > .env
+
       - name: Build browser extension
         run: npm run build
 
@@ -34,7 +40,7 @@ jobs:
         run: zip -r build_${GITHUB_SHA::6}.zip build
 
       - name: Upload build
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: browser_extension_build
           path: build_${GITHUB_SHA::6}.zip
