@@ -1,0 +1,43 @@
+name: build-browser-extension
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "apps/browser_extension/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "apps/browser_extension/**"
+
+
+jobs:
+  build-browser-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build browser extension
+        run: npm run build
+
+      - name: Zip build folder
+        run: zip -r build_${GITHUB_SHA::6}.zip build
+
+      - name: Upload build
+        uses: actions/upload-artifact@v1
+        with:
+          name: browser_extension_build
+          path: build_${GITHUB_SHA::6}.zip
+          mime-type: application/zip
+
+
