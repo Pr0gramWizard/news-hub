@@ -1,126 +1,90 @@
-import { ActionIcon, Card, Group, Switch, Text } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
-import React, { useCallback, useEffect } from 'react';
-import { Logout, Refresh, X } from 'tabler-icons-react';
+import { Button, Card, Center, Divider, Group, Loader, Stack, Switch, Text } from '@mantine/core';
+import React, { useEffect } from 'react';
 import { useStateContext } from '../context/StateContext';
-import { TOKEN_STORAGE_KEY } from '../pages/Popup/Popup';
+import { TOKEN_STORAGE_KEY, User } from '../pages/Popup/Popup';
+import jwt_decode from 'jwt-decode';
 
-interface DashboardProps {
-	mail: string;
+export interface JWTPayload {
+	sub: string;
+	email: string;
+	name: string;
 }
 
-interface UserStatistic {
-	label: string;
-	value: number | string;
-}
-
-export function Dashboard({ mail }: DashboardProps) {
+export function Dashboard() {
 	const SCRIPT_ENABLED_KEY = 'collection_script_enabled';
 	const { setState } = useStateContext();
-	const [stats, setStats] = React.useState<UserStatistic[]>([]);
 	const [isEnabled, setIsEnabled] = React.useState(false);
-
-	const memoizedCallback = useCallback(async () => {
-		try {
-			chrome.storage.local.get(TOKEN_STORAGE_KEY, async (result) => {
-				const token = result[TOKEN_STORAGE_KEY];
-				const response = await fetch(`${process.env.API_URL}/stats/me`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				const data = await response.json();
-				if (response.status === 403) {
-					chrome.storage.local.remove([TOKEN_STORAGE_KEY], () => {
-						showNotification({
-							autoClose: 5000,
-							title: 'Authentication error',
-							message: 'Your session has expired. Please log in again.',
-							color: 'red',
-							icon: <X />,
-						});
-						setState('login');
-					});
-					return;
-				}
-				setStats(data);
-			});
-		} catch (e) {
-			if (!(e instanceof Error)) {
-				throw e;
-			}
-			console.log(e);
-		}
-	}, [setState]);
+	const [user, setUser] = React.useState<User | undefined>(undefined);
 
 	useEffect(() => {
-		async function fetchData() {
-			await memoizedCallback();
-			chrome.storage.local.get(SCRIPT_ENABLED_KEY, async (result) => {
-				if (result[SCRIPT_ENABLED_KEY]) {
-					await toggleExtension(true);
-				}
+		chrome.storage.local.get([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], (result) => {
+			console.log(result);
+			const data = result[TOKEN_STORAGE_KEY];
+			const payload = jwt_decode<JWTPayload>(data.token);
+			setUser({
+				email: payload.email,
+				name: data.name,
 			});
-		}
-
-		fetchData();
-	}, [setStats, memoizedCallback]);
+			setIsEnabled(result[SCRIPT_ENABLED_KEY] === true);
+		});
+	}, [setIsEnabled, setUser]);
 
 	const toggleExtension = async (isEnabled: boolean) => {
 		setIsEnabled(isEnabled);
 		await chrome.storage.local.set({ [SCRIPT_ENABLED_KEY]: isEnabled });
+		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+			const currentTab = tabs[0];
+			if (!currentTab || !currentTab.id) return;
+			chrome.tabs.sendMessage(currentTab.id, { isEnabled });
+		});
 	};
 
-	const items = stats.map((s) => (
-		<div key={s.label}>
-			<Text align="center" size="lg" weight={500}>
-				{s.value}
-			</Text>
-			<Text align="center" size="sm" color="dimmed">
-				{s.label}
-			</Text>
-		</div>
-	));
-
 	return (
-		<Card withBorder p="xl" radius="md">
-			<Text align="center" size="lg" weight={500} mt="sm">
-				{mail}
-			</Text>
-			<Group mt="md" position="center" spacing={30}>
-				{items}
-			</Group>
-			<Group grow spacing={5}>
-				<Switch
-					checked={isEnabled}
-					onChange={async (event) => {
-						const { checked } = event.target;
-						await toggleExtension(checked);
-					}}
-					onLabel="ON"
-					offLabel="OFF"
-				/>
-				<ActionIcon
-					variant="default"
-					onClick={async () => {
-						await memoizedCallback();
-					}}
-				>
-					<Refresh />
-				</ActionIcon>
-				<ActionIcon
-					color={'red'}
-					onClick={() => {
-						chrome.storage.local.remove([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], () => {
-							setState('login');
-						});
-					}}
-				>
-					<Logout />
-				</ActionIcon>
-			</Group>
-		</Card>
+		<>
+			{!user ? (
+				<Center style={{ height: '100vh' }}>
+					<Loader />
+				</Center>
+			) : (
+				<Card withBorder p="xl" radius="md">
+					<Text align="center" size="lg" weight={500} mt="sm">
+						Welcome <span style={{ color: 'cornflowerblue' }}>{user.name}</span>
+					</Text>
+					<Divider mb="md" />
+					<Stack>
+						<Group>
+							<Switch
+								label="Extension status"
+								checked={isEnabled}
+								size="lg"
+								onChange={async (event) => {
+									const { checked } = event.target;
+									await toggleExtension(checked);
+								}}
+								onLabel="ON"
+								offLabel="OFF"
+							/>
+						</Group>
+
+						<Button
+							size="sm"
+							color={'red'}
+							onClick={() => {
+								chrome.storage.local.remove([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], () => {
+									chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+										const currentTab = tabs[0];
+										if (!currentTab || !currentTab.id) return;
+										chrome.tabs.sendMessage(currentTab.id, { isEnabled: false });
+									});
+									setState('login');
+								});
+							}}
+						>
+							Logout{' '}
+						</Button>
+					</Stack>
+				</Card>
+			)}
+		</>
 	);
 }

@@ -7,12 +7,12 @@ function isTweetPromoted(article: HTMLElement) {
 }
 
 function observeTwitterDOM() {
+	console.log('Observing Twitter DOM');
 	// Check if tweet scrolls into view
 	const io = new IntersectionObserver(
 		async (entries) => {
 			for (const entry of entries) {
 				if (entry.isIntersecting) {
-
 					const article = entry.target;
 					const tweetUsername = Array.from(article.querySelectorAll('span')).find(
 						(x) => x.textContent && x.textContent.includes('@')
@@ -35,7 +35,7 @@ function observeTwitterDOM() {
 	// @ts-ignore
 	const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-	const observer = new MutationObserver(function(mutations) {
+	const observer = new MutationObserver(function (mutations) {
 		for (const mutation of mutations) {
 			for (const node of mutation.addedNodes) {
 				if (node instanceof HTMLElement) {
@@ -71,22 +71,20 @@ function observeTwitterDOM() {
 	observer.observe(document, config);
 }
 
-// Toggle content observer on/off
-chrome.storage.onChanged.addListener((changes, namespace) => {
-	if (namespace === 'local') {
-		if (changes.hasOwnProperty('collection_script_enabled')) {
-			if (changes.collection_script_enabled.newValue === true) {
-				observeTwitterDOM();
-			} else {
-				(window as any).twitterContentObserver.disconnect();
-				(window as any).twitterIntersectionObserver.disconnect();
-			}
-		}
+chrome.runtime.onMessage.addListener((event, sender, sendResponse) => {
+	console.log('Received message from browser extension', event);
+	if (event.isEnabled) {
+		observeTwitterDOM();
+	} else {
+		console.log('Stopping observing Twitter DOM');
+		(window as any).twitterContentObserver.disconnect();
+		(window as any).twitterIntersectionObserver.disconnect();
 	}
+	sendResponse('Message received');
+	window.location.reload();
 });
 
 chrome.storage.local.get('collection_script_enabled', (result) => {
-	console.log(result);
 	if (result.collection_script_enabled === true) {
 		observeTwitterDOM();
 	}
