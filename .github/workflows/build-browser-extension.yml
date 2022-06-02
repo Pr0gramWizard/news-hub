@@ -43,7 +43,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: browser_extension_build
-          path: build_${GITHUB_SHA::6}.zip
-          mime-type: application/zip
+          path: ./apps/browser_extension/build_${GITHUB_SHA::6}.zip
 
 

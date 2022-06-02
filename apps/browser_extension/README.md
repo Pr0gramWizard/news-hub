@@ -45,7 +45,8 @@ In your Chrome browser navigate to `chrome://extensions/`.
 Somewhere on the page there should be a `Developer mode` toggle.  
 If not already enabled, enable it.
 You should find a `Load unpacked` button then where you can select a path.  
-Navigate to the `build` folder of the browser extension code folder.
+Navigate to the `build` folder of the browser extension code folder.  
+When the extension is rebuilt you still have to reload the extension on the "Manage extensions" page.
 
 ## Login and usage
 
@@ -54,5 +55,5 @@ There you can log in with your credentials.
 Unfortunately, there is no possibility to register a new account over the browser extension yet.  
 For that, you have to use the Dashboard.  
 Once you are logged in you can just enable the extension and scroll through your Twitter timeline.  
-Each tweet that is collected the twitter handle of collected tweet is marked golden.    
+Each tweet that is collected the Twitter handle of collected tweet is marked golden.    
 
