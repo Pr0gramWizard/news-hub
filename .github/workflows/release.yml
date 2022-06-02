@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Add tag to github env
+        run: echo "APP_VERSION=`echo ${github.ref_name}`" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: cd ./apps/browser_extension && yarn install --frozen-lockfile
 
@@ -23,9 +26,9 @@ jobs:
         run: cd ./apps/browser_extension && yarn build
 
       - name: Zip build folder
-        run: zip -r ./apps/browser_extension/build_${ github.ref_name }.zip ./apps/browser_extension/build
+        run: zip -r ./apps/browser_extension/build_${ APP_VERSION }.zip ./apps/browser_extension/build
 
       - name: Create Release
-        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${ github.ref_name }.zip#Browser Extension'
+        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${ APP_VERSION }.zip#Browser Extension'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
