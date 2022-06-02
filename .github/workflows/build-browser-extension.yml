@@ -46,6 +46,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: browser_extension_build
-          path: ./apps/browser_extension/build_${SHORT_SHA}.zip
+          path: ./apps/browser_extension/build_${{ env.SHORT_SHA }}.zip
 
 
