@@ -42,14 +42,22 @@ jobs:
       - name: Bump version of top level package
         run: npm version ${{ github.event.inputs.version }}
 
-      - name: Bump version of Node API
-        run: cd ./api/node && npm version ${{ github.event.inputs.version }}
+      - name: Define version variable
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          VERSION=$(echo $VERSION | sed -e 's/^v//')
+          echo $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Bump version of browser extension
-        run: cd ./apps/browser_extension && npm version ${{ github.event.inputs.version }}
+      - name: Bump version of all apps
+        run: |
+          sed -i "s/^version=.*/version=${{ env.$VERSION }}/g" ./api/node/package.json
+          sed -i "s/^version=.*/version=${{ env.$VERSION }}/g" ./apps/browser_extension/package.json
+          sed -i "s/^version=.*/version=${{ env.$VERSION }}/g" ./apps/browser_extension/package.json
+          cat package.json | grep version
+          cat ./api/node/package.json | grep version
+          cat ./apps/browser_extension/package.json | grep version
+          cat ./apps/browser_extension/package.json | grep version
 
-      - name: Bump version of dashboard
-        run: cd ./apps/browser_extension && npm version ${{ github.event.inputs.version }}
-
-      - name: Push latest version
-        run: git push origin master --follow-tags
+      # - name: Push latest version
+      #   run: git push origin master --follow-tags
