@@ -44,8 +44,7 @@ jobs:
 
       - name: Define version variable
         run: |
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          VERSION=$(echo $VERSION | sed -e 's/^v//')
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/^@//')
           echo $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
