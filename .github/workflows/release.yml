@@ -1,9 +1,9 @@
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
-name: Create Release
+name: Release
 
 jobs:
   sync-api:
@@ -19,15 +19,17 @@ jobs:
       - name: Adding Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }}  >> ~/.ssh/known_hosts
 
-      - name: Pull changes on remote server with ssh
+      - name: Update version in env file
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sed -i "s/^VERSION=.*/VERSION=${{ github.ref_name }}/g" ~/news_net/api/node/.env
-            cd ~/news_net
+            sed -i "s/^VERSION=.*/VERSION=${{ github.ref_name }}/g" ${{ secrets.REMOTE_NODE_API_PATH }/.env
+            cd ${{ secrets.REMOTE_PATH }}
+            eval $(ssh-agent -s)
+            ssh-add ${{ secrets.REMOTE_GITHUB_SSH_KEY_LOCATION }}
             git pull
 
   sync-dashboard:
@@ -53,7 +55,7 @@ jobs:
         run: touch ./apps/dashboard/.env
 
       - name: Add API_URL to .env
-        run: echo 'VITE_API_URL="${{ secrets.REMOTE_API_URL }}"' > ./apps/dashboard/.env
+        run: echo 'VITE_API_URL="https://newshub.mortaga.de/api"' > ./apps/dashboard/.env
 
       - name: Add APP_VERSION to .env
         run: echo 'VITE_APP_VERSION="${{ github.ref_name }}"' > ./apps/dashboard/.env
@@ -64,7 +66,8 @@ jobs:
       - name: Push dashboard to remote server
         run: scp -r ./apps/dashboard/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.REMOTE_DASHBOARD_PATH }}
 
-  create-github-release:
+  release-please:
+    needs: [ sync-api, sync-dashboard ]
     name: Create GitHub Release
     runs-on: ubuntu-latest
     steps:
@@ -81,9 +84,13 @@ jobs:
         run: cd ./apps/browser_extension && yarn build
 
       - name: Zip build folder
-        run: zip -r ./apps/browser_extension/build_${{github.ref_name}}.zip ./apps/browser_extension/build
+        run: zip -r ./build_${{github.ref_name}}.zip ./apps/browser_extension/build
 
       - name: Create Release
-        run: gh release create ${{ github.ref }} --generate-notes './apps/browser_extension/build_${{github.ref_name}}.zip#Browser Extension'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: google-github-actions/release-please-action@v3
+        with:
+          command: release-pr
+          release-type: node
+          package-name: newshub
+          extra-files: |
+            ./build_${{github.ref_name}}.zip
