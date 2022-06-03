@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 name: Release
 
@@ -84,13 +84,9 @@ jobs:
         run: cd ./apps/browser_extension && yarn build
 
       - name: Zip build folder
-        run: zip -r ./build_${{github.ref_name}}.zip ./apps/browser_extension/build
+        run: cd ./apps/browser_extension && zip -r ../../build_${{github.ref_name}}.zip ./build
 
       - name: Create Release
-        uses: google-github-actions/release-please-action@v3
-        with:
-          command: release-pr
-          release-type: node
-          package-name: newshub
-          extra-files: |
-            ./build_${{github.ref_name}}.zip
+        run: gh release create ${{ github.ref }} --generate-notes './build_${{github.ref_name}}.zip#Browser Extension'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
