@@ -39,8 +39,17 @@ jobs:
           git config user.name 'Maged Mortaga'
           git config user.email '18315564+Pr0gramWizard@users.noreply.github.com'
 
-      - name: Bump version
+      - name: Bump version of top level package
         run: npm version ${{ github.event.inputs.version }}
+
+      - name: Bump version of Node API
+        run: cd ./api/node && npm version ${{ github.event.inputs.version }}
+
+      - name: Bump version of browser extension
+        run: cd ./apps/browser_extension && npm version ${{ github.event.inputs.version }}
+
+      - name: Bump version of dashboard
+        run: cd ./apps/browser_extension && npm version ${{ github.event.inputs.version }}
 
       - name: Push latest version
         run: git push origin master --follow-tags
