@@ -111,7 +111,7 @@ export function NavBar() {
 			<Navbar.Section grow>
 				<Group className={classes.header} position="center">
 					<NewsHubLogo variant="black" width={150} />
-					<Code sx={{ fontWeight: 700 }}>v{import.meta.env.VITE_APP_VERSION || '0.0.0'}</Code>
+					<Code sx={{ fontWeight: 700 }}>{import.meta.env.VITE_APP_VERSION || 'v0.0.0'}</Code>
 				</Group>
 				{links}
 			</Navbar.Section>
