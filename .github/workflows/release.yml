@@ -33,6 +33,8 @@ jobs:
             git pull
             yarn rebuild
             yarn start:api
+            docker network connect ${{ secrets.DOCKER_NETWORK }} ${{ secrets.DOCKER_NODE_CONTAINER }}
+            docker network connect ${{ secrets.DOCKER_NETWORK }} ${{ secrets.DOCKER_PYTHON_CONTAINER }}
 
   sync-dashboard:
     name: Sync Dashboard to remote server
