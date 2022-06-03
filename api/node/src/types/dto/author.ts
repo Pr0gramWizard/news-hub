@@ -64,3 +64,19 @@ export class CreateAuthor {
 	@IsOptional()
 	avatar?: string;
 }
+
+export class AuthorUserCount {
+	@ApiProperty()
+	username!: string;
+
+	@ApiProperty()
+	totalNumberOfTweets!: string;
+
+	@ApiProperty()
+	numberOfTweetsByUser!: string;
+}
+
+export class AuthorWithCount extends AuthorResponse {
+	@ApiProperty()
+	tweetCount!: string;
+}

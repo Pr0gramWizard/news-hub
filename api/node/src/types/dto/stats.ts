@@ -1,22 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OldTweetFrequencyResponse, OldTweetTopTweetersResponse } from './old.tweet';
+import { IsNumber, IsString } from 'class-validator';
 
-export class StatsResponse {
+export class UserStats {
 	@ApiProperty()
-	numberOfTweets!: number;
-
-	@ApiProperty()
-	numberOfOldTweets!: number;
+	@IsNumber()
+	value!: number;
 
 	@ApiProperty()
-	numberOfAuthors!: number;
-
-	@ApiProperty()
-	numberOfUsers!: number;
-
-	@ApiProperty()
-	oldTweetsFrequencyByDay!: OldTweetFrequencyResponse;
-
-	@ApiProperty()
-	topTweeters!: OldTweetTopTweetersResponse;
+	@IsString()
+	label!: string;
 }
