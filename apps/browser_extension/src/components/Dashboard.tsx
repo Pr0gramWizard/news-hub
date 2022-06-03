@@ -15,6 +15,7 @@ export function Dashboard() {
 	const { setState } = useStateContext();
 	const [isEnabled, setIsEnabled] = React.useState(false);
 	const [user, setUser] = React.useState<User | undefined>(undefined);
+	const appVersion = process.env.VERSION;
 
 	useEffect(() => {
 		chrome.storage.local.get([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], (result) => {
@@ -49,6 +50,9 @@ export function Dashboard() {
 				<Card withBorder p="xl" radius="md">
 					<Text align="center" size="lg" weight={500} mt="sm">
 						Welcome <span style={{ color: 'cornflowerblue' }}>{user.name}</span>
+					</Text>
+					<Text align="center" size="sm" mt="ms" weight={900}>
+						Version: <span style={{ color: 'dimgrey' }}>{appVersion}</span>
 					</Text>
 					<Divider mb="md" />
 					<Stack>

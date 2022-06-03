@@ -12,6 +12,7 @@ Create a new `.env` file and add the following lines:
 
 ```
 API_URL="http://localhost:3000/api"
+VERSION="x.x.x"
 ```  
 
 Be sure to change the value if you are using a remote endpoint or other port.
