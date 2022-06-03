@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sed -i "s/^VERSION=.*/VERSION=${{ github.ref_name }}/g" ${{ secrets.REMOTE_NODE_API_PATH }/.env
+            sed -i "s/^VERSION=.*/VERSION=${{ github.ref_name }}/g" ${{ secrets.REMOTE_NODE_API_PATH }}/.env
             cd ${{ secrets.REMOTE_PATH }}
             eval $(ssh-agent -s)
             ssh-add ${{ secrets.REMOTE_GITHUB_SSH_KEY_LOCATION }}
