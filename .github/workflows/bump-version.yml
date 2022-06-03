@@ -40,15 +40,11 @@ jobs:
           git config user.email '18315564+Pr0gramWizard@users.noreply.github.com'
 
       - name: Bump version of top level package
-        id: bump-version
         run: npm version ${{ github.event.inputs.version }}
 
       - name: Define version variable
         run: |
-          VERSION=${{ steps.bump-version.outputs.stdout }}
-          echo $VERSION
-          VERSION=$(echo $VERSION | sed 's/^@//')
-          echo $VERSION
+          VERSION=$(awk -F'"' '/"version": ".+"/{ print $4; exit; }' package.json)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Bump version of all apps
