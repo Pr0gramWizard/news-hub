@@ -49,13 +49,14 @@ jobs:
 
       - name: Bump version of all apps
         run: |
-          sed -i "s/^version=.*/version=${{ env.VERSION }}/g" ./api/node/package.json
-          sed -i "s/^version=.*/version=${{ env.VERSION }}/g" ./apps/browser_extension/package.json
-          sed -i "s/^version=.*/version=${{ env.VERSION }}/g" ./apps/browser_extension/package.json
+          jq '.version="${{ env.VERSION }}"' ./api/node/package.json
+          jq '.version="${{ env.VERSION }}"' ./apps/browser_extension/package.json
+          jq '.version="${{ env.VERSION }}"' ./apps/browser_extension/package.json
+          
           cat package.json | grep version
           cat ./api/node/package.json | grep version
           cat ./apps/browser_extension/package.json | grep version
           cat ./apps/browser_extension/package.json | grep version
 
-      # - name: Push latest version
+      # - name: Push the latest version
       #   run: git push origin master --follow-tags
