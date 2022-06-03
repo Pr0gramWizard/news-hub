@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sed -i "s/^VERSION=.*/VERSION='${{ github.ref }}'/g" ~/news_net/api/node/.env
+            sed -i "s/^VERSION=.*/VERSION=${{ github.ref_name }}/g" ~/news_net/api/node/.env
             cd ~/news_net
             git pull
 
@@ -34,6 +34,15 @@ jobs:
     name: Sync Dashboard to remote server
     runs-on: ubuntu-latest
     steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'placeholder'
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }}  >> ~/.ssh/known_hosts
+
       - name: Checkout code
         uses: actions/checkout@v3
 
