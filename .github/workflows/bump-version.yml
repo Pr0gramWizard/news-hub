@@ -40,11 +40,14 @@ jobs:
           git config user.email '18315564+Pr0gramWizard@users.noreply.github.com'
 
       - name: Bump version of top level package
+        id: bump-version
         run: npm version ${{ github.event.inputs.version }}
 
       - name: Define version variable
         run: |
-          VERSION=$(echo "${{ github.ref_name }}" | sed 's/^@//')
+          VERSION=${{ steps.bump-version.outputs.stdout }}
+          echo $VERSION
+          VERSION=$(echo $VERSION | sed 's/^@//')
           echo $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
