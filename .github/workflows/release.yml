@@ -31,6 +31,8 @@ jobs:
             eval $(ssh-agent -s)
             ssh-add ${{ secrets.REMOTE_GITHUB_SSH_KEY_LOCATION }}
             git pull
+            yarn rebuild
+            yarn start:api
 
   sync-dashboard:
     name: Sync Dashboard to remote server
@@ -58,7 +60,7 @@ jobs:
         run: echo 'VITE_API_URL="https://newshub.mortaga.de/api"' > ./apps/dashboard/.env
 
       - name: Add APP_VERSION to .env
-        run: echo 'VITE_APP_VERSION="${{ github.ref_name }}"' > ./apps/dashboard/.env
+        run: echo 'VITE_APP_VERSION="${{ github.ref_name }}"' >> ./apps/dashboard/.env
 
       - name: Build dashboard
         run: cd ./apps/dashboard && yarn build
