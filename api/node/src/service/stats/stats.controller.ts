@@ -1,26 +1,13 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { BadRequestException, Controller, Get, Injectable } from '@nestjs/common';
-import { TweetAuthorService } from '@tweet/author/tweet.author.service';
-import { OldTweetService } from '@tweet/old_tweets/old.tweet.service';
 import { TweetService } from '@tweet/tweet.service';
-import { StatsResponse } from '@type/dto/stats';
 import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import { UserContext } from '../../decorator/user.decorator';
 import { JwtPayload } from '../auth/auth.service';
-import { ApiOkResponse, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../../decorator/auth.decorator';
-
-class UserStats {
-	@ApiProperty()
-	@IsNumber()
-	value!: number;
-
-	@ApiProperty()
-	@IsString()
-	label!: string;
-}
+import { UserStats } from '@type/dto/stats';
 
 @Injectable()
 @Controller('stats')
@@ -28,31 +15,10 @@ class UserStats {
 export class StatsController {
 	constructor(
 		private readonly tweetService: TweetService,
-		private readonly oldTweetService: OldTweetService,
-		private readonly authorService: TweetAuthorService,
 		private readonly userService: UserService,
 		private readonly logger: NewsHubLogger,
 	) {
 		this.logger.setContext(StatsController.name);
-	}
-
-	@Get('old/tweets')
-	@ApiOkResponse({ type: StatsResponse })
-	async getStats(): Promise<StatsResponse> {
-		const numberOfTweets = await this.tweetService.count();
-		const numberOfOldTweets = await this.oldTweetService.count();
-		const numberOfAuthors = await this.authorService.count();
-		const numberOfUsers = await this.userService.count();
-		const oldTweetsFrequencyByDay = await this.oldTweetService.getTweetFrequency();
-		const topTweeters = await this.oldTweetService.getTopNTweetUsers(10);
-		return {
-			numberOfTweets,
-			numberOfOldTweets,
-			numberOfAuthors,
-			numberOfUsers,
-			topTweeters,
-			oldTweetsFrequencyByDay,
-		};
 	}
 
 	@Get('/me')

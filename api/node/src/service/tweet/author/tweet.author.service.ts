@@ -6,7 +6,7 @@ import { TwitterApiException } from '@type/error/general';
 import { TwitterApiErrorCode } from '@type/error/twitter.api';
 import { UserV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
-import { CreateAuthor } from '@type/dto/author';
+import { AuthorWithCount, CreateAuthor } from '@type/dto/author';
 import { Author } from './tweet.author.entity';
 
 @Injectable()
@@ -66,5 +66,34 @@ export class TweetAuthorService {
 
 	async count(): Promise<number> {
 		return this.authorRepository.count();
+	}
+
+	async getTopTenNewsRelatedAuthors(): Promise<AuthorWithCount[]> {
+		return await this.authorRepository
+			.createQueryBuilder('author')
+			.select('author.id', 'id')
+			.addSelect('author.username', 'username')
+			.leftJoinAndSelect('author.tweets', 'tweet')
+			.addSelect('COUNT(tweet.id)', 'tweetCount')
+			.where('tweet.isNewsRelated = :isNewsRelated', { isNewsRelated: true })
+			.groupBy('author.id')
+			.orderBy('COUNT(tweet.id)', 'DESC')
+			.limit(10)
+			.getRawMany();
+	}
+
+	async getNumberOfTweetsByUserAndAuthors(sub: string, authors: string[]): Promise<AuthorWithCount[]> {
+		return await this.authorRepository
+			.createQueryBuilder('author')
+			.select('author.id', 'id')
+			.addSelect('author.username', 'username')
+			.leftJoinAndSelect('author.tweets', 'tweet')
+			.addSelect('COUNT(tweet.id)', 'tweetCount')
+			.where('tweet.isNewsRelated = :isNewsRelated', { isNewsRelated: true })
+			.where('tweet.user = :user', { user: sub })
+			.andWhere('author.username IN (:...authors)', { authors })
+			.groupBy('author.id')
+			.orderBy('COUNT(tweet.id)', 'DESC')
+			.getRawMany();
 	}
 }
