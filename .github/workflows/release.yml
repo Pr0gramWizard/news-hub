@@ -70,7 +70,7 @@ jobs:
       - name: Push dashboard to remote server
         run: scp -r ./apps/dashboard/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.REMOTE_DASHBOARD_PATH }}
 
-  release-please:
+  create-github-release:
     needs: [ sync-api, sync-dashboard ]
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -82,7 +82,13 @@ jobs:
         run: cd ./apps/browser_extension && yarn install --frozen-lockfile
 
       - name: Create .env file
-        run: cd ./apps/browser_extension && touch .env && echo 'API_URL="https://newshub.mortaga.de/api"' > .env
+        run: touch ./apps/browser_extension/.env
+
+      - name: Add API_URL to .env
+        run: echo 'API_URL="https://newshub.mortaga.de/api"' > ./apps/browser_extension/.env
+
+      - name: Add APP_VERSION to .env
+        run: echo 'APP_VERSION="${{ github.ref_name }}"' >> ./apps/browser_extension/.env
 
       - name: Build browser extension
         run: cd ./apps/browser_extension && yarn build
