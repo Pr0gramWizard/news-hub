@@ -49,9 +49,9 @@ jobs:
 
       - name: Bump version of all apps
         run: |
-          jq '.version="${{ env.VERSION }}"' ./api/node/package.json
-          jq '.version="${{ env.VERSION }}"' ./apps/browser_extension/package.json
-          jq '.version="${{ env.VERSION }}"' ./apps/browser_extension/package.json
+          jq '.version="${{ env.VERSION }}"' ./api/node/package.json > ./api/node/package.json.tmp && mv ./api/node/package.json.tmp ./api/node/package.json
+          jq '.version="${{ env.VERSION }}"' ./apps/dashboard/package.json > ./apps/dashboard/package.json.tmp && mv ./apps/dashboard/package.json.tmp ./apps/dashboard/package.json
+          jq '.version="${{ env.VERSION }}"' ./apps/browser_extension/package.json > ./apps/browser_extension/package.json.tmp && mv ./apps/browser_extension/package.json.tmp ./apps/browser_extension/package.json
           
           cat package.json | grep version
           cat ./api/node/package.json | grep version
