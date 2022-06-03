@@ -1,7 +1,7 @@
 export default () => ({
 	env: process.env.NODE_ENV || 'development',
 	port: parseInt(process.env.APP_PORT || '8000', 10),
-	version: process.env.APP_VERSION || '1.0.0',
+	version: process.env.VERSION || '1.0.0',
 	database: {
 		host: process.env.DATABASE_HOST,
 		port: parseInt(process.env.DATABASE_PORT || '3306', 10),
