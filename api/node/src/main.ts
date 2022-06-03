@@ -18,11 +18,12 @@ async function bootstrap() {
 	const config = app.get(ConfigService);
 	const port = config.get('port');
 	const environment = config.get('env');
+	const version = config.get('version');
 
 	const swaggerConfig = new DocumentBuilder()
 		.setTitle('NewsHub API')
 		.setDescription('This is the auto-generated documentation for the NewsHub API')
-		.setVersion('1.0')
+		.setVersion(version)
 		.addBearerAuth()
 		.build();
 

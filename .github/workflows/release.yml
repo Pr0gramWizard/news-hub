@@ -6,6 +6,55 @@ on:
 name: Create Release
 
 jobs:
+  sync-api:
+    name: Sync API to remote server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'placeholder'
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }}  >> ~/.ssh/known_hosts
+
+      - name: Pull changes on remote server with ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sed -i "s/^VERSION=.*/VERSION='${{ github.ref }}'/g" ~/news_net/api/node/.env
+            cd ~/news_net
+            git pull
+
+  sync-dashboard:
+    name: Sync Dashboard to remote server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: cd ./apps/dashboard && yarn install --frozen-lockfile
+
+      - name: Create .env file
+        run: touch ./apps/dashboard/.env
+
+      - name: Add API_URL to .env
+        run: echo 'VITE_API_URL="${{ secrets.REMOTE_API_URL }}"' > ./apps/dashboard/.env
+
+      - name: Add APP_VERSION to .env
+        run: echo 'VITE_APP_VERSION="${{ github.ref_name }}"' > ./apps/dashboard/.env
+
+      - name: Build dashboard
+        run: cd ./apps/dashboard && yarn build
+
+      - name: Push dashboard to remote server
+        run: scp -r ./apps/dashboard/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.REMOTE_DASHBOARD_PATH }}
+
   create-github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
