@@ -28,6 +28,8 @@ export interface Tweet {
 	author: Author;
 	entities?: Entities;
 	type: TweetType[];
+	isNewsRelated: boolean;
+	userClassification: TweetType[] | null;
 }
 
 interface Hashtag {
@@ -36,7 +38,7 @@ interface Hashtag {
 	name: string;
 }
 
-enum TweetType {
+export enum TweetType {
 	NORMAL = 'NORMAL',
 	CONTAINS_NEWS_ARTICLE = 'CONTAINS_NEWS_ARTICLE',
 	AUTHOR_IS_NEWS_OUTLET = 'AUTHOR_IS_NEWS_OUTLET',

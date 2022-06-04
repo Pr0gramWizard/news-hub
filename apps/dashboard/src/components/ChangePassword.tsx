@@ -60,7 +60,6 @@ export function ChangePassword() {
 			<Paper withBorder shadow="md" p={30} radius="md" mt="xl">
 				<form
 					onSubmit={form.onSubmit(async (values) => {
-						console.log(values);
 						await handleSubmit(values);
 					})}
 				>

@@ -14,6 +14,7 @@ import {
 import { AuthorType } from '@tweet/author/tweet.author.entity';
 import { HashtagService } from '@tweet/hashtag/hashtag.service';
 import {
+	ClassifyTweetDto,
 	LimitQuery,
 	OrderQuery,
 	PageQuery,
@@ -114,7 +115,7 @@ export class TweetController {
 	@Get('is/news')
 	@Auth()
 	@ApiOkResponse({
-		description: 'Get all tweets of requesting user by type',
+		description: 'Get all news related tweets of requesting user',
 		type: [TweetResponse],
 	})
 	@ApiBadRequestResponse({
@@ -161,7 +162,7 @@ export class TweetController {
 		if (!user) {
 			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
 		}
-		// Parse and validate passed url. Currently, we only support twitter.com
+		// Parse and validate passed url. Currently, we only support Twitter urls
 		const { pathname, hostname } = new URL(url);
 		if (!this.supportedSocialMediaLinks.includes(hostname)) {
 			this.logger.debug(`Unsupported social media link: ${hostname}`);
@@ -256,5 +257,29 @@ export class TweetController {
 			}
 			await this.articleService.createManyByUrl(newsLinks, tweet);
 		}
+	}
+
+	@Post('/classify')
+	@Auth()
+	@ApiCreatedResponse({
+		description: 'Stored the tweet in the database',
+	})
+	@ApiNotFoundResponse({
+		description: 'User not found',
+	})
+	@ApiBadRequestResponse({
+		description: 'Either the tweet url is not valid or there was an error with the data the Twitter API returned',
+	})
+	async classifyTweet(@UserContext() jwtUser: JwtPayload, @Body() data: ClassifyTweetDto) {
+		const user = await this.userService.findById(jwtUser.sub);
+		if (!user) {
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		const { tweetId, classifications } = data;
+		const tweet = await this.tweetService.findByIdAndUser(tweetId, user);
+		if (!tweet) {
+			throw new BadRequestException(TweetErrorCode.TWEET_NOT_FOUND);
+		}
+		await this.tweetService.setUserClassification(tweet.id, classifications);
 	}
 }

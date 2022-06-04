@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Author } from '@tweet/author/tweet.author.entity';
-import { User } from '@user/user.entity';
-import { IsArray, IsBoolean, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
-import { TweetType } from '../../service/tweet/tweet.entity';
-import { ArticleMetaData, ArticleResponse } from './article';
-import { AuthorResponse } from './author';
-import { HashtagResponse } from './hashtag';
+import {ApiProperty} from '@nestjs/swagger';
+import {Author} from '@tweet/author/tweet.author.entity';
+import {User} from '@user/user.entity';
+import {IsArray, IsBoolean, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
+import {TweetEntitiesV2, TweetV2} from 'twitter-api-v2';
+import {TweetType} from '../../service/tweet/tweet.entity';
+import {ArticleMetaData, ArticleResponse} from './article';
+import {AuthorResponse} from './author';
+import {HashtagResponse} from './hashtag';
 
 // Controller DTOs
 export class TweetResponse {
@@ -60,6 +60,9 @@ export class TweetResponse {
 
 	@ApiProperty()
 	url!: string;
+
+	@ApiProperty({ enum: ['NORMAL', 'CONTAINS_NEWS_ARTICLE', 'AUTHOR_IS_NEWS_OUTLET'], isArray: true, nullable: true })
+	userClassification!: TweetType[] | null;
 }
 
 export class PaginatedTweetResponse {
@@ -198,4 +201,15 @@ export class SortQuery {
 export class OrderQuery {
 	@ApiProperty({ description: 'Direction to order', required: false, default: 'DESC' })
 	order?: 'ASC' | 'DESC';
+}
+
+export class ClassifyTweetDto {
+	@ApiProperty()
+	@IsString()
+	tweetId!: string;
+
+	@ApiProperty({ enum: ['NORMAL', 'CONTAINS_NEWS_ARTICLE', 'AUTHOR_IS_NEWS_OUTLET'], isArray: true })
+	@IsArray()
+	@IsOptional()
+	classifications!: TweetType[];
 }

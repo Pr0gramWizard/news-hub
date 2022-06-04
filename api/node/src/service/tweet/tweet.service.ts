@@ -2,7 +2,7 @@ import { NewsHubLogger } from '@common/logger.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTweet, PaginatedTweetResponse, TweetProps, TweetQueryParameter } from '@type/dto/tweet';
-import { TwitterApiException } from '@type/error/general';
+import { InternalServerException, TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
 import { User } from '@user/user.entity';
 import { TweetEntityUrlV2 } from 'twitter-api-v2';
@@ -35,7 +35,9 @@ export class TweetService {
 				id,
 				user,
 			},
-			{ relations: ['author', 'hashtags', 'articles', 'articles.newsPage'] },
+			{
+				relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
+			},
 		);
 	}
 
@@ -175,5 +177,13 @@ export class TweetService {
 
 	async count(): Promise<number> {
 		return this.tweetRepository.count();
+	}
+
+	async setUserClassification(id: string, classification: TweetType[]): Promise<void> {
+		const updateResult = await this.tweetRepository.update({ id }, { userClassification: classification });
+		if (updateResult.affected === 0) {
+			this.logger.debug(updateResult);
+			throw new InternalServerException();
+		}
 	}
 }

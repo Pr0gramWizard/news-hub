@@ -1,9 +1,13 @@
-import { Tweet } from '../types/tweet';
+import { Tweet, TweetType } from '../types/tweet';
 import { DetailTableRow, DetailTableRowProps } from './DetailTableRow';
-import { Anchor, Badge, createStyles, Divider, Paper, Table, Text, Tooltip } from '@mantine/core';
-import React from 'react';
+import { Anchor, Badge, Button, createStyles, Divider, Group, Paper, Table, Text, Tooltip } from '@mantine/core';
+import React, { useContext } from 'react';
 import { useClipboard } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
+import { TweetTypeMultiSelect } from './TweetTypeMultiSelect';
+import { DeviceFloppy } from 'tabler-icons-react';
+import AuthContext from '../context/authProvider';
+import { handleFetchErrorResponse } from '../util/handleError';
 
 interface TweetDetailCardProps {
 	tweet: Tweet;
@@ -48,7 +52,12 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
+	const { user } = useContext(AuthContext);
+	if (!user) {
+		throw new Error('User not found');
+	}
 	const clipboard = useClipboard({ timeout: 500 });
+	const [tweetTypes, setTweetTypes] = React.useState<TweetType[]>(tweet.type);
 	const { classes } = useStyles();
 	const tweetDetails: DetailTableRowProps[] = [
 		{ label: 'ID', value: tweet.id },
@@ -85,7 +94,7 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 		},
 		{ label: 'Language', value: tweet.language },
 		{
-			label: 'Type',
+			label: 'System classification',
 			value:
 				tweet.type.length > 0 ? (
 					<div>
@@ -100,6 +109,17 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 				),
 		},
 		{
+			label: 'User classification',
+			value: (
+				<TweetTypeMultiSelect
+					tweet={tweet}
+					onChange={(changes: string[]) => {
+						setTweetTypes(changes as TweetType[]);
+					}}
+				/>
+			),
+		},
+		{
 			label: 'Hashtags',
 			value:
 				tweet.hashtags.length > 0 ? (
@@ -112,6 +132,7 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 					<span>No hashtags</span>
 				),
 		},
+		{ label: 'News-related', value: tweet.isNewsRelated ? 'Yes' : 'No' },
 		{ label: 'Created at', value: new Date(tweet.createdAt).toLocaleString('de-DE') },
 		{ label: 'Seen at', value: new Date(tweet.seenAt).toLocaleString('de-DE') },
 	];
@@ -128,6 +149,39 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 					})}
 				</tbody>
 			</Table>
+			<Group position="center" className={classes.content}>
+				<Button
+					leftIcon={<DeviceFloppy />}
+					onClick={async () => {
+						try {
+							const updatedClassification = tweetTypes.length > 0 ? tweetTypes : null;
+							const response = await fetch(`${import.meta.env.VITE_API_URL}/tweet/classify`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									Authorization: `Bearer ${user.token}`,
+								},
+								body: JSON.stringify({
+									tweetId: tweet.id,
+									classifications: updatedClassification,
+								}),
+							});
+							await handleFetchErrorResponse(response);
+							showNotification({
+								message: 'Tweet classified',
+								color: 'green',
+							});
+						} catch (e) {
+							if (!(e instanceof Error)) {
+								throw e;
+							}
+							showNotification(e);
+						}
+					}}
+				>
+					Save
+				</Button>
+			</Group>
 		</Paper>
 	);
 }

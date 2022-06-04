@@ -1,7 +1,16 @@
 import { User } from '@user/user.entity';
 import { TweetEntitiesV2 } from 'twitter-api-v2';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { TweetProps } from '../../types/dto/tweet';
+import {
+	AfterLoad,
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	OneToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
+import { TweetProps } from '@type/dto/tweet';
 import { Article } from '../article/article.entity';
 import { Author } from './author/tweet.author.entity';
 import { Hashtag } from './hashtag/hashtag.entity';
@@ -39,6 +48,14 @@ export class Tweet {
 	@Column({ type: 'boolean', default: false, name: 'is_news_related' })
 	isNewsRelated!: boolean;
 
+	@Column({
+		default: null,
+		nullable: true,
+		type: 'set',
+		enum: TweetType,
+	})
+	userClassification!: TweetType[];
+
 	@Column({ default: 0 })
 	totalComments!: number;
 
@@ -75,5 +92,16 @@ export class Tweet {
 
 	constructor(props?: TweetProps) {
 		Object.assign(this, props);
+	}
+
+	@AfterLoad()
+	afterLoad() {
+		if (!this.userClassification) {
+			return;
+		}
+
+		this.isNewsRelated =
+			this.userClassification.includes(TweetType.CONTAINS_NEWS_ARTICLE) ||
+			this.userClassification.includes(TweetType.AUTHOR_IS_NEWS_OUTLET);
 	}
 }
