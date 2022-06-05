@@ -270,3 +270,6 @@ fabric.properties
 /.build
 
 /database
+
+tweets.csv
+tweets.json
