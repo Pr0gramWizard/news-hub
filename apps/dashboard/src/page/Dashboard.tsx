@@ -43,7 +43,7 @@ interface StatCardProps {
 	value: string;
 }
 
-interface StatsRepoonse {
+interface StatsResponse {
 	label: string;
 	value: string | number;
 }
@@ -82,7 +82,7 @@ export function Dashboard() {
 				setUser(undefined);
 				return;
 			}
-			const json = (await stats.json()) as StatsRepoonse[];
+			const json = (await stats.json()) as StatsResponse[];
 			const newStats = [];
 			for (const stat of json) {
 				newStats.push({

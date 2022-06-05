@@ -1,12 +1,12 @@
-import {ApiProperty} from '@nestjs/swagger';
-import {Author} from '@tweet/author/tweet.author.entity';
-import {User} from '@user/user.entity';
-import {IsArray, IsBoolean, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
-import {TweetEntitiesV2, TweetV2} from 'twitter-api-v2';
-import {TweetType} from '../../service/tweet/tweet.entity';
-import {ArticleMetaData, ArticleResponse} from './article';
-import {AuthorResponse} from './author';
-import {HashtagResponse} from './hashtag';
+import { ApiProperty } from '@nestjs/swagger';
+import { Author } from '@tweet/author/tweet.author.entity';
+import { User } from '@user/user.entity';
+import { IsArray, IsBoolean, IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
+import { TweetType } from '@tweet/tweet.entity';
+import { ArticleMetaData, ArticleResponse } from './article';
+import { AuthorResponse } from './author';
+import { HashtagResponse } from './hashtag';
 
 // Controller DTOs
 export class TweetResponse {
@@ -212,4 +212,10 @@ export class ClassifyTweetDto {
 	@IsArray()
 	@IsOptional()
 	classifications!: TweetType[];
+}
+
+export class FileExportFormat {
+	@ApiProperty({ enum: ['csv', 'json'], default: 'json' })
+	@IsString()
+	format!: 'csv' | 'json';
 }

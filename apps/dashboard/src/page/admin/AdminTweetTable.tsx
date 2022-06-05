@@ -18,31 +18,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import ReactCountryFlag from 'react-country-flag';
 import { useNavigate } from 'react-router-dom';
 import { BrandTwitter, Search, X } from 'tabler-icons-react';
-import CenteredTableHeader from '../components/CenteredTableHeader';
-import AuthContext from '../context/authProvider';
-import { Tweet } from '../types/tweet';
+import CenteredTableHeader from '../../components/CenteredTableHeader';
+import AuthContext from '../../context/authProvider';
+import { Tweet } from '../../types/tweet';
+import { getCountryFlag, getLanguageDisplayName } from '../TweetTable';
 
-export const getLanguageDisplayName = (language: string): string => {
-	let languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
-	try {
-		let languageName = languageNames.of(language);
-		return languageName && languageName !== 'root' ? languageName : 'Unknown language';
-	} catch (e) {
-		return 'Unknown language';
-	}
-};
-
-export const getCountryFlag = (language?: string): string => {
-	if (!language || language === 'und') {
-		return 'xx';
-	}
-	if (language === 'en') {
-		return 'gb';
-	}
-	return language;
-};
-
-export function TweetTable() {
+export function AdminTweetTable() {
 	const { user, setUser } = useContext(AuthContext);
 	const [data, setData] = useState<Tweet[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -58,7 +39,7 @@ export function TweetTable() {
 			throw new Error('User is not logged in');
 		}
 		const response = await fetch(
-			`${import.meta.env.VITE_API_URL}/tweet/user?searchTerm=${debouncedSearch}&limit=15&page=${activePage}`,
+			`${import.meta.env.VITE_API_URL}/tweet?searchTerm=${debouncedSearch}&limit=15&page=${activePage}`,
 			{
 				method: 'GET',
 				headers: {
@@ -178,7 +159,7 @@ export function TweetTable() {
 													<Menu.Item
 														icon={<Search size={14} />}
 														onClick={() => {
-															navigate(`/tweet/${row.id}`);
+															navigate(`/admin/tweet/${row.id}`);
 														}}
 													>
 														View Tweet details

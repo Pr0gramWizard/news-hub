@@ -6,11 +6,12 @@ interface AuthProviderProps {
 	children: React.ReactNode;
 }
 
-export interface User {
+export interface Account {
 	name: string;
 	email: string;
 	role: string;
 	token: string;
+	isAdmin: boolean;
 }
 
 export interface LoginResponse {
@@ -19,7 +20,7 @@ export interface LoginResponse {
 }
 
 interface AuthContextProps {
-	user: User | undefined;
+	user: Account | undefined;
 	setUser: (user?: LoginResponse) => void;
 	isLoading: boolean | undefined;
 	setIsLoading: (isLoading: boolean) => void;
@@ -34,7 +35,7 @@ const AuthContext = createContext<AuthContextProps>({
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
 	const navigate = useNavigate();
-	const [user, setUser] = useState<User | undefined>(JSON.parse(localStorage.getItem('user') || 'null'));
+	const [user, setUser] = useState<Account | undefined>(JSON.parse(localStorage.getItem('user') || 'null'));
 	const [isLoading, setIsLoading] = useState(true);
 
 	const setUserCallback = (user: LoginResponse | undefined) => {
@@ -44,12 +45,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 			navigate('/login');
 			return;
 		}
-		const payload = jwtDecode(user.token) as User;
+		const payload = jwtDecode(user.token) as Account;
+		const role = payload.role.toLowerCase();
 		const userPayload = {
 			name: user.name,
 			email: payload.email,
-			role: payload.role,
+			role,
 			token: user.token,
+			isAdmin: role === 'admin' || role === 'super_admin',
 		};
 		setUser(userPayload);
 		localStorage.setItem('user', JSON.stringify(userPayload));

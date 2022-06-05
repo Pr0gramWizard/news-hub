@@ -1,15 +1,16 @@
 import { NewsHubLogger } from '@common/logger.service';
-import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
 	ChangeBasicInformationRequest,
 	ChangeUserRoleRequest,
 	GetUserResponse,
 	ResetPasswordRequest,
+	UserForAdminDashboard,
 	UserResponse,
 } from '@type/dto/user';
 import { UserErrorCodes } from '@type/error/user';
-import { UserRole } from '@user/user.entity';
+import { User, UserRole } from '@user/user.entity';
 import { UserService } from './user.service';
 import { Auth } from '../../decorator/auth.decorator';
 import { UserContext } from '../../decorator/user.decorator';
@@ -27,20 +28,21 @@ export class UserController {
 	@ApiNotFoundResponse({ description: 'User not found' })
 	@Auth(UserRole.ADMIN)
 	async getUserById(@Param('id') userId: string): Promise<GetUserResponse> {
-		const user = await this.userService.findById(userId);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
-		this.logger.log(`User with id ${userId} was found`);
+		const user = await this.userService.findByIdOrFail(userId);
 		return this.userService.transformUserToUserResponse(user);
 	}
 
 	@Get('')
 	@Auth(UserRole.ADMIN)
-	@ApiOkResponse({ description: 'User entities', type: [GetUserResponse] })
-	async getAllUsers(): Promise<GetUserResponse[]> {
-		const rawUsers = await this.userService.findAll();
-		return rawUsers.map(this.userService.transformUserToUserResponse);
+	@ApiOkResponse({ description: 'User entities', type: [UserForAdminDashboard] })
+	async findAllForDashboard(): Promise<UserForAdminDashboard[]> {
+		const users = await this.userService.findAll();
+		return users.map((u) => {
+			return {
+				...u,
+				numberOfCollectedTweets: u.tweets.length,
+			};
+		});
 	}
 
 	@Get('news/tweets')
@@ -61,10 +63,7 @@ export class UserController {
 	@ApiOkResponse({ description: 'Password reset' })
 	async resetPassword(@Body() body: ResetPasswordRequest, @UserContext() jwtPayload: JwtPayload): Promise<void> {
 		const { sub } = jwtPayload;
-		const user = await this.userService.findById(sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(sub);
 		const { oldPassword, newPassword } = body;
 		await this.userService.updatePassword(user, oldPassword, newPassword);
 	}
@@ -85,10 +84,7 @@ export class UserController {
 	@ApiOkResponse({ description: 'Changed role of user' })
 	async changeUserRole(@Body() body: ChangeUserRoleRequest): Promise<void> {
 		const { userId, role } = body;
-		const user = await this.userService.findById(userId);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(userId);
 		if (user.role === role) {
 			return;
 		}
@@ -96,5 +92,24 @@ export class UserController {
 			throw new BadRequestException(UserErrorCodes.USER_IS_ADMIN);
 		}
 		await this.userService.updateRole(userId, role);
+	}
+
+	@Delete(':id')
+	@Auth(UserRole.ADMIN)
+	@ApiOkResponse({ description: 'User deleted' })
+	@ApiNotFoundResponse({ description: 'User not found' })
+	async deleteUser(@Param('id') userId: string, @UserContext() jwtPayload: JwtPayload): Promise<void> {
+		const requestingUser = await this.userService.findByIdOrFail(jwtPayload.sub);
+		const userToDelete = await this.userService.findByIdOrFail(userId);
+		if (requestingUser.id === userToDelete.id) {
+			throw new BadRequestException(UserErrorCodes.WRONG_DELETE_ROUTE);
+		}
+		if (userToDelete.role === UserRole.SUPER_ADMIN) {
+			throw new BadRequestException(UserErrorCodes.CANNOT_DELETE_SUPER_ADMIN);
+		}
+		if (requestingUser.role === UserRole.ADMIN && userToDelete.role === UserRole.ADMIN) {
+			throw new BadRequestException(UserErrorCodes.CANNOT_DELETE_ADMIN);
+		}
+		await this.userService.delete(userId);
 	}
 }
