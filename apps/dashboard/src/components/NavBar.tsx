@@ -1,9 +1,32 @@
-import { Code, createStyles, Group, Navbar } from '@mantine/core';
+import { Box, Code, createStyles, Group, Navbar, ThemeIcon } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowBigUpLines, BrandTwitter, LayoutDashboard, Logout, Settings } from 'tabler-icons-react';
+import {
+	ArrowBigUpLines,
+	BrandTwitter,
+	Icon as TablerIcon,
+	LayoutDashboard,
+	Lock,
+	Logout,
+	Settings,
+} from 'tabler-icons-react';
 import AuthContext from '../context/authProvider';
 import { NewsHubLogo } from './NewsHubLogo';
+import { LinksGroup } from './LinksGroup';
+
+interface NavBarItem {
+	icon: TablerIcon;
+	link?: string;
+	label: string;
+	links?: NestedNavBarItem[];
+	isAdminItem?: boolean;
+	prefix?: string;
+}
+
+interface NestedNavBarItem {
+	link: string;
+	label: string;
+}
 
 const useStyles = createStyles((theme, _params, getRef) => {
 	const icon = getRef('icon');
@@ -62,11 +85,22 @@ const useStyles = createStyles((theme, _params, getRef) => {
 	};
 });
 
-export const navbarLinks = [
+export const navbarLinks: NavBarItem[] = [
 	{ link: '/', label: 'Dashboard', icon: LayoutDashboard },
 	{ link: '/tweets', label: 'Tweets', icon: BrandTwitter },
 	{ link: '/parse/tweet', label: 'Parse Tweet', icon: ArrowBigUpLines },
 	{ link: '/account', label: 'Settings', icon: Settings },
+	{
+		label: 'Admin',
+		isAdminItem: true,
+		icon: Lock,
+		prefix: 'admin',
+		links: [
+			{ link: '/admin/users', label: 'All Users' },
+			{ link: '/admin/tweets', label: 'All Tweets' },
+			{ link: '/admin/export', label: 'Export' },
+		],
+	},
 ];
 
 export function NavBar() {
@@ -81,6 +115,18 @@ export function NavBar() {
 	const { pathname } = useLocation();
 
 	useEffect(() => {
+		if (pathname.includes('admin')) {
+			const adminLinks = navbarLinks.find((link) => link.label === 'Admin');
+			if (!adminLinks || !adminLinks.links) {
+				return;
+			}
+			adminLinks.links.forEach((link) => {
+				if (link.link === pathname) {
+					setActive(link.label);
+				}
+			});
+			return;
+		}
 		navbarLinks.find((link) => {
 			if (link.link === pathname) {
 				setActive(link.label);
@@ -88,23 +134,39 @@ export function NavBar() {
 		});
 	});
 
-	const links = navbarLinks.map((item) => (
-		<a
-			className={cx(classes.link, {
-				[classes.linkActive]: item.label === active,
-			})}
-			href={item.link}
-			key={item.label}
-			onClick={(event) => {
-				event.preventDefault();
-				setActive(item.label);
-				navigate(item.link);
-			}}
-		>
-			<item.icon className={classes.linkIcon} />
-			<span>{item.label}</span>
-		</a>
-	));
+	const links = navbarLinks.map((item) => {
+		if (item.isAdminItem && !user.isAdmin) {
+			return;
+		}
+		if (item.link) {
+			return (
+				<a
+					className={cx(classes.link, {
+						[classes.linkActive]: item.label === active,
+					})}
+					href={item.link}
+					key={item.label}
+					onClick={(event) => {
+						event.preventDefault();
+						setActive(item.label);
+						if (item.link) {
+							navigate(item.link);
+						}
+					}}
+				>
+					<Box sx={{ display: 'flex', alignItems: 'center' }}>
+						<ThemeIcon variant="light" size={30}>
+							<item.icon size={18} />
+						</ThemeIcon>
+						<Box ml="md" key={`box-${item.label}`}>
+							{item.label}
+						</Box>
+					</Box>
+				</a>
+			);
+		}
+		return <LinksGroup key={`link-group-${item.label}`} {...item} activeItem={active} />;
+	});
 
 	return (
 		<Navbar width={{ sm: 250 }} p="md">

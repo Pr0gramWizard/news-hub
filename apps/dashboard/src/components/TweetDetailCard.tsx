@@ -11,6 +11,7 @@ import { handleFetchErrorResponse } from '../util/handleError';
 
 interface TweetDetailCardProps {
 	tweet: Tweet;
+	readonly: boolean;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -51,7 +52,7 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
+export function TweetDetailCard({ tweet, readonly }: TweetDetailCardProps) {
 	const { user } = useContext(AuthContext);
 	if (!user) {
 		throw new Error('User not found');
@@ -113,6 +114,7 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 			value: (
 				<TweetTypeMultiSelect
 					tweet={tweet}
+					readonly={readonly}
 					onChange={(changes: string[]) => {
 						setTweetTypes(changes as TweetType[]);
 					}}
@@ -149,39 +151,41 @@ export function TweetDetailCard({ tweet }: TweetDetailCardProps) {
 					})}
 				</tbody>
 			</Table>
-			<Group position="center" className={classes.content}>
-				<Button
-					leftIcon={<DeviceFloppy />}
-					onClick={async () => {
-						try {
-							const updatedClassification = tweetTypes.length > 0 ? tweetTypes : null;
-							const response = await fetch(`${import.meta.env.VITE_API_URL}/tweet/classify`, {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json',
-									Authorization: `Bearer ${user.token}`,
-								},
-								body: JSON.stringify({
-									tweetId: tweet.id,
-									classifications: updatedClassification,
-								}),
-							});
-							await handleFetchErrorResponse(response);
-							showNotification({
-								message: 'Tweet classified',
-								color: 'green',
-							});
-						} catch (e) {
-							if (!(e instanceof Error)) {
-								throw e;
+			{!readonly && (
+				<Group position="center" className={classes.content}>
+					<Button
+						leftIcon={<DeviceFloppy />}
+						onClick={async () => {
+							try {
+								const updatedClassification = tweetTypes.length > 0 ? tweetTypes : null;
+								const response = await fetch(`${import.meta.env.VITE_API_URL}/tweet/classify`, {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										Authorization: `Bearer ${user.token}`,
+									},
+									body: JSON.stringify({
+										tweetId: tweet.id,
+										classifications: updatedClassification,
+									}),
+								});
+								await handleFetchErrorResponse(response);
+								showNotification({
+									message: 'Tweet classified',
+									color: 'green',
+								});
+							} catch (e) {
+								if (!(e instanceof Error)) {
+									throw e;
+								}
+								showNotification(e);
 							}
-							showNotification(e);
-						}
-					}}
-				>
-					Save
-				</Button>
-			</Group>
+						}}
+					>
+						Save
+					</Button>
+				</Group>
+			)}
 		</Paper>
 	);
 }

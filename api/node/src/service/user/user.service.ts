@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { ChangeBasicInformationRequest, CreateUserDTO, GetUserResponse } from '../../types/dto/user';
+import { ChangeBasicInformationRequest, CreateUserDTO, GetUserResponse } from '@type/dto/user';
 import { User, UserRole } from './user.entity';
 import { InternalServerException } from '@type/error/general';
 import { NewsHubLogger } from '@common/logger.service';
@@ -24,9 +24,24 @@ export class UserService {
 		});
 	}
 
+	async findByIdOrFail(id: string): Promise<User> {
+		const user = await this.userRepository.findOne(id, {
+			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
+		});
+		if (!user) {
+			this.logger.debug(`User with id ${id} not found`);
+			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		}
+		return user;
+	}
+
 	async findAll(): Promise<User[]> {
 		return this.userRepository.find({
-			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
+			select: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'],
+			relations: ['tweets'],
+			order: {
+				createdAt: 'DESC',
+			},
 		});
 	}
 
@@ -87,6 +102,18 @@ export class UserService {
 			this.logger.debug(result);
 			throw new InternalServerException();
 		}
+	}
+
+	async delete(id: string): Promise<void> {
+		const result = await this.userRepository.delete(id);
+		if (result.affected === 0) {
+			this.logger.debug(result);
+			throw new InternalServerException();
+		}
+	}
+
+	isAdmin(user: User): boolean {
+		return user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN;
 	}
 
 	transformUserToUserResponse(user: User): GetUserResponse {

@@ -25,8 +25,51 @@ export class TweetService {
 		this.logger.setContext(TweetService.name);
 	}
 
-	async findAll(): Promise<Tweet[]> {
-		return await this.tweetRepository.find();
+	async findPaginated(queryParameter: TweetQueryParameter, userId?: string): Promise<PaginatedTweetResponse> {
+		const page = queryParameter?.page || 1;
+		const limit = queryParameter?.limit || 20;
+		const offset = (page - 1) * limit;
+		const order = queryParameter?.order || 'DESC';
+		const orderBy = queryParameter?.sort || 'seenAt';
+		const searchTerm = queryParameter?.searchTerm;
+
+		const whereOptions: FindManyOptions<Tweet> = {
+			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
+			order: { [orderBy]: order },
+			skip: offset,
+			take: limit,
+		};
+		// TODO: Refactor this
+		if (searchTerm) {
+			if (searchTerm.startsWith('author:')) {
+				whereOptions.where = {
+					author: { username: Like(`%${searchTerm.split(':')[1]}%`) },
+				};
+			} else if (searchTerm.startsWith('lang:') || searchTerm.startsWith('language:')) {
+				whereOptions.where = {
+					language: Like(`%${searchTerm.split(':')[1]}%`),
+				};
+			} else if (searchTerm.startsWith('verified:')) {
+				const verifiedStatus = searchTerm.split(':')[1] === 'true';
+				whereOptions.where = {
+					author: {
+						isVerified: verifiedStatus,
+					},
+				};
+			} else {
+				whereOptions.where = {
+					text: Like(`%${searchTerm}%`),
+				};
+			}
+		}
+		if (userId) {
+			whereOptions.where = {
+				...(whereOptions.where as object),
+				user: { id: userId },
+			};
+		}
+		const [tweets, total] = await this.tweetRepository.findAndCount(whereOptions);
+		return { tweets, total };
 	}
 
 	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
@@ -39,6 +82,14 @@ export class TweetService {
 				relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
 			},
 		);
+	}
+
+	async findAll(): Promise<Tweet[]> {
+		return this.tweetRepository.find();
+	}
+
+	async findById(id: string): Promise<Tweet | undefined> {
+		return this.tweetRepository.findOne(id, { relations: ['author', 'hashtags', 'articles', 'articles.newsPage'] });
 	}
 
 	async findAllNewsRelatedTweetsByUser(user: User): Promise<Tweet[]> {
@@ -90,53 +141,8 @@ export class TweetService {
 		return await this.tweetRepository.save(tweet);
 	}
 
-	async findAllByUserId(id: string, queryParameter?: TweetQueryParameter): Promise<PaginatedTweetResponse> {
-		const page = queryParameter?.page || 1;
-		const limit = queryParameter?.limit || 20;
-		const offset = (page - 1) * limit;
-		const order = queryParameter?.order || 'DESC';
-		const orderBy = queryParameter?.sort || 'seenAt';
-		const searchTerm = queryParameter?.searchTerm;
-		this.logger.debug(
-			`findAllByUserId: Fetching tweets for user ${id} with page ${page} and limit ${limit} and order ${order} and orderBy ${orderBy} and searchTerm ${searchTerm}`,
-		);
-		const whereOptions: FindManyOptions<Tweet> = {
-			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
-			order: { [orderBy]: order },
-			skip: offset,
-			take: limit,
-		};
-		// TODO: Refactor this
-		if (searchTerm) {
-			if (searchTerm.startsWith('author:')) {
-				whereOptions.where = {
-					user: { id },
-					author: { username: Like(`%${searchTerm.split(':')[1]}%`) },
-				};
-			} else if (searchTerm.startsWith('lang:') || searchTerm.startsWith('language:')) {
-				whereOptions.where = {
-					user: { id },
-					language: Like(`%${searchTerm.split(':')[1]}%`),
-				};
-			} else if (searchTerm.startsWith('verified:')) {
-				const verifiedStatus = searchTerm.split(':')[1] === 'true';
-				whereOptions.where = {
-					user: { id },
-					author: {
-						isVerified: verifiedStatus,
-					},
-				};
-			} else {
-				whereOptions.where = {
-					text: Like(`%${searchTerm}%`),
-					user: { id },
-				};
-			}
-		} else {
-			whereOptions.where = { user: { id } };
-		}
-		const [tweets, total] = await this.tweetRepository.findAndCount(whereOptions);
-		return { tweets, total };
+	async findAllByUserId(id: string, queryParameter: TweetQueryParameter): Promise<PaginatedTweetResponse> {
+		return this.findPaginated(queryParameter, id);
 	}
 
 	async countByUserId(id: string): Promise<number> {

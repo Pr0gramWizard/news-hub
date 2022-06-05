@@ -1,7 +1,7 @@
 import { NewsHubLogger } from '@common/logger.service';
 import { TwitterService } from '@common/twitter.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
-import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Res, StreamableFile } from '@nestjs/common';
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -15,6 +15,7 @@ import { AuthorType } from '@tweet/author/tweet.author.entity';
 import { HashtagService } from '@tweet/hashtag/hashtag.service';
 import {
 	ClassifyTweetDto,
+	FileExportFormat,
 	LimitQuery,
 	OrderQuery,
 	PageQuery,
@@ -27,7 +28,6 @@ import {
 } from '@type/dto/tweet';
 import { TwitterApiException } from '@type/error/general';
 import { TweetErrorCode } from '@type/error/tweet';
-import { UserErrorCodes } from '@type/error/user';
 import { UserService } from '@user/user.service';
 import { NewsLinks, NewsPageService } from 'service/news-page/news.page.service';
 import { URL } from 'url';
@@ -38,6 +38,11 @@ import { TweetAuthorService } from './author/tweet.author.service';
 import { TweetType } from './tweet.entity';
 import { TweetService } from './tweet.service';
 import { Auth } from '../../decorator/auth.decorator';
+import { UserRole } from '@user/user.entity';
+import { rm, writeFile } from 'fs/promises';
+import { createReadStream } from 'fs';
+import * as json2csv from 'json2csv';
+import { Response } from 'express';
 
 @ApiTags('Tweet')
 @Controller('tweet')
@@ -75,10 +80,7 @@ export class TweetController {
 	): Promise<PaginatedTweetResponse> {
 		const { sub } = jwtPayload;
 		// Check if requesting user exists
-		const user = await this.userService.findById(sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(sub);
 		const { tweets, total } = await this.tweetService.findAllByUserId(user.id, queryParameter);
 		return {
 			tweets,
@@ -101,9 +103,14 @@ export class TweetController {
 	): Promise<TweetResponse> {
 		const { sub } = jwtPayload;
 		// Check if requesting user exists
-		const user = await this.userService.findById(sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
+		const user = await this.userService.findByIdOrFail(sub);
+		const isAdmin = this.userService.isAdmin(user);
+		if (isAdmin) {
+			const tweet = await this.tweetService.findById(tweetId);
+			if (!tweet) {
+				throw new BadRequestException(TweetErrorCode.TWEET_NOT_FOUND);
+			}
+			return tweet;
 		}
 		const tweet = await this.tweetService.findByIdAndUser(tweetId, user);
 		if (!tweet) {
@@ -124,10 +131,7 @@ export class TweetController {
 	async getAllNewsRelatedTweetsByUser(@UserContext() jwtPayload: JwtPayload): Promise<TweetResponse[]> {
 		const { sub } = jwtPayload;
 		// Check if requesting user exists
-		const user = await this.userService.findById(sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(sub);
 		const tweets = await this.tweetService.findAllNewsRelatedTweetsByUser(user);
 		this.logger.debug(`Found ${tweets.length} news related tweets`);
 		return tweets;
@@ -139,8 +143,13 @@ export class TweetController {
 		description: 'Get all tweets',
 		type: [TweetResponse],
 	})
-	async getAllTweets(): Promise<TweetResponse[]> {
-		return this.tweetService.findAll();
+	@ApiQuery({ name: 'searchTerm', type: SearchTermQuery })
+	@ApiQuery({ name: 'limit', type: LimitQuery })
+	@ApiQuery({ name: 'page', type: PageQuery })
+	@ApiQuery({ name: 'sort', type: SortQuery })
+	@ApiQuery({ name: 'order', type: OrderQuery })
+	async getAllTweets(@Query() queryParameter: TweetQueryParameter): Promise<PaginatedTweetResponse> {
+		return this.tweetService.findPaginated(queryParameter);
 	}
 
 	@Post('')
@@ -158,10 +167,7 @@ export class TweetController {
 		const { sub } = jwtPayload;
 		const { url } = body;
 		// Check if requesting user exists
-		const user = await this.userService.findById(sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(sub);
 		// Parse and validate passed url. Currently, we only support Twitter urls
 		const { pathname, hostname } = new URL(url);
 		if (!this.supportedSocialMediaLinks.includes(hostname)) {
@@ -271,15 +277,53 @@ export class TweetController {
 		description: 'Either the tweet url is not valid or there was an error with the data the Twitter API returned',
 	})
 	async classifyTweet(@UserContext() jwtUser: JwtPayload, @Body() data: ClassifyTweetDto) {
-		const user = await this.userService.findById(jwtUser.sub);
-		if (!user) {
-			throw new BadRequestException(UserErrorCodes.USER_NOT_FOUND);
-		}
+		const user = await this.userService.findByIdOrFail(jwtUser.sub);
 		const { tweetId, classifications } = data;
 		const tweet = await this.tweetService.findByIdAndUser(tweetId, user);
 		if (!tweet) {
 			throw new BadRequestException(TweetErrorCode.TWEET_NOT_FOUND);
 		}
 		await this.tweetService.setUserClassification(tweet.id, classifications);
+	}
+
+	@Get('export/:format')
+	@Auth(UserRole.ADMIN)
+	@ApiCreatedResponse({
+		description: 'Stored the tweet in the database',
+	})
+	async exportTweets(
+		@Param() params: FileExportFormat,
+		@Res({ passthrough: true }) res: Response,
+	): Promise<StreamableFile> {
+		const { format } = params;
+		const allTweets = await this.tweetService.findAll();
+		const csvFileName = 'tweets.csv';
+		const jsonFileName = 'tweets.json';
+
+		this.logger.debug(`Exporting ${allTweets.length} tweets to ${format}`);
+		if (format !== 'csv' && format !== 'json') {
+			throw new BadRequestException(TweetErrorCode.INVALID_FORMAT);
+		}
+		if (format === 'json') {
+			// Export to JSON
+			await rm(jsonFileName);
+			await writeFile(jsonFileName, JSON.stringify(allTweets), { encoding: 'utf8' });
+			const file = await createReadStream(jsonFileName, { encoding: 'utf8' });
+			res.set({
+				'Content-Type': 'application/json',
+				'Content-Disposition': `attachment; filename=${jsonFileName}`,
+			});
+			return new StreamableFile(file);
+		}
+		// Export to CSV
+		await rm(csvFileName);
+		const csvData = json2csv.parse(allTweets);
+		await writeFile(csvFileName, csvData, { encoding: 'utf8' });
+		const csvFile = await createReadStream(csvFileName, { encoding: 'utf8' });
+		res.set({
+			'Content-Type': 'text/csv',
+			'Content-Disposition': `attachment; filename=${csvFileName}`,
+		});
+		return new StreamableFile(csvFile);
 	}
 }

@@ -75,13 +75,13 @@ export class Tweet {
 	@JoinTable({ name: 'tweet_hashtag' })
 	hashtags!: Hashtag[];
 
-	@ManyToOne(() => Author)
+	@ManyToOne(() => Author, { onDelete: 'CASCADE' })
 	author!: Author;
 
 	@Column({ type: 'json', nullable: true })
 	entities?: TweetEntitiesV2;
 
-	@ManyToOne('User')
+	@ManyToOne('User', { onDelete: 'CASCADE' })
 	user!: User;
 
 	@Column({ name: 'created_at' })

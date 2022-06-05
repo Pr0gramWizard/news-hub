@@ -47,10 +47,10 @@ export class Article {
 	@Column('simple-array')
 	videos!: string[];
 
-	@ManyToOne(() => NewsPage, (newsPage) => newsPage.articles)
+	@ManyToOne(() => NewsPage, (newsPage) => newsPage.articles, { onDelete: 'CASCADE' })
 	newsPage!: NewsPage;
 
-	@ManyToOne(() => Tweet, (tweet) => tweet.articles)
+	@ManyToOne(() => Tweet, (tweet) => tweet.articles, { onDelete: 'CASCADE' })
 	tweet!: Tweet;
 
 	@CreateDateColumn({ name: 'created_at' })

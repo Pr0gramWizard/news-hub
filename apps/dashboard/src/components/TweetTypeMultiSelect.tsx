@@ -5,6 +5,7 @@ import { MultiSelect } from '@mantine/core';
 interface TweetTypeMultiSelectProps {
 	tweet: Tweet;
 	onChange: (changes: string[]) => void;
+	readonly: boolean;
 }
 
 const tweetTypeData = [
@@ -13,11 +14,12 @@ const tweetTypeData = [
 	{ label: 'Author is news outlet', value: 'AUTHOR_IS_NEWS_OUTLET' },
 ];
 
-export function TweetTypeMultiSelect({ tweet, onChange }: TweetTypeMultiSelectProps) {
+export function TweetTypeMultiSelect({ tweet, onChange, readonly }: TweetTypeMultiSelectProps) {
 	const [tweetType] = useState<TweetType[]>(tweet.userClassification || []);
 
 	return (
 		<MultiSelect
+			disabled={readonly}
 			data={tweetTypeData}
 			limit={5}
 			searchable
