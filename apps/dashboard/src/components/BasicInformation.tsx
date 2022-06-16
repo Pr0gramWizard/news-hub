@@ -6,7 +6,7 @@ import { handleFetchErrorResponse } from '../util/handleError';
 import { showNotification } from '@mantine/notifications';
 
 export function BasicInformation() {
-	const { user } = useContext(AuthContext);
+	const { user, updateUser } = useContext(AuthContext);
 	const form = useForm({
 		initialValues: {
 			username: user?.name,
@@ -14,6 +14,7 @@ export function BasicInformation() {
 			role: user?.role.toLowerCase(),
 		},
 		validate: {
+			username: (val) => (val && val.length > 0 ? null : 'Username is required'),
 			email: (value: string | undefined) => value && (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 		},
 	});
@@ -23,6 +24,9 @@ export function BasicInformation() {
 
 	const handleSubmit = async (values: typeof form.values) => {
 		const { username, email } = values;
+		if (!username || !email) {
+			throw new Error('Username and email are required');
+		}
 		const userData = {
 			name: username,
 			email,
@@ -41,6 +45,7 @@ export function BasicInformation() {
 				message: 'Successfully updated basic information',
 				color: 'green',
 			});
+			updateUser({ ...user, name: username, email });
 		}
 	};
 

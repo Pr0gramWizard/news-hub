@@ -19,7 +19,6 @@ export function Dashboard() {
 
 	useEffect(() => {
 		chrome.storage.local.get([TOKEN_STORAGE_KEY, SCRIPT_ENABLED_KEY], (result) => {
-			console.log(result);
 			const data = result[TOKEN_STORAGE_KEY];
 			const payload = jwt_decode<JWTPayload>(data.token);
 			setUser({

@@ -71,12 +71,12 @@ export class UserController {
 	@Post('update/basic-info')
 	@Auth()
 	@ApiOkResponse({ description: 'Basic information changed' })
-	async changeEmail(
+	async updateBasicInfo(
 		@Body() body: ChangeBasicInformationRequest,
 		@UserContext() jwtPayload: JwtPayload,
 	): Promise<void> {
 		const { sub } = jwtPayload;
-		await this.userService.updateEmail(sub, body);
+		await this.userService.updateBasicInfo(sub, body);
 	}
 
 	@Post('change/role')

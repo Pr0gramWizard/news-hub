@@ -306,8 +306,8 @@ export class TweetController {
 		}
 		if (format === 'json') {
 			// Export to JSON
-			await rm(jsonFileName);
-			await writeFile(jsonFileName, JSON.stringify(allTweets), { encoding: 'utf8' });
+			await rm(jsonFileName, { force: true });
+			await writeFile(jsonFileName, JSON.stringify(allTweets), { encoding: 'utf8', flag: 'w+' });
 			const file = await createReadStream(jsonFileName, { encoding: 'utf8' });
 			res.set({
 				'Content-Type': 'application/json',
@@ -316,9 +316,9 @@ export class TweetController {
 			return new StreamableFile(file);
 		}
 		// Export to CSV
-		await rm(csvFileName);
+		await rm(csvFileName, { force: true });
 		const csvData = json2csv.parse(allTweets);
-		await writeFile(csvFileName, csvData, { encoding: 'utf8' });
+		await writeFile(csvFileName, csvData, { encoding: 'utf8', flag: 'w+' });
 		const csvFile = await createReadStream(csvFileName, { encoding: 'utf8' });
 		res.set({
 			'Content-Type': 'text/csv',

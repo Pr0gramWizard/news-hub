@@ -87,7 +87,7 @@ export class UserService {
 		}
 	}
 
-	async updateEmail(id: string, payload: ChangeBasicInformationRequest): Promise<void> {
+	async updateBasicInfo(id: string, payload: ChangeBasicInformationRequest): Promise<void> {
 		const { email, name } = payload;
 		const result = await this.userRepository.update(id, { email, name });
 		if (result.affected === 0) {

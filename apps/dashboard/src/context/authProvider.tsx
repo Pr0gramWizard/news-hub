@@ -22,15 +22,20 @@ export interface LoginResponse {
 interface AuthContextProps {
 	user: Account | undefined;
 	setUser: (user?: LoginResponse) => void;
+	updateUser: (user: Account) => void;
 	isLoading: boolean | undefined;
 	setIsLoading: (isLoading: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
 	user: undefined,
-	setUser: () => {},
+	setUser: () => {
+	},
 	isLoading: undefined,
-	setIsLoading: () => {},
+	setIsLoading: () => {
+	},
+	updateUser: () => {
+	},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -59,8 +64,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 		navigate('/');
 	};
 
+	const updateUser = (user: Account) => {
+		setUser(user);
+		localStorage.setItem('user', JSON.stringify(user));
+	}
+
 	return (
-		<AuthContext.Provider value={{ user, setUser: setUserCallback, isLoading, setIsLoading }}>
+		<AuthContext.Provider value={{ user, setUser: setUserCallback, updateUser, isLoading, setIsLoading }}>
 			{children}
 		</AuthContext.Provider>
 	);
