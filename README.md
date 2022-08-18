@@ -17,3 +17,9 @@ $ yarn start
 
 This will start all applications in docker.
 If you only want to start certain ones just check the top-level package.json file.
+
+If there any errors sometimes it helps to rebuild all the images.
+
+```bash
+$ yarn rebuild
+```

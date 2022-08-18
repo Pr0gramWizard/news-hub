@@ -17,7 +17,13 @@ Hint: Be sure to change the value if you are using a remote endpoint or other po
 
 ## Installation (Docker)
 
-1. Done. Go [back](/README.md) to the root of the project and follow the instructions.
+1. Run the following command to install all dependencies:
+
+```bash
+$ yarn install
+```
+
+2. Done. Go [back](/README.md) to the root of the project and follow the instructions.
 
 ## Local development
 
