@@ -4,20 +4,22 @@ The browser extension allows the user to login in and auto-collect the tweets wh
 
 #### Forked from [this repository](https://github.com/lxieyang/chrome-extension-boilerplate-react)
 
-## Installing and Running
-
-## Setup
+## Prerequisites
 
 Create a new `.env` file and add the following lines:
 
 ```
 API_URL="http://localhost:3000/api"
 VERSION="x.x.x"
-```  
+```
 
-Be sure to change the value if you are using a remote endpoint or other port.
+Hint: Be sure to change the value if you are using a remote endpoint or other port.
 
-### Local development
+## Installation (Docker)
+
+1. Done. Go [back](/README.md) to the root of the project and follow the instructions.
+
+## Local development
 
 You can start the browser extension using webpack.  
 For that make sure that you have `node` installed (any version `> 14.x`).
@@ -56,4 +58,4 @@ There you can log in with your credentials.
 Unfortunately, there is no possibility to register a new account over the browser extension yet.  
 For that, you have to use the Dashboard.  
 Once you are logged in you can just enable the extension and scroll through your Twitter timeline.  
-Each tweet that is collected the Twitter handle of collected tweet is marked golden.    
+Each tweet that is collected the Twitter handle of collected tweet is marked golden.
