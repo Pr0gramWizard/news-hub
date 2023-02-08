@@ -38,8 +38,12 @@ export class NewsPageService {
 		return this.newsPageRepository.save(newsPage);
 	}
 
-	async findOneByUrl(url: string): Promise<NewsPage | undefined> {
-		return this.newsPageRepository.findOne({ url });
+	async findOneByUrl(url: string) {
+		return this.newsPageRepository.findOne({
+			where: {
+				url,
+			},
+		});
 	}
 
 	async areNewsLinks(tweetLinks: TweetLink[]): Promise<CheckUrlResponse[]> {
@@ -58,7 +62,7 @@ export class NewsPageService {
 		this.logger.debug(`Checking if ${url.urlDomain} is a news link`);
 		const newsPage = await this.findOneByUrl(url.urlDomain);
 		return {
-			newsPage,
+			newsPage: newsPage ?? undefined,
 			isNews: !!newsPage,
 			checkedUrl: url.urlDomain,
 			fullUrl: url.fullUrl,

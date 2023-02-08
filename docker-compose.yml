@@ -11,6 +11,7 @@ services:
       - ./api/node/.env
     depends_on:
       - api-python
+      - db
     command: npm run start:debug -- --preserveWatchOutput
     ports:
       - "3000:3000"
@@ -36,7 +37,6 @@ services:
     volumes:
       - ./apps/browser_extension:/srv/app
 
-
   admin-dashboard:
     container_name: admin-dashboard
     build: ./apps/dashboard
@@ -48,3 +48,17 @@ services:
       - /app/node_modules/
     ports:
       - "3001:3001"
+
+  db:
+    container_name: db
+    image: mariadb:latest
+    restart: always
+    command: --init-file /data/application/init.sql
+    volumes:
+      - ./db:/var/lib/mysql
+      - ./seed.sql:/data/application/init.sql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"

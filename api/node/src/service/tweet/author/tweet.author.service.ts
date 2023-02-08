@@ -2,11 +2,11 @@ import { NewsHubLogger } from '@common/logger.service';
 import { isUndefinedOrEmptyObject } from '@common/util';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuthorWithCount, CreateAuthor } from '@type/dto/author';
 import { TwitterApiException } from '@type/error/general';
 import { TwitterApiErrorCode } from '@type/error/twitter.api';
 import { UserV2 } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
-import { AuthorWithCount, CreateAuthor } from '@type/dto/author';
 import { Author } from './tweet.author.entity';
 
 @Injectable()
@@ -19,8 +19,12 @@ export class TweetAuthorService {
 		this.logger.setContext(TweetAuthorService.name);
 	}
 
-	async findById(id: string): Promise<Author | undefined> {
-		return this.authorRepository.findOne(id);
+	async findById(id: string) {
+		return this.authorRepository.findOne({
+			where: {
+				id,
+			},
+		});
 	}
 
 	async create(tweetAuthor: UserV2): Promise<Author> {

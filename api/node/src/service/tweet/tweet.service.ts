@@ -72,38 +72,52 @@ export class TweetService {
 		return { tweets, total };
 	}
 
-	async findByIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne(
-			{
+	async findByIdAndUser(id: string, user: User) {
+		return this.tweetRepository.findOne({
+			where: {
 				id,
-				user,
+				user: {
+					id: user.id,
+				},
 			},
-			{
-				relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
-			},
-		);
+			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
+		});
 	}
 
 	async findAll(): Promise<Tweet[]> {
 		return this.tweetRepository.find();
 	}
 
-	async findById(id: string): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne(id, { relations: ['author', 'hashtags', 'articles', 'articles.newsPage'] });
+	async findById(id: string) {
+		return this.tweetRepository.findOne({
+			where: {
+				id,
+			},
+			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
+		});
 	}
 
 	async findAllNewsRelatedTweetsByUser(user: User): Promise<Tweet[]> {
 		return this.tweetRepository.find({
 			where: {
-				user,
+				user: {
+					id: user.id,
+				},
 				isNewsRelated: true,
 			},
 			relations: ['author', 'hashtags', 'articles', 'articles.newsPage'],
 		});
 	}
 
-	async findByTweetIdAndUser(id: string, user: User): Promise<Tweet | undefined> {
-		return this.tweetRepository.findOne({ tweetId: id, user });
+	async findByTweetIdAndUser(id: string, user: User) {
+		return this.tweetRepository.findOne({
+			where: {
+				tweetId: id,
+				user: {
+					id: user.id,
+				},
+			},
+		});
 	}
 
 	async addTweetType(tweet: Tweet, tweetType: TweetType): Promise<Tweet> {

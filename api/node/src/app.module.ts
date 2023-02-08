@@ -2,6 +2,7 @@ import { CommonModule } from '@common/common.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TweetAuthorModule } from '@tweet/author/tweet.author.module';
 import { TweetModule } from '@tweet/tweet.module';
 import { UserModule } from '@user/user.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -12,7 +13,6 @@ import { ArticleModule } from './service/article/article.module';
 import { AuthModule } from './service/auth/auth.module';
 import { NewsPageModule } from './service/news-page/news.page.module';
 import { StatsModule } from './service/stats/stats.module';
-import { TweetAuthorModule } from '@tweet/author/tweet.author.module';
 
 @Module({
 	imports: [

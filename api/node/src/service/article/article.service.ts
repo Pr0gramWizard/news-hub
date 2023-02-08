@@ -27,9 +27,14 @@ export class ArticleService {
 		return this.articleRepository.save(article);
 	}
 
-	async findByUrl(url: string): Promise<Article | undefined> {
+	async findByUrl(url: string) {
 		this.logger.debug(`Finding article by url: ${url}`);
-		return this.articleRepository.findOne({ url }, { relations: ['newsPage'] });
+		return this.articleRepository.findOne({
+			where: {
+				url,
+			},
+			relations: ['newsPage'],
+		});
 	}
 
 	async createManyByUrl(newsLinks: NewsLinks[], tweet: Tweet): Promise<Article[]> {

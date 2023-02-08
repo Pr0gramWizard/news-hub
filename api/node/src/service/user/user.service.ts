@@ -1,12 +1,12 @@
+import { NewsHubLogger } from '@common/logger.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChangeBasicInformationRequest, CreateUserDTO, GetUserResponse } from '@type/dto/user';
+import { InternalServerException } from '@type/error/general';
+import { UserErrorCodes } from '@type/error/user';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { ChangeBasicInformationRequest, CreateUserDTO, GetUserResponse } from '@type/dto/user';
 import { User, UserRole } from './user.entity';
-import { InternalServerException } from '@type/error/general';
-import { NewsHubLogger } from '@common/logger.service';
-import { UserErrorCodes } from '@type/error/user';
 
 @Injectable()
 export class UserService {
@@ -18,14 +18,20 @@ export class UserService {
 		this.logger.setContext(UserService.name);
 	}
 
-	async findById(id: string): Promise<User | undefined> {
-		return this.userRepository.findOne(id, {
+	async findById(id: string) {
+		return this.userRepository.findOne({
+			where: {
+				id,
+			},
 			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
 		});
 	}
 
 	async findByIdOrFail(id: string): Promise<User> {
-		const user = await this.userRepository.findOne(id, {
+		const user = await this.userRepository.findOne({
+			where: {
+				id,
+			},
 			relations: ['tweets', 'tweets.author', 'tweets.articles', 'tweets.articles.newsPage', 'tweets.hashtags'],
 		});
 		if (!user) {
@@ -58,8 +64,12 @@ export class UserService {
 			.getMany();
 	}
 
-	async findByMail(email: string): Promise<User | undefined> {
-		return this.userRepository.findOne({ email });
+	async findByMail(email: string) {
+		return this.userRepository.findOne({
+			where: {
+				email,
+			},
+		});
 	}
 
 	async create(body: CreateUserDTO): Promise<User> {

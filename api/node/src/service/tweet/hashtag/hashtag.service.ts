@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Hashtag } from '@tweet/hashtag/hashtag.entity';
 import { Tweet } from '@tweet/tweet.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class HashtagService {
@@ -11,15 +11,13 @@ export class HashtagService {
 		private readonly hashtagRepository: Repository<Hashtag>,
 	) {}
 
-	async findByName(name: string): Promise<Hashtag | undefined> {
-		return this.hashtagRepository.findOne(
-			{
+	async findByName(name: string) {
+		return this.hashtagRepository.findOne({
+			where: {
 				name,
 			},
-			{
-				relations: ['tweets'],
-			},
-		);
+			relations: ['hashtags'],
+		});
 	}
 
 	async create(hashtag: string, tweets: Tweet[]): Promise<Hashtag> {

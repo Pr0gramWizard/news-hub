@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsDefined, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { UserRole } from '@user/user.entity';
 import { TweetResponse } from '@type/dto/tweet';
+import { UserRole } from '@user/user.entity';
+import { IsDate, IsDefined, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 // Register DTOs
 
@@ -89,7 +89,6 @@ export class CreateUserDTO {
 	@IsEmail()
 	email!: string;
 
-	@IsEnum(UserRole)
 	@IsOptional()
 	role?: UserRole;
 }
@@ -137,7 +136,6 @@ export class ChangeBasicInformationRequest {
 
 export class ChangeUserRoleRequest {
 	@ApiProperty()
-	@IsEnum(UserRole)
 	@IsDefined()
 	role!: UserRole;
 
@@ -169,4 +167,3 @@ export class UserForAdminDashboard {
 	@ApiProperty()
 	numberOfCollectedTweets!: number;
 }
-
